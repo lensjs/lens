@@ -15,7 +15,7 @@
     "build": "tsup --clean && npm run build:ui",
     "build:ui": "npm --prefix src/ui run build",
     "clean": "rm -rf dist",
-    "postbuild": "cp -r src/ui/dist/ dist/ui --force",
+    "postbuild": "node copy-front-build.cjs",
     "format": "prettier --write .",
     "test": "vitest"
   },

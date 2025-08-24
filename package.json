@@ -17,6 +17,7 @@
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@types/node": "^20.10.0",
+    "commitlint": "19.8.1",
     "husky": "^9.1.7",
     "lerna": "^8.2.3",
     "tsup": "^8.5.0",
