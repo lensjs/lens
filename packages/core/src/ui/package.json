@@ -4,7 +4,7 @@
   "version": "0.0.5",
   "type": "module",
   "scripts": {
-    "dev": "cross-env VITE_API_URL=http://localhost:3333 vite",
+    "dev": "cross-env VITE_API_URL=http://localhost:3000 vite",
     "prod": "cross-env VITE_API_URL='' tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -14,6 +14,7 @@
     "@tailwindcss/vite": "^4.1.12",
     "@tanstack/react-query": "^5.85.5",
     "@types/react-syntax-highlighter": "^15.5.13",
+    "@uiw/react-json-view": "2.0.0-alpha.37",
     "dayjs": "^1.11.18",
     "js-beautify": "^1.15.4",
     "lucide-react": "^0.542.0",

@@ -1,15 +1,12 @@
 "use client";
 
 import type React from "react";
-import type { JSX } from "react";
 import { useState } from "react";
+import JsonView from "@uiw/react-json-view";
+import { nordTheme } from '@uiw/react-json-view/nord';
 
 interface JsonViewerProps {
   data: Record<string, any> | string | string[];
-}
-
-function generateRandomKey(prefix = "key") {
-  return prefix + "-" + Math.random().toString(36).substr(2, 9);
 }
 
 const JsonViewer: React.FC<JsonViewerProps> = ({ data }) => {
@@ -56,199 +53,6 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data }) => {
     </svg>
   );
 
-  const formatJson = (obj: any, indent = 0): JSX.Element[] => {
-    const elements: JSX.Element[] = [];
-    const indentStr = "  ".repeat(indent);
-
-    if (Array.isArray(obj)) {
-      elements.push(
-        <span
-          key={generateRandomKey("open-bracket")}
-          className="text-neutral-600 dark:text-neutral-400"
-        >
-          [
-        </span>,
-      );
-      obj.forEach((item, index) => {
-        elements.push(<br key={generateRandomKey("br")} />);
-        elements.push(
-          <span key={generateRandomKey("indent")} className="text-transparent">
-            {indentStr}{" "}
-          </span>,
-        );
-        elements.push(...formatData(item, indent + 1));
-        if (index < obj.length - 1) {
-          elements.push(
-            <span
-              key={generateRandomKey("comma")}
-              className="text-neutral-600 dark:text-neutral-400"
-            >
-              ,
-            </span>,
-          );
-        }
-      });
-      elements.push(<br key={generateRandomKey("br-close")} />);
-      elements.push(
-        <span
-          key={generateRandomKey("indent-close")}
-          className="text-transparent"
-        >
-          {indentStr}
-        </span>,
-      );
-      elements.push(
-        <span
-          key={generateRandomKey("close-bracket")}
-          className="text-neutral-600 dark:text-neutral-400"
-        >
-          ]
-        </span>,
-      );
-    } else if (typeof obj === "object" && obj !== null) {
-      elements.push(
-        <span
-          key={generateRandomKey("open-brace")}
-          className="text-neutral-600 dark:text-neutral-400"
-        >
-          {"{"}
-        </span>,
-      );
-      const entries = Object.entries(obj);
-      entries.forEach(([key, value], index) => {
-        elements.push(<br key={generateRandomKey("br")} />);
-        elements.push(
-          <span key={generateRandomKey("indent")} className="text-transparent">
-            {indentStr}{" "}
-          </span>,
-        );
-        elements.push(
-          <span
-            key={generateRandomKey("key")}
-            className="text-blue-600 dark:text-blue-400"
-          >
-            "{key}"
-          </span>,
-        );
-        elements.push(
-          <span
-            key={generateRandomKey("colon")}
-            className="text-neutral-600 dark:text-neutral-400"
-          >
-            :{" "}
-          </span>,
-        );
-        elements.push(...formatData(value, indent + 1));
-        if (index < entries.length - 1) {
-          elements.push(
-            <span
-              key={generateRandomKey("comma")}
-              className="text-neutral-600 dark:text-neutral-400"
-            >
-              ,
-            </span>,
-          );
-        }
-      });
-      elements.push(<br key={generateRandomKey("br-close")} />);
-      elements.push(
-        <span
-          key={generateRandomKey("indent-close")}
-          className="text-transparent"
-        >
-          {indentStr}
-        </span>,
-      );
-      elements.push(
-        <span
-          key={generateRandomKey("close-brace")}
-          className="text-neutral-600 dark:text-neutral-400"
-        >
-          {"}"}
-        </span>,
-      );
-    }
-    return elements;
-  };
-  function formatData(data: any, indent = 0): JSX.Element[] {
-    // Single string
-    if (typeof data === "string") {
-      return [
-        <span
-          key={generateRandomKey("string")}
-          className="text-green-600 dark:text-green-400"
-        >
-          "{data}"
-        </span>,
-      ];
-    }
-
-    // Array of strings (pretty printed, one per line)
-    if (Array.isArray(data) && data.every((item) => typeof item === "string")) {
-      const elements: JSX.Element[] = [];
-      const indentStr = "  ".repeat(indent);
-
-      elements.push(
-        <span
-          key={generateRandomKey("open-bracket")}
-          className="text-neutral-600 dark:text-neutral-400"
-        >
-          [
-        </span>,
-      );
-
-      data.forEach((str, i) => {
-        elements.push(<br key={generateRandomKey("br")} />);
-        elements.push(
-          <span key={generateRandomKey("indent")} className="text-transparent">
-            {indentStr}{" "}
-          </span>,
-        );
-        elements.push(
-          <span
-            key={generateRandomKey("string-item")}
-            className="text-green-600 dark:text-green-400"
-          >
-            "{str}"
-          </span>,
-        );
-        if (i < data.length - 1) {
-          elements.push(
-            <span
-              key={generateRandomKey("comma")}
-              className="text-neutral-600 dark:text-neutral-400"
-            >
-              ,
-            </span>,
-          );
-        }
-      });
-
-      elements.push(<br key={generateRandomKey("br-close")} />);
-      elements.push(
-        <span
-          key={generateRandomKey("indent-close")}
-          className="text-transparent"
-        >
-          {indentStr}
-        </span>,
-      );
-      elements.push(
-        <span
-          key={generateRandomKey("close-bracket")}
-          className="text-neutral-600 dark:text-neutral-400"
-        >
-          ]
-        </span>,
-      );
-
-      return elements;
-    }
-
-    // Fallback: objects, numbers, booleans, nested arrays/objects
-    return formatJson(data, indent);
-  }
-
   return (
     <div className="bg-neutral-50 dark:bg-slate-900 rounded-lg p-4 font-mono text-sm overflow-x-auto relative">
       <button
@@ -262,9 +66,20 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data }) => {
       >
         {copied ? <CheckIcon /> : <CopyIcon />}
       </button>
-      <pre className="whitespace-pre-wrap pr-12 text-neutral-800 dark:text-neutral-200 min-h-10">
-        {formatData(data)}
-      </pre>
+      <div className="whitespace-pre-wrap pr-12 text-neutral-800 dark:text-neutral-200 min-h-10">
+        {typeof data === "string" || Array.isArray(data) ? (
+          <pre>{JSON.stringify(data, null, 2)}</pre>
+        ) : (
+          <JsonView
+            value={data}
+            enableClipboard={false}
+            style={nordTheme}
+            collapsed={false}
+            displayDataTypes={false}
+            displayObjectSize={false}
+          />
+        )}
+      </div>
     </div>
   );
 };
