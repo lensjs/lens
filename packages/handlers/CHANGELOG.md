@@ -1,5 +1,12 @@
 # @lensjs/watchers
 
+## 1.0.15
+
+### Patch Changes
+
+- Updated dependencies
+  - @lensjs/core@2.1.1
+
 ## 1.0.14
 
 ### Patch Changes

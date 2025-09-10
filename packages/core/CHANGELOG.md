@@ -1,5 +1,11 @@
 # @lensjs/core
 
+## 2.1.1
+
+### Patch Changes
+
+- fix(ui): json viewer not showing some data types correct
+
 ## 2.1.0
 
 ### Minor Changes

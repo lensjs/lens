@@ -1,5 +1,13 @@
 # @lensjs/adonis
 
+## 1.2.1
+
+### Patch Changes
+
+- fix(ui): json viewer not showing some data types correct
+- Updated dependencies
+  - @lensjs/core@2.1.1
+
 ## 1.2.0
 
 ### Minor Changes
