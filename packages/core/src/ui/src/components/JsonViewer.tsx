@@ -4,7 +4,7 @@ import type React from "react";
 import { useState } from "react";
 import JsonView from "@uiw/react-json-view";
 import { nordTheme } from "@uiw/react-json-view/nord";
-import { Check } from "lucide-react";
+import { Check, Copy } from "lucide-react";
 import CopyTypeButton from "./CopyTypeButton";
 
 interface JsonViewerProps {
@@ -25,24 +25,8 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data }) => {
     }
   };
 
-  const CopyIcon = () => (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-    </svg>
-  );
-
   return (
-    <div className="bg-neutral-50 dark:bg-slate-900 rounded-lg p-4 font-mono text-sm overflow-x-auto relative">
+    <div className="bg-neutral-50 dark:bg-slate-900 rounded-lg p-4 font-mono text-sm overflow-x-auto overflow-y-visible relative">
       <div className="absolute top-3 right-3 flex gap-2">
         <CopyTypeButton data={data} />
         <button
@@ -54,7 +38,7 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data }) => {
           }`}
           title={copied ? "Copied!" : "Copy to clipboard"}
         >
-          {copied ? <Check size={15} /> : <CopyIcon />}
+          {copied ? <Check size={15} /> : <Copy />}
         </button>
       </div>
       <div className="whitespace-pre-wrap pr-20 text-neutral-800 dark:text-neutral-200 min-h-10">
