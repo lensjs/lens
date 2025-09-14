@@ -1,5 +1,14 @@
 # @lensjs/express
 
+## 1.2.1
+
+### Patch Changes
+
+- fix(ui): json viewer not showing some data types correct
+- Updated dependencies
+  - @lensjs/core@2.1.1
+  - @lensjs/watchers@1.0.15
+
 ## 1.2.0
 
 ### Minor Changes

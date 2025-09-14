@@ -109,6 +109,7 @@ export function prepareIgnoredPaths(path: string, ignoredPaths: RegExp[]) {
     ...ignoredPaths,
     new RegExp(`^\/?${normalizedPath}(\/|$)`),
     /^\/?lens-config$/,
+    /^\/?favicon\.ico$/,
     /^\/\.well-known\//,
   ];
 
@@ -152,4 +153,3 @@ export function prettyHrTime(
 
   return `${(ms / 1000).toFixed(1)} s`;
 }
-

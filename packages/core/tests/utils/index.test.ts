@@ -148,7 +148,7 @@ describe("utils", () => {
       const { normalizedPath, ignoredPaths: newIgnoredPaths } =
         prepareIgnoredPaths(path, ignoredPaths);
       expect(normalizedPath).toBe("api");
-      expect(newIgnoredPaths).toHaveLength(4);
+      expect(newIgnoredPaths).toHaveLength(5);
       newIgnoredPaths[0] &&
         expect(newIgnoredPaths[0].toString()).toBe("/^\\/admin/");
       newIgnoredPaths[1] &&

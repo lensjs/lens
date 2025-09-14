@@ -137,6 +137,10 @@ export default class BetterSqliteStore extends Store {
   }
 
   private setupSchema() {
+    // Enable WAL mode for concurrency
+    this.connection.exec("PRAGMA journal_mode = WAL;");
+    this.connection.exec("PRAGMA synchronous = NORMAL;"); // safer for concurrent writes
+
     const createTable = `
       CREATE TABLE IF NOT EXISTS ${TABLE_NAME} (
         id TEXT PRIMARY KEY,
