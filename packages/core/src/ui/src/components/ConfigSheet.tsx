@@ -3,6 +3,7 @@
 import type React from "react";
 import { useState, useEffect } from "react";
 import { X, Settings, Check } from "lucide-react";
+import type { LanguageTypeOption } from "../types";
 
 interface ConfigSheetProps {
   isOpen: boolean;
@@ -10,7 +11,8 @@ interface ConfigSheetProps {
 }
 
 const ConfigSheet: React.FC<ConfigSheetProps> = ({ isOpen, onClose }) => {
-  const [selectedLanguage, setSelectedLanguage] = useState<"ts" | "dart">("ts");
+  const [selectedLanguage, setSelectedLanguage] =
+    useState<LanguageTypeOption>("ts");
 
   // Load saved preference from localStorage
   useEffect(() => {
@@ -21,7 +23,7 @@ const ConfigSheet: React.FC<ConfigSheetProps> = ({ isOpen, onClose }) => {
   }, []);
 
   // Save preference to localStorage
-  const handleLanguageChange = (language: "ts" | "dart") => {
+  const handleLanguageChange = (language: LanguageTypeOption) => {
     setSelectedLanguage(language);
     localStorage.setItem("lens-copy-language", language);
     // Dispatch custom event to notify other components

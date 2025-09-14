@@ -3,6 +3,7 @@
 import type React from "react";
 import { useState, useEffect } from "react";
 import { Check } from "lucide-react";
+import type { LanguageTypeOption } from "../types";
 
 interface CopyTypeButtonProps {
   data: Record<string, unknown> | string | string[] | unknown;
@@ -10,7 +11,8 @@ interface CopyTypeButtonProps {
 
 const CopyTypeButton: React.FC<CopyTypeButtonProps> = ({ data }) => {
   const [typeCopied, setTypeCopied] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState<"ts" | "dart">("ts");
+  const [selectedLanguage, setSelectedLanguage] =
+    useState<LanguageTypeOption>("ts");
 
   // Load saved preference from localStorage
   useEffect(() => {
@@ -22,7 +24,7 @@ const CopyTypeButton: React.FC<CopyTypeButtonProps> = ({ data }) => {
 
   const getDataType = (
     value: Record<string, unknown> | string | string[] | unknown,
-    language: "ts" | "dart" = "ts"
+    language: LanguageTypeOption = "ts"
   ): string => {
     if (value === null) return "null";
     if (value === undefined) return language === "dart" ? "null" : "undefined";
