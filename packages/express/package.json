@@ -8,6 +8,26 @@
   "publishConfig": {
     "access": "public"
   },
+  "keywords": [
+    "express",
+    "lens",
+    "monitoring",
+    "debugging",
+    "logging",
+    "database",
+    "queries",
+    "requests",
+    "cache"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lensjs/lens.git",
+    "directory": "packages/express"
+  },
+  "homepage": "https://lensjs.vercel.app/",
+  "bugs": {
+    "url": "https://github.com/lensjs/lens/issues"
+  },
   "exports": {
     ".": {
       "require": "./dist/index.cjs",
