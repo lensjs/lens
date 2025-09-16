@@ -1,55 +1,110 @@
 import {
   DynamicModule,
-  INestApplication,
+  MiddlewareConsumer,
   Module,
+  NestModule,
   OnApplicationBootstrap,
+  OnModuleInit,
   Provider,
 } from "@nestjs/common";
 import {
   CacheWatcher,
   ExceptionWatcher,
   Lens,
+  lensUtils,
+  LensWatcher,
   QueryWatcher,
   RequestWatcher,
-  WatcherTypeEnum,
 } from "@lensjs/core";
-import { NestLensConfig } from "./define_config";
-import { APP_FILTER, APP_INTERCEPTOR} from "@nestjs/core";
+import { HttpAdapterHost, APP_INTERCEPTOR } from "@nestjs/core";
+import { NestLensConfig, RequiredNestLensConfig } from "./types.js";
+import NestLensAdapter from "./adapter.js";
+import { LensMiddleware } from "./lens_middleware.js";
+import { LensInterceptor } from "./lens.interceptor.js";
+import { createDynamicController } from "./utils/route.js";
 
 @Module({})
-export class LensModule implements OnApplicationBootstrap {
-  static forRoot(config: NestLensConfig): DynamicModule {
+export class LensModule
+  implements OnApplicationBootstrap, NestModule, OnModuleInit
+{
+  constructor(
+    private readonly adapter: NestLensAdapter,
+    private readonly httpAdapterHost: HttpAdapterHost,
+  ) {}
+
+  static forRoot(config?: NestLensConfig): DynamicModule {
     const defaultConfig = {
+      adapter: "express",
       appName: "Lens",
       enabled: true,
       path: "/lens",
       ignoredPaths: [],
       onlyPaths: [],
       requestWatcherEnabled: true,
-      cacheWatcherEnabled: false,
       exceptionWatcherEnabled: true,
+      cacheWatcherEnabled: false,
     };
+
+    const mergedConfig = {
+      ...defaultConfig,
+      ...config,
+    } as RequiredNestLensConfig;
+
+    const watchers: LensWatcher[] = [];
+    const defaultWatchers = [
+      {
+        enabled: mergedConfig.requestWatcherEnabled,
+        watcher: new RequestWatcher(),
+      },
+      {
+        enabled: mergedConfig.cacheWatcherEnabled,
+        watcher: new CacheWatcher(),
+      },
+      {
+        enabled: mergedConfig.queryWatcher?.enabled,
+        watcher: new QueryWatcher(),
+      },
+      {
+        enabled: mergedConfig.exceptionWatcherEnabled,
+        watcher: new ExceptionWatcher(),
+      },
+    ];
+
+    defaultWatchers.forEach((w) => {
+      if (w.enabled) {
+        watchers.push(w.watcher);
+      }
+    });
+
+    const { ignoredPaths, normalizedPath } = lensUtils.prepareIgnoredPaths(
+      mergedConfig.path,
+      mergedConfig.ignoredPaths,
+    );
+
+    mergedConfig.path = normalizedPath;
 
     const lensAdapterProvider: Provider = {
       provide: NestLensAdapter,
-      useFactory: () => {
-        const adapter = new NestLensAdapter()
-          .setConfig(config)
-          .setIgnoredPaths(config.ignoredPaths)
-          .setOnlyPaths(config.onlyPaths);
-
-        return adapter;
+      useFactory: (httpAdapterHost: HttpAdapterHost) => {
+        return new NestLensAdapter()
+          .setWatchers(watchers)
+          .setConfig(mergedConfig)
+          .setIgnoredPaths(ignoredPaths)
+          .setHttpAdapter(httpAdapterHost.httpAdapter)
+          .setOnlyPaths(mergedConfig.onlyPaths);
       },
+      inject: [HttpAdapterHost],
     };
+
+    const DynamicController = createDynamicController(
+      Lens.getRoutes({ basePath: mergedConfig.path }).apiRoutes,
+    );
 
     return {
       module: LensModule,
+      controllers: [DynamicController],
       providers: [
         lensAdapterProvider,
-        {
-          provide: APP_FILTER,
-          useClass: LensExceptionFilter,
-        },
         {
           provide: APP_INTERCEPTOR,
           useClass: LensInterceptor,
@@ -60,18 +115,28 @@ export class LensModule implements OnApplicationBootstrap {
   }
 
   async onApplicationBootstrap() {
-    const adapter = this.app.get(NestLensAdapter);
+    console.log("Bootstrapping LensModule...");
 
-    await Lens.setAdapter(adapter).start({
-      basePath: adapter.config.path,
-      enabled: adapter.config.enabled,
-      appName: adapter.config.appName,
+    const adapter = this.adapter;
+
+    await Lens.setAdapter(adapter).setWatchers(adapter.getWatchers()).start({
+      basePath: adapter.getConfig().path,
+      enabled: adapter.getConfig().enabled,
+      appName: adapter.getConfig().appName,
     });
 
-    // Apply the LensMiddleware globally
-    this.app.use(new LensMiddleware().use);
+    console.log("LensModule initialized");
+  }
 
-    // Setup adapter specific logic
-    adapter.setup();
+  configure(consumer: MiddlewareConsumer) {
+    console.log("Configuring LensModule...");
+    consumer.apply(LensMiddleware).forRoutes("*");
+    console.log("LensModule configured");
+  }
+
+  public onModuleInit() {
+    const httpAdapter = this.httpAdapterHost.httpAdapter;
+
+    this.adapter.registerUI(httpAdapter.getInstance());
   }
 }

@@ -153,3 +153,7 @@ export function prettyHrTime(
 
   return `${(ms / 1000).toFixed(1)} s`;
 }
+
+export function normalizePath(path: string) {
+  return path.startsWith("/") ? path : `/${path}`;
+}

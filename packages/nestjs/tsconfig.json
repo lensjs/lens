@@ -10,7 +10,8 @@
     "outDir": "dist",
     "rootDir": "lib",
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "esModuleInterop": true
   },
   "include": ["lib"]
 }

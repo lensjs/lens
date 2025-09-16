@@ -1,7 +1,8 @@
 import { QueryWatcherHandler } from "@lensjs/watchers";
 import { UserEntry } from "@lensjs/core";
 
-export type ExpressAdapterConfig = {
+export type NestLensConfig = {
+  adapter?: NestAdapter;
   appName?: string;
   enabled?: boolean;
   path?: string;
@@ -14,12 +15,14 @@ export type ExpressAdapterConfig = {
     enabled: boolean;
     handler: QueryWatcherHandler;
   };
-  isAuthenticated?: (request: Request) => Promise<boolean>;
-  getUser?: (request: Request) => Promise<UserEntry>;
+  isAuthenticated?: <T = unknown>(request: T) => Promise<boolean>;
+  getUser?: <T = unknown>(request: T) => Promise<UserEntry>;
 };
 
-export type RequiredExpressAdapterConfig = Required<ExpressAdapterConfig> & {
-  queryWatcher?: ExpressAdapterConfig["queryWatcher"];
-  isAuthenticated?: ExpressAdapterConfig["isAuthenticated"];
-  getUser?: ExpressAdapterConfig["getUser"];
+export type RequiredNestLensConfig = Required<NestLensConfig> & {
+  queryWatcher?: NestLensConfig["queryWatcher"];
+  isAuthenticated?: NestLensConfig["isAuthenticated"];
+  getUser?: NestLensConfig["getUser"];
 };
+
+export type NestAdapter = "express" | "fastify";
