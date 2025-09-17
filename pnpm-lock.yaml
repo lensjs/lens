@@ -679,6 +679,9 @@ importers:
       '@fastify/static':
         specifier: 8.2.0
         version: 8.2.0
+      '@lensjs/express':
+        specifier: workspace:*
+        version: link:../express
       '@lensjs/watchers':
         specifier: workspace:*
         version: link:../handlers

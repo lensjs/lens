@@ -1,28 +1,22 @@
-import { QueryWatcherHandler } from "@lensjs/watchers";
 import { UserEntry } from "@lensjs/core";
+import {
+  ExpressAdapterConfig,
+  RequiredExpressAdapterConfig,
+} from "@lensjs/express";
+import { INestApplication } from "@nestjs/common";
+
+export type NestAdapter = "express" | "fastify";
 
 export type NestLensConfig = {
+  app: INestApplication;
   adapter?: NestAdapter;
-  appName?: string;
-  enabled?: boolean;
-  path?: string;
-  ignoredPaths?: RegExp[];
-  onlyPaths?: RegExp[];
-  requestWatcherEnabled?: boolean;
-  cacheWatcherEnabled?: boolean;
-  exceptionWatcherEnabled?: boolean;
-  queryWatcher?: {
-    enabled: boolean;
-    handler: QueryWatcherHandler;
-  };
-  isAuthenticated?: <T = unknown>(request: T) => Promise<boolean>;
-  getUser?: <T = unknown>(request: T) => Promise<UserEntry>;
-};
+  isAuthenticated?: (request: unknown) => Promise<boolean>;
+  getUser?: (request: unknown) => Promise<UserEntry>;
+} & Omit<ExpressAdapterConfig, "app">;
 
-export type RequiredNestLensConfig = Required<NestLensConfig> & {
-  queryWatcher?: NestLensConfig["queryWatcher"];
+export type RequiredNestLensConfig = RequiredExpressAdapterConfig & {
+  app: NestLensConfig["app"];
+  adapter?: NestAdapter;
   isAuthenticated?: NestLensConfig["isAuthenticated"];
   getUser?: NestLensConfig["getUser"];
 };
-
-export type NestAdapter = "express" | "fastify";

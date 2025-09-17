@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach, Mock} from 'vitest';
-import ExpressAdapter from '../src/adapter';
+import {ExpressAdapter} from '../src/adapter';
 import { Express, Request, Response as ExpressResponse } from "express";
 import { 
   LensAdapter, 
