@@ -1,0 +1,6 @@
+{
+  "extends": "@lensjs/typescript-config/fastify.json",
+  "compilerOptions": {
+        "types": ["@fastify/static"]
+    }
+}
