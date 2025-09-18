@@ -12,6 +12,7 @@ import { NestLensConfig, RequiredNestLensConfig } from "./types";
 import ExpressNestAdapter from "./adapters/next";
 import { LensExceptionFilter } from "./exception-filter";
 import { HttpAdapterHost } from "@nestjs/core";
+import FastifyNestAdapter from "./adapters/fastify";
 
 const defaultConfig = {
   adapter: "express",
@@ -24,21 +25,6 @@ const defaultConfig = {
   exceptionWatcherEnabled: true,
   cacheWatcherEnabled: false,
 };
-
-function initializeExpressAdapter(
-  mergedConfig: RequiredNestLensConfig,
-  ignoredPaths: RegExp[],
-) {
-  return new ExpressNestAdapter({
-    app: mergedConfig.app.getHttpAdapter().getInstance(),
-  })
-    .setIgnoredPaths(ignoredPaths)
-    .setConfig({
-      ...mergedConfig,
-      app: mergedConfig.app.getHttpAdapter().getInstance(),
-    })
-    .setOnlyPaths(mergedConfig.onlyPaths);
-}
 
 export async function lens(config: NestLensConfig) {
   const mergedConfig = {
@@ -83,11 +69,27 @@ export async function lens(config: NestLensConfig) {
 
   switch (mergedConfig.adapter) {
     case "express":
-      adapter = initializeExpressAdapter(mergedConfig, ignoredPaths);
+      adapter = new ExpressNestAdapter({
+        app: mergedConfig.app.getHttpAdapter().getInstance(),
+      });
+      break;
+    case "fastify":
+      adapter = new FastifyNestAdapter({
+        app: mergedConfig.app.getHttpAdapter().getInstance(),
+      });
+      mergedConfig.exceptionWatcherEnabled = false;
       break;
     default:
       throw new Error("Lens Only Supports Express And Fastify Adapters");
   }
+
+  adapter = adapter
+    .setIgnoredPaths(ignoredPaths)
+    .setConfig({
+      ...mergedConfig,
+      app: mergedConfig.app.getHttpAdapter().getInstance(),
+    })
+    .setOnlyPaths(mergedConfig.onlyPaths);
 
   // Catch exceptions
   const { httpAdapter } = mergedConfig.app.get(HttpAdapterHost);
