@@ -5,6 +5,7 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
+import { createSequelizeHandler } from '@lensjs/watchers';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -16,6 +17,10 @@ async function bootstrap() {
     adapter: 'fastify',
     app,
     appName: 'NestJS Example',
+    queryWatcher: {
+      enabled: true,
+      handler: createSequelizeHandler({ provider: 'mysql' }),
+    },
     isAuthenticated: async () => {
       return true;
     },
