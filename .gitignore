@@ -34,8 +34,8 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 .vscode/
 lens.db
-*.db-shm
-*.db-wal
+*.db
+*.db-*
 database.sqlite
 .npmrc
 .turbo
