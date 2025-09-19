@@ -20,7 +20,7 @@ Lens leverages [Express Error Handling](https://expressjs.com/en/guide/error-han
 ```ts
 // All routes are defined above
 
-handleExceptions(app);
+handleExceptions();
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
