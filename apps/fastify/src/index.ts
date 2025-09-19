@@ -4,14 +4,12 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import MemoryCache from "./concrete/cache/memory_cache.js";
 
-const fastify = Fastify({
-  logger: true,
-});
+const fastify = Fastify();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const assetsPath = path.join(__dirname, "..", "assets");
 const cache = new MemoryCache();
 
-const { logException } = await lens({
+await lens({
   app: fastify,
   cacheWatcherEnabled: true,
 });
@@ -69,12 +67,12 @@ fastify.get("/clear-cache", () => {
   };
 });
 
-// Error Handler
-fastify.setErrorHandler((err, req) => {
-  logException(err, req);
-
-  throw err;
-});
+// // Error Handler
+// fastify.setErrorHandler((err) => {
+//   logException(err);
+//
+//   throw err;
+// });
 
 await fastify.listen({ port: 3000 });
 

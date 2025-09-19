@@ -2,6 +2,7 @@ import {
   CacheWatcher,
   ExceptionWatcher,
   Lens,
+  lensContext,
   lensUtils,
   LensWatcher,
   QueryWatcher,
@@ -11,7 +12,7 @@ import { FastifyAdapterConfig, RequiredFastifyAdapterConfig } from "./types";
 import { FastifyAdapter } from "./adapter";
 import { WatcherTypeEnum } from "@lensjs/core";
 import { lensExceptionUtils } from "@lensjs/core";
-import { FastifyError, FastifyInstance, FastifyRequest } from "fastify";
+import { FastifyError, FastifyInstance } from "fastify";
 
 const defaultConfig = {
   appName: "Lens",
@@ -22,6 +23,7 @@ const defaultConfig = {
   requestWatcherEnabled: true,
   cacheWatcherEnabled: false,
   exceptionWatcherEnabled: true,
+  registerErrorHandler: true,
 };
 
 export const lens = async (config: FastifyAdapterConfig) => {
@@ -67,7 +69,10 @@ export const lens = async (config: FastifyAdapterConfig) => {
     .setIgnoredPaths(ignoredPaths)
     .setOnlyPaths(mergedConfig.onlyPaths);
 
-  if (mergedConfig.exceptionWatcherEnabled) {
+  if (
+    mergedConfig.exceptionWatcherEnabled &&
+    mergedConfig.registerErrorHandler
+  ) {
     handleExceptions({
       app: mergedConfig.app,
       enabled: mergedConfig.exceptionWatcherEnabled && mergedConfig.enabled,
@@ -82,10 +87,9 @@ export const lens = async (config: FastifyAdapterConfig) => {
   });
 
   return {
-    logException: (error: FastifyError, request: FastifyRequest) =>
+    logException: (error: FastifyError) =>
       logException(
         error,
-        request,
         mergedConfig.exceptionWatcherEnabled && mergedConfig.enabled,
         watchers.find((w) => w.name === WatcherTypeEnum.EXCEPTION),
       ),
@@ -94,7 +98,6 @@ export const lens = async (config: FastifyAdapterConfig) => {
 
 function logException(
   error: FastifyError,
-  request: FastifyRequest,
   enabled: boolean,
   watcher?: ExceptionWatcher,
 ) {
@@ -102,7 +105,7 @@ function logException(
 
   watcher.log({
     ...lensExceptionUtils.constructErrorObject(error),
-    requestId: (request as any).lensContext?.requestId,
+    requestId: lensContext.getStore()?.requestId,
   });
 }
 
@@ -115,8 +118,8 @@ function handleExceptions({
   enabled: boolean;
   watcher?: ExceptionWatcher;
 }) {
-  app.setErrorHandler((err, req) => {
-    logException(err, req, enabled, watcher);
+  app.setErrorHandler((err) => {
+    logException(err, enabled, watcher);
   });
 }
 
