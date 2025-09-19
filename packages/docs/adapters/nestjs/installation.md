@@ -19,7 +19,9 @@ npm install fastify
 > [!IMPORTANT]
 > This package is published as an ES module ("type": "module" in package.json). 
 > It does not support CommonJS (require). Please ensure your project is configured for ESM to use this package.
+
 minimal setup for you project if you are depending on expressjs 
+
 
 ```ts
 import { NestFactory } from '@nestjs/core';
