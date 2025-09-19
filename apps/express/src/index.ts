@@ -10,7 +10,7 @@ const port = 3000;
 const cache = new MemoryCache();
 const sequelize = new Sequelize({
   dialect: "sqlite",
-  storage: "./lens.db",
+  storage: "./random.db",
   benchmark: true,
   logQueryParameters: true,
   logging: (sql, timing) => {

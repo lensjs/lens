@@ -50,8 +50,8 @@ export default class Lens {
 
     adapter.registerRoutes(apiRoutes);
 
-    const { __dirname } = getMeta(import.meta.url);
-    const uiPath = path.resolve(this.normalizeDirName(__dirname), "ui");
+    const uiPath = this.getUiPath();
+
     adapter.serveUI(uiPath, config.basePath, getUiConfig());
   }
 
@@ -77,6 +77,77 @@ export default class Lens {
     return this.adapter;
   }
 
+  public static getUiPath() {
+    const { __dirname } = getMeta(import.meta.url);
+
+    return path.resolve(this.normalizeDirName(__dirname), "ui");
+  }
+
+  public static getRoutes({ basePath }: { basePath: string }) {
+    const apiRoutes = [
+      {
+        method: "GET" as const,
+        path: `/lens-config`,
+        handler: () => ApiController.fetchUiConfig(),
+      },
+      {
+        method: "GET" as const,
+        path: `/${basePath}/api/requests`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getRequests(data),
+      },
+      {
+        method: "GET" as const,
+        path: `/${basePath}/api/requests/:id`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getRequest(data),
+      },
+      {
+        method: "GET" as const,
+        path: `/${basePath}/api/queries`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getQueries(data),
+      },
+      {
+        method: "GET" as const,
+        path: `/${basePath}/api/queries/:id`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getQuery(data),
+      },
+      {
+        method: "GET" as const,
+        path: `/${basePath}/api/cache`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getCacheEntries(data),
+      },
+      {
+        method: "GET" as const,
+        path: `/${basePath}/api/cache/:id`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getCacheEntry(data),
+      },
+      {
+        method: "GET" as const,
+        path: `/${basePath}/api/exceptions`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getExceptions(data),
+      },
+      {
+        method: "GET" as const,
+        path: `/${basePath}/api/exceptions/:id`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getException(data),
+      },
+      {
+        method: "DELETE" as const,
+        path: `/${basePath}/api/truncate`,
+        handler: async () => await ApiController.truncate(),
+      },
+    ];
+
+    return { apiRoutes };
+  }
+
   private static async bindContainerDeps(config: LensConfig) {
     const dbStore = await this.getStore();
     Container.singleton("store", () => dbStore);
@@ -93,71 +164,6 @@ export default class Lens {
         },
       };
     });
-  }
-
-  private static getRoutes({ basePath }: { basePath: string }) {
-    const apiRoutes = [
-      {
-        method: "GET" as const,
-        path: `/lens-config`,
-        handler: () => ApiController.fetchUiConfig(),
-      },
-      {
-        method: "GET" as const,
-        path: `${basePath}/api/requests`,
-        handler: async (data: RouteDefinitionHandler) =>
-          await ApiController.getRequests(data),
-      },
-      {
-        method: "GET" as const,
-        path: `${basePath}/api/requests/:id`,
-        handler: async (data: RouteDefinitionHandler) =>
-          await ApiController.getRequest(data),
-      },
-      {
-        method: "GET" as const,
-        path: `${basePath}/api/queries`,
-        handler: async (data: RouteDefinitionHandler) =>
-          await ApiController.getQueries(data),
-      },
-      {
-        method: "GET" as const,
-        path: `${basePath}/api/queries/:id`,
-        handler: async (data: RouteDefinitionHandler) =>
-          await ApiController.getQuery(data),
-      },
-      {
-        method: "GET" as const,
-        path: `${basePath}/api/cache`,
-        handler: async (data: RouteDefinitionHandler) =>
-          await ApiController.getCacheEntries(data),
-      },
-      {
-        method: "GET" as const,
-        path: `${basePath}/api/cache/:id`,
-        handler: async (data: RouteDefinitionHandler) =>
-          await ApiController.getCacheEntry(data),
-      },
-      {
-        method: "GET" as const,
-        path: `${basePath}/api/exceptions`,
-        handler: async (data: RouteDefinitionHandler) =>
-          await ApiController.getExceptions(data),
-      },
-      {
-        method: "GET" as const,
-        path: `${basePath}/api/exceptions/:id`,
-        handler: async (data: RouteDefinitionHandler) =>
-          await ApiController.getException(data),
-      },
-      {
-        method: "DELETE" as const,
-        path: `${basePath}/api/truncate`,
-        handler: async () => await ApiController.truncate(),
-      },
-    ];
-
-    return { apiRoutes };
   }
 
   private static async getDefaultStore(): Promise<Store> {

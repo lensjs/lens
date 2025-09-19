@@ -4,7 +4,7 @@ This guide explains how to integrate Lens's exception watcher with your Express 
 
 ## Configuration
 
-First, ensure the `exceptionWatcherEnabled` option is set to `true` when initializing Lens. This option is enabled by default, but it's good practice to confirm its status in your configuration:
+First, ensure the `exceptionWatcherEnabled` option is set to `true` within the configuration object passed to the `lens` initialization function. This option is enabled by default, but it's good practice to explicitly confirm its status:
 
 ```ts
 const { handleExceptions } = await lens({
@@ -20,7 +20,7 @@ Lens leverages [Express Error Handling](https://expressjs.com/en/guide/error-han
 ```ts
 // All routes are defined above
 
-handleExceptions(app);
+handleExceptions();
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);

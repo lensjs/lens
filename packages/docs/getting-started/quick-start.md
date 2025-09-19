@@ -15,7 +15,9 @@ Select your framework below to see its detailed installation guide.
 <div class="vp-doc">
   <ul>
     <li><a href="../adapters/express/installation">Express</a></li>
+    <li><a href="../adapters/nestjs/installation">NestJS</a></li>
     <li><a href="../adapters/adonis/installation">AdonisJS</a></li>
+    <li><a href="../adapters/fastify/installation">Fastify</a></li>
   </ul>
 </div>
 

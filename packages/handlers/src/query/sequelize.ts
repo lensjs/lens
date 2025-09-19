@@ -3,11 +3,11 @@ import { watcherEmitter } from "../utils/emitter";
 import { QueryWatcherHandler, SequelizeQueryType } from "../types";
 import { now } from "@lensjs/date";
 
-function normalizeSql(sql: string) {
+export function normalizeSql(sql: string) {
   return sql.replace(/^Executed \(default\):\s*/, "");
 }
 
-function normalizeQuery(query: string): { sql: string; params: any } {
+export function normalizeQuery(query: string): { sql: string; params: any } {
   const queryWithParams = normalizeSql(query)
     .split(";")
     .filter((i) => i !== "");
@@ -17,14 +17,14 @@ function normalizeQuery(query: string): { sql: string; params: any } {
   }
 
   const sql = queryWithParams[0] as string;
-  const stringParams = queryWithParams[1] as string;
-  let params = [];
+  let stringParams = queryWithParams[1] as string;
+  let params: any;
 
   try {
-    params = JSON.parse(stringParams);
+    const isParamsObject = stringParams.trim().startsWith("{");
 
-    if (typeof params === "object") {
-      params;
+    if (isParamsObject) {
+      params = JSON.parse(stringParams);
     } else {
       params = stringParams.split(",").map((item) => JSON.parse(item));
     }
@@ -35,7 +35,7 @@ function normalizeQuery(query: string): { sql: string; params: any } {
   return { sql, params };
 }
 
-function sequelizeEventHandler({
+export function sequelizeEventHandler({
   payload,
   provider,
 }: {
@@ -51,6 +51,7 @@ function sequelizeEventHandler({
   }
 
   const { sql, params } = normalizeQuery(payload.sql);
+
   return {
     query: lensUtils.formatSqlQuery(
       lensUtils.interpolateQuery(sql, params),

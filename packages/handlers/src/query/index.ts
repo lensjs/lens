@@ -4,4 +4,4 @@ import { createSequelizeHandler } from "./sequelize";
 
 export * from "./prisma";
 export * from "./kysely";
-export * from "./sequelize";
+export { createSequelizeHandler } from "./sequelize";
