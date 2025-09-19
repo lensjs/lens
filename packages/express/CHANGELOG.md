@@ -1,5 +1,17 @@
 # @lensjs/express
 
+## 1.3.0
+
+### Minor Changes
+
+- Add Fastify And NestJs Adapters
+
+### Patch Changes
+
+- Updated dependencies
+  - @lensjs/core@2.2.0
+  - @lensjs/watchers@1.0.16
+
 ## 1.2.1
 
 ### Patch Changes

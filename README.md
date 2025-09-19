@@ -4,7 +4,7 @@ Lens is a powerful debugging tool for your Node.js applications. It provides a b
 
 ## Key Features
 
-- **Framework Adapters:** Out-of-the-box support for Express and AdonisJS.
+- **Framework Adapters:** Out-of-the-box support for Express, Fastify, NestJs and AdonisJS.
 - **Request Inspection:** Inspect incoming requests, their headers, and bodies.
 - **Query Monitoring:** Monitor database queries and their execution time.
 - **Cache Inspection:** Inspect cache entries.

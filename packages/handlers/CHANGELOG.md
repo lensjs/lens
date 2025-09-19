@@ -1,5 +1,13 @@
 # @lensjs/watchers
 
+## 1.0.16
+
+### Patch Changes
+
+- Add Fastify And NestJs Adapters
+- Updated dependencies
+  - @lensjs/core@2.2.0
+
 ## 1.0.15
 
 ### Patch Changes

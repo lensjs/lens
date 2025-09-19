@@ -1,5 +1,13 @@
 # @lensjs/adonis
 
+## 1.2.2
+
+### Patch Changes
+
+- Add Fastify And NestJs Adapters
+- Updated dependencies
+  - @lensjs/core@2.2.0
+
 ## 1.2.1
 
 ### Patch Changes
