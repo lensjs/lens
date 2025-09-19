@@ -8,7 +8,7 @@ hero:
   tagline: Effortlessly monitor requests, database queries, and more with a beautiful dashboard.
   actions:
     - theme: brand
-      text: Getting Started
+      text: Get Started
       link: /getting-started/quick-start
 
 features:
