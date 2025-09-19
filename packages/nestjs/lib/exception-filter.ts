@@ -1,6 +1,5 @@
 import {
   ExceptionWatcher,
-  lensContext,
   lensExceptionUtils,
 } from "@lensjs/core";
 import { Catch, ArgumentsHost, HttpException } from "@nestjs/common";
@@ -17,14 +16,9 @@ export class LensExceptionFilter extends BaseExceptionFilter {
   }
 
   catch(exception: HttpException, host: ArgumentsHost): void {
-    // the .lensContext is available in fastify adapter
-    const context =
-      host.switchToHttp().getRequest().lensContext ?? lensContext.getStore();
-
     if (this.enabled && this.watcher && host.getType() === "http") {
       this.watcher.log({
         ...lensExceptionUtils.constructErrorObject(exception),
-        requestId: context?.requestId,
       });
     }
 
