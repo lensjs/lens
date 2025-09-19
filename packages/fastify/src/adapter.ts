@@ -121,6 +121,7 @@ export class FastifyAdapter extends LensAdapter {
 
         await watcher?.log({
           data: queryPayload,
+          requestId: lensContext.getStore()?.requestId,
         });
       },
     });

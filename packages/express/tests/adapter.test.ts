@@ -300,6 +300,7 @@ describe('ExpressAdapter', () => {
           createdAt: 'now',
           type: 'sql',
         },
+        requestId: 'mock-context-req-id',
       });
     });
 

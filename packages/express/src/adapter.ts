@@ -115,6 +115,7 @@ export class ExpressAdapter extends LensAdapter {
 
         await watcher?.log({
           data: queryPayload,
+          requestId: lensContext.getStore()?.requestId,
         });
       },
     });
