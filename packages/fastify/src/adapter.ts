@@ -130,16 +130,21 @@ export class FastifyAdapter extends LensAdapter {
     if (!this.config.requestWatcherEnabled) return;
 
     // Use Fastify's onRequest hook to intercept all requests
-    this.app.addHook("onRequest", async (request: FastifyRequest) => {
-      if (this.shouldIgnorePath(request.url)) return;
+    this.app.addHook(
+      "onRequest",
+      (request: FastifyRequest, _: FastifyReply, done) => {
+        if (this.shouldIgnorePath(request.url)) return done();
 
-      const context = {
-        requestId: lensUtils.generateRandomUuid(),
-      };
+        const context = {
+          requestId: lensUtils.generateRandomUuid(),
+        };
 
-      (request as any).lensContext = context;
-      (request as any).lensStartTime = process.hrtime();
-    });
+        (request as any).lensContext = context;
+        (request as any).lensStartTime = process.hrtime();
+
+        lensContext.run(context, done);
+      },
+    );
 
     // Use onSend hook to capture response data
     this.app.addHook(
@@ -161,18 +166,13 @@ export class FastifyAdapter extends LensAdapter {
         if (this.shouldIgnorePath(request.url)) return;
 
         const startTime = (request as any).lensStartTime;
-        const context = (request as any).lensContext;
 
-        if (startTime && context) {
-          await lensContext.run(context, async () => {
-            await this.finalizeRequestLog(
-              request,
-              reply,
-              requestWatcher,
-              startTime,
-            );
-          });
-        }
+        await this.finalizeRequestLog(
+          request,
+          reply,
+          requestWatcher,
+          startTime,
+        );
       },
     );
   }
