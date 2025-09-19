@@ -76,9 +76,9 @@ export const lens = async (config: ExpressAdapterConfig) => {
   });
 
   return {
-    handleExceptions: (app: Application) =>
+    handleExceptions: () =>
       handleExceptions({
-        app,
+        app: mergedConfig.app,
         enabled: mergedConfig.exceptionWatcherEnabled && mergedConfig.enabled,
         watcher: watchers.find((w) => w.name === WatcherTypeEnum.EXCEPTION),
       }),
