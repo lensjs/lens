@@ -16,20 +16,9 @@ async function bootstrap() {
   await lens({
     adapter: 'fastify',
     app,
-    appName: 'NestJS Example',
     queryWatcher: {
       enabled: true,
       handler: createSequelizeHandler({ provider: 'mysql' }),
-    },
-    isAuthenticated: async () => {
-      return true;
-    },
-    getUser: async () => {
-      return Promise.resolve({
-        id: 1,
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-      });
     },
   });
 
