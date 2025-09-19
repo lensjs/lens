@@ -76,8 +76,16 @@ export default defineConfig({
                 link: "/handlers/query/express",
               },
               {
+                text: "Fastify",
+                link: "/handlers/query/fastify",
+              },
+              {
                 text: "AdonisJS",
                 link: "/handlers/query/adonis",
+              },
+              {
+                text: "NestJS",
+                link: "/handlers/query/nestjs",
               },
             ],
           },
@@ -90,8 +98,16 @@ export default defineConfig({
                 link: "/handlers/cache/express",
               },
               {
+                text: "Fastify",
+                link: "/handlers/cache/fastify",
+              },
+              {
                 text: "AdonisJS",
                 link: "/handlers/cache/adonis",
+              },
+              {
+                text: "NestJS",
+                link: "/handlers/cache/nestjs",
               },
             ],
           },
