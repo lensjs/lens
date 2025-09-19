@@ -1,4 +1,3 @@
-import { lensContext } from "@lensjs/core";
 import { emitCacheEvent } from "@lensjs/watchers";
 
 export default class MemoryCache {
