@@ -71,11 +71,18 @@ export async function lens(config: NestLensConfig) {
     case "express":
       adapter = new ExpressNestAdapter({
         app: mergedConfig.app.getHttpAdapter().getInstance(),
+      }).setConfig({
+        ...mergedConfig,
+        app: mergedConfig.app.getHttpAdapter().getInstance(),
       });
       break;
     case "fastify":
       adapter = new FastifyNestAdapter({
         app: mergedConfig.app.getHttpAdapter().getInstance(),
+      }).setConfig({
+        ...mergedConfig,
+        app: mergedConfig.app.getHttpAdapter().getInstance(),
+        registerErrorHandler: false,
       });
       mergedConfig.exceptionWatcherEnabled = false;
       break;
@@ -85,10 +92,6 @@ export async function lens(config: NestLensConfig) {
 
   adapter = adapter
     .setIgnoredPaths(ignoredPaths)
-    .setConfig({
-      ...mergedConfig,
-      app: mergedConfig.app.getHttpAdapter().getInstance(),
-    })
     .setOnlyPaths(mergedConfig.onlyPaths);
 
   // Catch exceptions
