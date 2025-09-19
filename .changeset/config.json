@@ -8,7 +8,11 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
-        "docs",
-        "ui"
-    ]
+    "docs",
+    "ui",
+    "nestjs-example",
+    "fastify-example",
+    "example-adonis",
+    "example-express"
+  ]
 }
