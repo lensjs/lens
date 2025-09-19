@@ -18,10 +18,11 @@ export default defineConfig({
       },
       {
         text: "Adapters",
-        collapsed: false,
+        collapsed: true,
         items: [
           {
             text: "Express",
+            collapsed: true,
             items: [
               { text: "Installation", link: "/adapters/express/installation" },
               {
@@ -31,7 +32,27 @@ export default defineConfig({
             ],
           },
           {
+            text: "NestJS",
+            collapsed: true,
+            items: [
+              { text: "Installation", link: "/adapters/nestjs/installation" },
+              { text: "Configuration", link: "/adapters/nestjs/configuration" },
+            ],
+          },
+          {
+            text: "Fastify",
+            collapsed: true,
+            items: [
+              { text: "Installation", link: "/adapters/fastify/installation" },
+              {
+                text: "Configuration",
+                link: "/adapters/fastify/configuration",
+              },
+            ],
+          },
+          {
             text: "AdonisJS",
+            collapsed: true,
             items: [
               { text: "Installation", link: "/adapters/adonis/installation" },
             ],
@@ -85,6 +106,14 @@ export default defineConfig({
               {
                 text: "AdonisJS",
                 link: "/handlers/exception/adonis",
+              },
+              {
+                text: "NestJS",
+                link: "/handlers/exception/nestjs",
+              },
+              {
+                text: "Fastify",
+                link: "/handlers/exception/fastify",
               },
             ],
           },
