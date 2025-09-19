@@ -1,9 +1,10 @@
 {
-  "name": "fastify",
+  "name": "fastify-example",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "type": "module",
+  "private": true,
   "module": "src/index.ts",
   "dependencies": {
     "@fastify/static": "8.2.0",
