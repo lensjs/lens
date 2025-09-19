@@ -1,7 +1,7 @@
-import { FastifyInstance, FastifyRequest } from "fastify";
-import { QueryWatcherHandler } from "@lensjs/watchers";
-import { UserEntry } from "@lensjs/core";
-import { SendOptions } from "@fastify/static";
+import type { FastifyInstance, FastifyRequest } from "fastify";
+import type { QueryWatcherHandler } from "@lensjs/watchers";
+import type { UserEntry } from "@lensjs/core";
+import type { SendOptions } from "@fastify/static";
 
 export type FastifyAdapterConfig = {
   app: FastifyInstance;

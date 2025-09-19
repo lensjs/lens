@@ -8,11 +8,14 @@ import {
   QueryWatcher,
   RequestWatcher,
 } from "@lensjs/core";
-import { FastifyAdapterConfig, RequiredFastifyAdapterConfig } from "./types";
-import { FastifyAdapter } from "./adapter";
+import type {
+  FastifyAdapterConfig,
+  RequiredFastifyAdapterConfig,
+} from "./types.ts";
+import { FastifyAdapter } from "./adapter.js";
 import { WatcherTypeEnum } from "@lensjs/core";
 import { lensExceptionUtils } from "@lensjs/core";
-import { FastifyError, FastifyInstance } from "fastify";
+import type { FastifyError, FastifyInstance } from "fastify";
 
 const defaultConfig = {
   appName: "Lens",
@@ -76,7 +79,9 @@ export const lens = async (config: FastifyAdapterConfig) => {
     handleExceptions({
       app: mergedConfig.app,
       enabled: mergedConfig.exceptionWatcherEnabled && mergedConfig.enabled,
-      watcher: watchers.find((w) => w.name === WatcherTypeEnum.EXCEPTION),
+      watcher: watchers.find(
+        (w) => w.name === WatcherTypeEnum.EXCEPTION,
+      ) as ExceptionWatcher,
     });
   }
 
@@ -86,12 +91,16 @@ export const lens = async (config: FastifyAdapterConfig) => {
     basePath: normalizedPath,
   });
 
+  const exceptionWatcher = watchers.find(
+    (w) => w.name === WatcherTypeEnum.EXCEPTION,
+  ) as ExceptionWatcher;
+
   return {
     logException: (error: FastifyError) =>
       logException(
         error,
         mergedConfig.exceptionWatcherEnabled && mergedConfig.enabled,
-        watchers.find((w) => w.name === WatcherTypeEnum.EXCEPTION),
+        exceptionWatcher,
       ),
   };
 };
@@ -105,7 +114,7 @@ function logException(
 
   watcher.log({
     ...lensExceptionUtils.constructErrorObject(error),
-    requestId: lensContext.getStore()?.requestId,
+    requestId: lensContext.getStore()?.requestId ?? "",
   });
 }
 
@@ -123,5 +132,8 @@ function handleExceptions({
   });
 }
 
-export { FastifyAdapter } from "./adapter";
-export { RequiredFastifyAdapterConfig, FastifyAdapterConfig } from "./types";
+export { FastifyAdapter } from "./adapter.js";
+export type {
+  RequiredFastifyAdapterConfig,
+  FastifyAdapterConfig,
+} from "./types.js";

@@ -2,16 +2,16 @@ import {
   LensAdapter,
   lensUtils,
   RequestWatcher,
-  RouteDefinition,
+  type RouteDefinition,
   WatcherTypeEnum,
   QueryWatcher,
   lensContext,
   CacheWatcher,
   lensEmitter,
-  HttpMethod,
+  type HttpMethod,
 } from "@lensjs/core";
-import { RequiredFastifyAdapterConfig } from "./types";
-import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import type { RequiredFastifyAdapterConfig } from "./types.ts";
+import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import * as path from "node:path";
 import * as fs from "node:fs";
 import { nowISO } from "@lensjs/date";
@@ -76,7 +76,7 @@ export class FastifyAdapter extends LensAdapter {
   ): void {
     this.app.register(fastifyStatic, {
       root: uiPath,
-      prefix: `${lensUtils.normalizePath(spaRoute)}/`,
+      prefix: `${this.normalizePath(lensUtils.normalizePath(spaRoute))}/`,
       wildcard: false,
       serve: false,
     });
@@ -121,7 +121,7 @@ export class FastifyAdapter extends LensAdapter {
 
         await watcher?.log({
           data: queryPayload,
-          requestId: lensContext.getStore()?.requestId,
+          requestId: lensContext.getStore()?.requestId ?? "",
         });
       },
     });
@@ -231,7 +231,7 @@ export class FastifyAdapter extends LensAdapter {
           if (fs.existsSync(filePath)) {
             return "Purged By Lens";
           }
-          return payload;
+          return "Purged By Lens"; // Return Purged By Lens for unparseable strings that are not file paths
         }
       } else if (Buffer.isBuffer(payload)) {
         return "Purged By Lens";
