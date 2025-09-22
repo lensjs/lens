@@ -223,7 +223,7 @@ describe("ExpressAdapter", () => {
     it("should serve static UI assets", () => {
       adapter.serveUI("/path/to/ui", "/lens", {});
       expect(mockApp.use).toHaveBeenCalledWith("/lens", expect.any(Function));
-      expect(express.static).toHaveBeenCalledWith("/path/to/ui");
+      expect(express.static).toHaveBeenCalledWith("/path/to/ui", { fallthrough: true });
     });
 
     it("should serve favicon.ico", () => {
@@ -237,7 +237,7 @@ describe("ExpressAdapter", () => {
       const res = { sendFile: vi.fn() } as unknown as ExpressResponse;
       const faviconHandler = (mockApp.get as Mock).mock.calls[0][1];
       faviconHandler(req, res);
-      expect(res.sendFile).toHaveBeenCalledWith("/path/to/ui/favicon.ico");
+      expect(res.sendFile).toHaveBeenCalledWith("favicon.ico", { root: "/path/to/ui" });
     });
 
     it("should serve index.html for SPA routes", () => {
@@ -258,7 +258,7 @@ describe("ExpressAdapter", () => {
       (lensUtils.isStaticFile as Mock).mockReturnValue(false);
 
       spaRouteHandler(req, res);
-      expect(res.sendFile).toHaveBeenCalledWith("/path/to/ui/index.html");
+      expect(res.sendFile).toHaveBeenCalledWith("index.html", { root: "/path/to/ui" });
       expect(res.download).not.toHaveBeenCalled();
     });
 
@@ -283,8 +283,7 @@ describe("ExpressAdapter", () => {
       );
 
       spaRouteHandler(req, res);
-      expect(res.download).toHaveBeenCalledWith("/path/to/ui/assets/image.png");
-      expect(res.sendFile).not.toHaveBeenCalled();
+      expect(res.sendFile).toHaveBeenCalledWith("image.png", { root: "/path/to/ui/assets" });
     });
   });
 
