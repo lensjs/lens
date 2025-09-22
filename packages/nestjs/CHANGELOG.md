@@ -1,5 +1,13 @@
 # @lensjs/nestjs
 
+## 2.0.2
+
+### Patch Changes
+
+- Fix Express Static Server
+- Updated dependencies
+  - @lensjs/express@1.3.2
+
 ## 2.0.1
 
 ### Patch Changes

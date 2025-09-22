@@ -73,21 +73,25 @@ export class ExpressAdapter extends LensAdapter {
     spaRoute: string,
     _dataToInject: Record<string, any>,
   ): void {
-    this.app.use(this.normalizePath(spaRoute), express.static(uiPath));
+    this.app.use(
+      this.normalizePath(spaRoute),
+      express.static(uiPath, { fallthrough: true }),
+    );
 
-    this.app.get(
-      this.normalizePath(`${spaRoute}/favicon.ico`),
-      (_: Request, res: Response) =>
-        res.sendFile(path.join(uiPath, "favicon.ico")),
+    this.app.get(this.normalizePath(`${spaRoute}/favicon.ico`), (_, res) =>
+      res.sendFile('favicon.ico', {root: uiPath}),
     );
 
     this.app.get(new RegExp(`^/${spaRoute}(?!/api)(/.*)?$`), (req, res) => {
       if (lensUtils.isStaticFile(req.path.split("/"))) {
-        return res.download(
-          path.join(uiPath, lensUtils.stripBeforeAssetsPath(req.path)),
-        );
+        const staticFile = lensUtils
+          .stripBeforeAssetsPath(req.path)
+          .split(path.sep)[1] as string;
+
+        return res.sendFile(staticFile, { root: path.join(uiPath, "assets") });
       }
-      return res.sendFile(path.join(uiPath, "index.html"));
+
+      return res.sendFile("index.html", { root: uiPath });
     });
   }
 

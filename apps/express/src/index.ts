@@ -133,7 +133,7 @@ app.get("/throw-error", async (_, res) => {
   new MyRandomClass().throwsErrors();
 });
 
-handleExceptions(app);
+handleExceptions();
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
