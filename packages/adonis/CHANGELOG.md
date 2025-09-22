@@ -1,5 +1,13 @@
 # @lensjs/adonis
 
+## 1.2.3
+
+### Patch Changes
+
+- Drop Using Emittery
+- Updated dependencies
+  - @lensjs/core@2.2.1
+
 ## 1.2.2
 
 ### Patch Changes

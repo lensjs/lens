@@ -1,5 +1,13 @@
 # @lensjs/watchers
 
+## 1.0.17
+
+### Patch Changes
+
+- Drop Using Emittery
+- Updated dependencies
+  - @lensjs/core@2.2.1
+
 ## 1.0.16
 
 ### Patch Changes
