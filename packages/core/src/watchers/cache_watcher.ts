@@ -31,7 +31,7 @@ export default class CacheWatcher extends Watcher {
 
     if ("data" in data && typeof data.data === "object" && data.data !== null) {
       if ("key" in data.data) {
-        key = String(data.data.key);
+        key = String(data.data.key ?? "__");
       }
       if ("value" in data.data) {
         value = data.data.value;

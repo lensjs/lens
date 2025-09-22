@@ -13,7 +13,7 @@ const getColumns = (): TableColumn<CacheTableRow>[] => {
   return [
     {
       name: "Key",
-      value: (row) => row.data.data.key || "__",
+      value: (row) => row.data.data?.key ?? "__",
     },
     {
       name: "Operation",
