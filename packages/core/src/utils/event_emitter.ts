@@ -1,10 +1,35 @@
-import Emittery from "emittery";
+import { EventEmitter } from "events";
 import { CacheEntry } from "../types";
 
-export const createEmittery = <T extends Record<string, any>>() => {
-  return new Emittery<T>();
+type LensEvents = {
+  cache: CacheEntry;
 };
 
-export const lensEmitter = createEmittery<{
-    cache: CacheEntry
-}>()
+class TypedEventEmitter<T extends Record<string, any>> {
+  public emitter = new EventEmitter();
+
+  on<K extends keyof T>(event: K, listener: (payload: T[K]) => void): this {
+    this.emitter.on(event as string, listener);
+    return this;
+  }
+
+  off<K extends keyof T>(event: K, listener: (payload: T[K]) => void): this {
+    this.emitter.off(event as string, listener);
+    return this;
+  }
+
+  once<K extends keyof T>(event: K, listener: (payload: T[K]) => void): this {
+    this.emitter.once(event as string, listener);
+    return this;
+  }
+
+  emit<K extends keyof T>(event: K, payload: T[K]): boolean {
+    return this.emitter.emit(event as string, payload);
+  }
+}
+
+export const createEmittery = <T extends Record<string, any>>() => {
+  return new TypedEventEmitter<T>();
+};
+
+export const lensEmitter = createEmittery<LensEvents>();
