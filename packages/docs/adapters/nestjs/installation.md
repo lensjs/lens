@@ -7,14 +7,22 @@ first you need to create a new nestjs project by follow the [NestJS Quick Start]
 after that you need to install lensjs for your project
 
 ```bash
-npm install @lensjs/nestjs
+npm install @lensjs/nestjs 
 ```
 
-and based on your adapter you need to install the corresponding dependency so if you are using fastify you need to install it like this and you do the same step for express
+and based on your adapter you need to install the corresponding dependency:
+
+For express:
+```bash
+npm install @lensjs/express
+```
+For fastify:
+
 
 ```bash
 npm install fastify
 ```
+
 minimal setup for you project if you are depending on expressjs 
 
 
@@ -62,3 +70,7 @@ async function bootstrap() {
 
 bootstrap();
 ```
+
+### Next Steps
+
+Check out the [Configuration](./configuration.md) Guide to enable watchers and customize LensJS.
