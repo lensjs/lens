@@ -6,7 +6,7 @@ import { lens } from "@lensjs/express";
 import MemoryCache from "./concrete/cache/memory_cache";
 
 const app = express();
-const port = 3000;
+const port = 3333;
 const cache = new MemoryCache();
 const sequelize = new Sequelize({
   dialect: "sqlite",
