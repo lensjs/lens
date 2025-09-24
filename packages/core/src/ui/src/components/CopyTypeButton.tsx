@@ -1,118 +1,176 @@
 "use client";
 
-import type React from "react";
-import { useState, useEffect } from "react";
-import { Check } from "lucide-react";
-import type { LanguageTypeOption } from "../types";
+import React, { useState, useCallback } from 'react';
+import { quicktype, InputData, jsonInputForTargetLanguage } from 'quicktype-core';
+import {  ChevronDown } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
 
+// Type definition for supported languages
+const SUPPORTED_LANGUAGES = [
+  { value: 'typescript', label: 'TS' },
+  { value: 'python', label: 'Python' },
+  // { value: 'csharp', label: 'C#' },
+  { value: 'java', label: 'Java' },
+  { value: 'kotlin', label: 'Kotlin' },
+  { value: 'swift', label: 'Swift' },
+  { value: 'dart', label: 'dart' },
+  // { value: 'go', label: 'Go' },
+  // { value: 'rust', label: 'Rust' },
+  // { value: 'ruby', label: 'Ruby' }
+];
+
+// Interface for component props
 interface CopyTypeButtonProps {
   data: Record<string, unknown> | string | string[] | unknown;
 }
 
 const CopyTypeButton: React.FC<CopyTypeButtonProps> = ({ data }) => {
-  const [typeCopied, setTypeCopied] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] =
-    useState<LanguageTypeOption>("ts");
+  const [selectedLanguage, setSelectedLanguage] = useState('typescript');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedType, setGeneratedType] = useState<string>('');
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [showSelect, setShowSelect] = useState(false);
 
-  // Load saved preference from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem("lens-copy-language");
-    if (saved === "ts" || saved === "dart") {
-      setSelectedLanguage(saved);
+  // Function to generate type using quicktype
+  const generateType = useCallback(async (lang: string, jsonObject: unknown) => {
+    setIsGenerating(true);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const jsonInput = jsonInputForTargetLanguage(lang as any);
+      
+      // Add JSON samples to quicktype
+      await jsonInput.addSource({
+        name: "Example",
+        samples: [JSON.stringify(jsonObject, null, 2)]
+      });
+
+      const inputData = new InputData();
+      inputData.addInput(jsonInput);
+
+      const result = await quicktype({
+        inputData,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        lang: lang as any,
+        inferMaps: false,
+        rendererOptions: {
+          'just-types': true,
+          'runtime-typecheck': false
+        }
+      });
+
+      setGeneratedType(result.lines.join('\n'));
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Error generating type:', error);
+      setGeneratedType(`// Error generating ${lang} type\n// ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsGenerating(false);
     }
   }, []);
 
-  const getDataType = (
-    value: Record<string, unknown> | string | string[] | unknown,
-    language: LanguageTypeOption = "ts"
-  ): string => {
-    if (value === null) return "null";
-    if (value === undefined) return language === "dart" ? "null" : "undefined";
-    if (Array.isArray(value)) {
-      // For arrays, show the type of elements
-      if (value.length === 0)
-        return language === "dart" ? "List<dynamic>" : "[]";
-      const elementTypes = [
-        ...new Set(value.map((item) => getDataType(item, language))),
-      ];
-      if (elementTypes.length === 1) {
-        if (language === "dart") {
-          return `List<${elementTypes[0]}>`;
-        }
-        return `${elementTypes[0]}[]`;
-      }
-      if (language === "dart") {
-        return `List<dynamic>`;
-      }
-      return `(${elementTypes.join(" | ")})[]`;
-    }
-    if (typeof value === "object" && value !== null) {
-      // For objects, create a type structure
-      const typeStructure: Record<string, string> = {};
-      for (const [key, val] of Object.entries(value)) {
-        typeStructure[key] = getDataType(val, language);
-      }
-      // Convert to string and remove quotes from type values
-      const jsonString = JSON.stringify(typeStructure, null, 2);
-
-      if (language === "dart") {
-        return jsonString.replace(
-          /"(String|int|double|bool|null|List<[^>]+>|Map<[^>]+>)"/g,
-          "$1"
-        );
-      }
-
-      return jsonString.replace(
-        /"(string|number|boolean|null|undefined|bigint|symbol)"/g,
-        "$1"
-      );
-    }
-
-    // Convert primitive types
-    if (language === "dart") {
-      switch (typeof value) {
-        case "string":
-          return "String";
-        case "number":
-          return Number.isInteger(value as number) ? "int" : "double";
-        case "boolean":
-          return "bool";
-        default:
-          return typeof value;
-      }
-    }
-
-    return typeof value;
+  // Handle language change
+  const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newLanguage = event.target.value;
+    setSelectedLanguage(newLanguage);
+    generateType(newLanguage, data);
   };
 
-  const copyDataType = async () => {
+  // Copy type to clipboard
+  const copyTypeToClipboard = async () => {
+    if (!generatedType) return;
+
     try {
-      const dataType = getDataType(data, selectedLanguage);
-      await navigator.clipboard.writeText(dataType);
-      setTypeCopied(true);
-      setTimeout(() => setTypeCopied(false), 2000);
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to copy data type: ", err);
+      await navigator.clipboard.writeText(generatedType);
+      setCopyStatus('success');
+      setTimeout(() => setCopyStatus('idle'), 2000);
+    } catch {
+      setCopyStatus('error');
+      setTimeout(() => setCopyStatus('idle'), 2000);
     }
   };
 
+  // Generate type when component mounts or data changes
+  React.useEffect(() => {
+    if (data) {
+      generateType(selectedLanguage, data);
+    }
+  }, [data, selectedLanguage, generateType]);
+
+  // Get copy button icon based on status
+  const getCopyIcon = () => {
+    switch (copyStatus) {
+      case 'success':
+        return '✓';
+      case 'error':
+        return '✗';
+      default:
+        return '📋';
+    }
+  };
+
+  // Get copy button class based on status
+  const getCopyButtonClass = () => {
+    const baseClass = 'p-1.5 rounded-md transition-all duration-200 flex items-center justify-center min-w-[28px] h-7';
+    switch (copyStatus) {
+      case 'success':
+        return `${baseClass} bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400`;
+      case 'error':
+        return `${baseClass} bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400`;
+      default:
+        return `${baseClass} bg-white text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 dark:bg-slate-800 dark:text-neutral-400 dark:hover:text-neutral-300 dark:hover:bg-slate-700`;
+    }
+  };
+
+  // Get the current language info
+  const getCurrentLanguage = () => {
+    return SUPPORTED_LANGUAGES.find(lang => lang.value === selectedLanguage);
+  };
+
+  if (!data || (typeof data === 'object' && Object.keys(data).length === 0) || (Array.isArray(data) && data.length === 0)) {
+    return <div />;
+  }
   return (
-    <button
-      onClick={copyDataType}
-      className={`px-3 py-2 rounded-md transition-colors ${
-        typeCopied
-          ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-          : "bg-white text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 dark:bg-slate-800 dark:text-neutral-400 dark:hover:text-neutral-300 dark:hover:bg-slate-700"
-      }`}
-      title={
-        typeCopied
-          ? "Type copied!"
-          : `Copy data type (${selectedLanguage.toUpperCase()})`
-      }
-    >
-      {typeCopied ? <Check size={15} /> : selectedLanguage.toUpperCase()}
-    </button>
+    <div className="flex items-center gap-1">
+      {/* Language Selector with icon only display */}
+      <div className={twMerge("relative group", showSelect ? '':'opacity-0 hover:opacity-100 transition-opacity duration-300')}>
+        <select
+          id="language-select"
+          value={selectedLanguage}
+          onChange={handleLanguageChange}
+          className="appearance-none bg-white text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 dark:bg-slate-800 dark:text-neutral-400 dark:hover:text-neutral-300 dark:hover:bg-slate-700 rounded-md px-2 pr-6 text-xs font-medium focus:outline-none transition-all duration-200 cursor-pointer min-w-[50px] h-7"
+          disabled={isGenerating}
+          title={getCurrentLanguage()?.label || 'Select Language'}
+        >
+          {SUPPORTED_LANGUAGES.map((lang) => (
+            <option key={lang.value} value={lang.value}>
+           {lang.label}
+            </option>
+          ))}
+        </select>
+        {/* Custom dropdown arrow */}
+        <div className="absolute inset-y-0 right-0 flex items-center pr-1 pointer-events-none">
+          <ChevronDown className='text-neutral-500 dark:text-neutral-400 size-3' />
+        </div>
+      </div>
+
+      {/* Copy Button */}
+      <div className="relative group">
+        <button
+          onClick={copyTypeToClipboard}
+          onMouseEnter={()=>{
+            setShowSelect(true);
+          }}
+          onMouseLeave={()=>{
+            setShowSelect(false);
+          }}
+          disabled={isGenerating || !generatedType}
+          className={getCopyButtonClass()}
+          title={copyStatus === 'success' ? 'Copied!' : copyStatus === 'error' ? 'Copy failed' : 'Copy type to clipboard'}
+        >
+          <span className="text-xs">{getCopyIcon()}</span>
+        </button>
+      </div>
+    </div>
   );
 };
 
