@@ -1,5 +1,17 @@
 # @lensjs/core
 
+## 2.2.1
+
+### Patch Changes
+
+- Drop Using Emittery
+
+## 2.2.0
+
+### Minor Changes
+
+- Add Fastify And NestJs Adapters
+
 ## 2.1.1
 
 ### Patch Changes

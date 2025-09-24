@@ -8,7 +8,7 @@ import {
   RequestWatcher,
 } from "@lensjs/core";
 import { ExpressAdapterConfig, RequiredExpressAdapterConfig } from "./types";
-import ExpressAdapter from "./adapter";
+import { ExpressAdapter } from "./adapter";
 import { WatcherTypeEnum } from "@lensjs/core";
 import { lensContext } from "@lensjs/core";
 import { handleUncaughExceptions } from "@lensjs/core";
@@ -76,10 +76,10 @@ export const lens = async (config: ExpressAdapterConfig) => {
   });
 
   return {
-    handleExceptions: (app: Application) =>
+    handleExceptions: () =>
       handleExceptions({
-        app,
-        enabled: mergedConfig.exceptionWatcherEnabled,
+        app: mergedConfig.app,
+        enabled: mergedConfig.exceptionWatcherEnabled && mergedConfig.enabled,
         watcher: watchers.find((w) => w.name === WatcherTypeEnum.EXCEPTION),
       }),
   };
@@ -107,3 +107,6 @@ export function handleExceptions({
 
   handleUncaughExceptions(watcher);
 }
+
+export { ExpressAdapter } from "./adapter";
+export { RequiredExpressAdapterConfig, ExpressAdapterConfig } from "./types";

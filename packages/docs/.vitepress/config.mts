@@ -18,10 +18,11 @@ export default defineConfig({
       },
       {
         text: "Adapters",
-        collapsed: false,
+        collapsed: true,
         items: [
           {
             text: "Express",
+            collapsed: true,
             items: [
               { text: "Installation", link: "/adapters/express/installation" },
               {
@@ -31,7 +32,27 @@ export default defineConfig({
             ],
           },
           {
+            text: "NestJS",
+            collapsed: true,
+            items: [
+              { text: "Installation", link: "/adapters/nestjs/installation" },
+              { text: "Configuration", link: "/adapters/nestjs/configuration" },
+            ],
+          },
+          {
+            text: "Fastify",
+            collapsed: true,
+            items: [
+              { text: "Installation", link: "/adapters/fastify/installation" },
+              {
+                text: "Configuration",
+                link: "/adapters/fastify/configuration",
+              },
+            ],
+          },
+          {
             text: "AdonisJS",
+            collapsed: true,
             items: [
               { text: "Installation", link: "/adapters/adonis/installation" },
             ],
@@ -55,8 +76,16 @@ export default defineConfig({
                 link: "/handlers/query/express",
               },
               {
+                text: "Fastify",
+                link: "/handlers/query/fastify",
+              },
+              {
                 text: "AdonisJS",
                 link: "/handlers/query/adonis",
+              },
+              {
+                text: "NestJS",
+                link: "/handlers/query/nestjs",
               },
             ],
           },
@@ -69,8 +98,16 @@ export default defineConfig({
                 link: "/handlers/cache/express",
               },
               {
+                text: "Fastify",
+                link: "/handlers/cache/fastify",
+              },
+              {
                 text: "AdonisJS",
                 link: "/handlers/cache/adonis",
+              },
+              {
+                text: "NestJS",
+                link: "/handlers/cache/nestjs",
               },
             ],
           },
@@ -85,6 +122,14 @@ export default defineConfig({
               {
                 text: "AdonisJS",
                 link: "/handlers/exception/adonis",
+              },
+              {
+                text: "NestJS",
+                link: "/handlers/exception/nestjs",
+              },
+              {
+                text: "Fastify",
+                link: "/handlers/exception/fastify",
               },
             ],
           },

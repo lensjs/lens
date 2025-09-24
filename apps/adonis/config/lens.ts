@@ -2,7 +2,7 @@ import env from '#start/env'
 import { defineConfig } from '@lensjs/adonis'
 
 const lensConfig = defineConfig({
-  appName: env.get('APP_NAME', 'Adonis Adapter'),
+  appName: env.get('APP_NAME', 'Awesome App'),
   enabled: env.get('LENS_ENABLED', true),
   path: env.get('LENS_BASE_PATH', 'lens'),
   ignoredPaths: [],

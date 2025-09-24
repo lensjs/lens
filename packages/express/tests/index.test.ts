@@ -1,10 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import ExpressAdapter from "../src/adapter";
-import { Lens, RequestWatcher, CacheWatcher, QueryWatcher, ExceptionWatcher, lensContext, lensExceptionUtils } from "@lensjs/core";
+import { ExpressAdapter } from "../src/adapter";
+import {
+  Lens,
+  RequestWatcher,
+  CacheWatcher,
+  QueryWatcher,
+  ExceptionWatcher,
+  lensContext,
+  lensExceptionUtils,
+} from "@lensjs/core";
 import { lens, handleExceptions } from "../src";
 import { Application, Request, Response, NextFunction } from "express";
 
-vi.mock("../src/adapter", () => {
+vi.mock("../src/adapter", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../src/adapter")>();
   const mockExpressAdapterInstance = {
     setConfig: vi.fn().mockReturnThis(),
     setIgnoredPaths: vi.fn().mockReturnThis(),
@@ -14,11 +23,13 @@ vi.mock("../src/adapter", () => {
     serveUI: vi.fn(),
   };
   return {
-    default: vi.fn(() => mockExpressAdapterInstance),
+    ...actual,
+    ExpressAdapter: vi.fn(() => mockExpressAdapterInstance),
   };
 });
 vi.mock("@lensjs/core", async () => {
-  const actual = await vi.importActual<typeof import("@lensjs/core")>("@lensjs/core");
+  const actual =
+    await vi.importActual<typeof import("@lensjs/core")>("@lensjs/core");
   return {
     ...actual,
     Lens: {
@@ -26,19 +37,19 @@ vi.mock("@lensjs/core", async () => {
       setWatchers: vi.fn().mockReturnThis(),
       start: vi.fn().mockResolvedValue(undefined),
     },
-    RequestWatcher: vi.fn(function() {
+    RequestWatcher: vi.fn(function () {
       this.name = "request";
       this.log = vi.fn();
     }),
-    CacheWatcher: vi.fn(function() {
+    CacheWatcher: vi.fn(function () {
       this.name = "cache";
       this.log = vi.fn();
     }),
-    QueryWatcher: vi.fn(function() {
+    QueryWatcher: vi.fn(function () {
       this.name = "query";
       this.log = vi.fn();
     }),
-    ExceptionWatcher: vi.fn(function() {
+    ExceptionWatcher: vi.fn(function () {
       this.name = "exception";
       this.log = vi.fn();
     }),
@@ -59,8 +70,8 @@ vi.mock("@lensjs/core", async () => {
       constructErrorObject: vi.fn((err) => ({
         name: err.name,
         message: err.message,
-        createdAt: 'mock-date',
-        fileInfo: { file: '', function: '', },
+        createdAt: "mock-date",
+        fileInfo: { file: "", function: "" },
         trace: [],
         codeFrame: null,
         originalStack: null,
@@ -83,7 +94,10 @@ describe("lens()", () => {
 
     expect(ExpressAdapter).toHaveBeenCalledWith({ app: mockApp });
     expect(Lens.setAdapter).toHaveBeenCalled();
-    expect(Lens.setWatchers).toHaveBeenCalledWith([expect.any(RequestWatcher), expect.any(ExceptionWatcher)]);
+    expect(Lens.setWatchers).toHaveBeenCalledWith([
+      expect.any(RequestWatcher),
+      expect.any(ExceptionWatcher),
+    ]);
     expect(Lens.start).toHaveBeenCalledWith({
       appName: "Lens",
       enabled: true,
@@ -111,7 +125,7 @@ describe("lens()", () => {
   });
 });
 
-describe('handleExceptions', () => {
+describe("handleExceptions", () => {
   let mockApp: Application;
   let mockRequest: Request;
   let mockResponse: Response;
@@ -128,7 +142,7 @@ describe('handleExceptions', () => {
     vi.mocked(lensContext.getStore).mockReturnValue(undefined);
   });
 
-  it('should register an error handling middleware when enabled and watcher is provided', () => {
+  it("should register an error handling middleware when enabled and watcher is provided", () => {
     handleExceptions({
       app: mockApp,
       enabled: true,
@@ -141,7 +155,7 @@ describe('handleExceptions', () => {
     expect(errorHandler.length).toBe(4); // Express error middleware has 4 arguments
   });
 
-  it('should not register an error handling middleware when disabled', () => {
+  it("should not register an error handling middleware when disabled", () => {
     handleExceptions({
       app: mockApp,
       enabled: false,
@@ -151,7 +165,7 @@ describe('handleExceptions', () => {
     expect(mockApp.use).not.toHaveBeenCalled();
   });
 
-  it('should not register an error handling middleware when no watcher is provided', () => {
+  it("should not register an error handling middleware when no watcher is provided", () => {
     handleExceptions({
       app: mockApp,
       enabled: true,
@@ -161,7 +175,7 @@ describe('handleExceptions', () => {
     expect(mockApp.use).not.toHaveBeenCalled();
   });
 
-  it('should log the exception and call next with the error', async () => {
+  it("should log the exception and call next with the error", async () => {
     handleExceptions({
       app: mockApp,
       enabled: true,
@@ -169,16 +183,16 @@ describe('handleExceptions', () => {
     });
 
     const errorHandler = mockApp.use.mock.calls[0][0];
-    const error = new Error('Test Express Error');
+    const error = new Error("Test Express Error");
 
     await errorHandler(error, mockRequest, mockResponse, mockNext);
 
     expect(lensExceptionUtils.constructErrorObject).toHaveBeenCalledWith(error);
     expect(mockExceptionWatcher.log).toHaveBeenCalledWith({
-      name: 'Error',
-      message: 'Test Express Error',
-      createdAt: 'mock-date',
-      fileInfo: { file: '', function: '' },
+      name: "Error",
+      message: "Test Express Error",
+      createdAt: "mock-date",
+      fileInfo: { file: "", function: "" },
       trace: [],
       codeFrame: null,
       originalStack: null,
@@ -187,7 +201,7 @@ describe('handleExceptions', () => {
     expect(mockNext).toHaveBeenCalledWith(error);
   });
 
-  it('should include requestId from lensContext if available', async () => {
+  it("should include requestId from lensContext if available", async () => {
     handleExceptions({
       app: mockApp,
       enabled: true,
@@ -195,15 +209,17 @@ describe('handleExceptions', () => {
     });
 
     const errorHandler = mockApp.use.mock.calls[0][0];
-    const error = new Error('Test Express Error with RequestId');
-    const requestId = 'express-request-id';
+    const error = new Error("Test Express Error with RequestId");
+    const requestId = "express-request-id";
 
     vi.mocked(lensContext.getStore).mockReturnValue({ requestId });
 
     await errorHandler(error, mockRequest, mockResponse, mockNext);
 
-    expect(mockExceptionWatcher.log).toHaveBeenCalledWith(expect.objectContaining({
-      requestId: requestId,
-    }));
+    expect(mockExceptionWatcher.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        requestId: requestId,
+      }),
+    );
   });
 });

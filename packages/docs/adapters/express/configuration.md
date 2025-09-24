@@ -24,7 +24,8 @@ await lens({
     handler: createPrismaHandler({
       prisma,
       provider: "mysql"
-  }),
+    }),
+  },
 });
 ```
 
@@ -33,11 +34,10 @@ await lens({
 This snippet illustrates all available configuration options for the Express adapter, along with inline comments for clarity:
 
 ```ts
-import express from "express";
+import express, { Request } from "express";
 import { lens } from "@lensjs/express";
 import { createPrismaHandler } from "@lensjs/watchers";
 import { PrismaClient } from "@prisma/client";
-import { BetterSqliteStore } from "@lensjs/core"; // Example store implementation
 
 const app = express();
 const prisma = new PrismaClient({ log: ["query"] });
@@ -70,9 +70,6 @@ await lens({
   // Optional: The display name for your application in the Lens dashboard. Defaults to "Lens".
   appName: "My Express App",
 
-  // Optional: Custom store implementation for Lens data. Defaults to `BetterSqliteStore`.
-  store: new BetterSqliteStore(),
-
   // Optional: An array of regex patterns for routes that Lens should ignore.
   ignoredPaths: [/^\/health/, /^\/metrics/],
 
@@ -80,14 +77,15 @@ await lens({
   onlyPaths: [/^\/api/],
 
   // Optional: An asynchronous function to determine if a user is authenticated to access the Lens dashboard.
-  isAuthenticated: async (req) => {
+  isAuthenticated: async (req: Request) => {
     const jwtToken = req.headers["authorization"]?.split(" ")[1];
+    const jwtSecret = "secret";
     // Replace with your actual JWT validation logic
     return jwtToken === getValidJwtToken(jwtToken, jwtSecret);
   },
 
   // Optional: An asynchronous function to resolve and attach user information to Lens events/logs.
-  getUser: async (req) => {
+  getUser: async (req: Request) => {
     // Replace with your actual user retrieval logic
     return {
       id: "123",

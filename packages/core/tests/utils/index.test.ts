@@ -67,6 +67,13 @@ describe("utils", () => {
       expect(interpolateQuery(query, bindings)).toBe(expected);
     });
 
+    it("should replace $1 numeric placeholder with no spaces", () => {
+      const query = "INSERT INTO users (id,name) VALUES (NULL,$1);";
+      const bindings = { $1: "John Doe" };
+      const expected = "INSERT INTO users (id,name) VALUES (NULL,'John Doe');";
+      expect(interpolateQuery(query, bindings)).toBe(expected);
+    });
+
     it("should replace $name named placeholder", () => {
       const query = "UPDATE users SET name = $name WHERE id = $id;";
       const bindings = { name: "Alice", id: 42 };
