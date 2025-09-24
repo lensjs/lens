@@ -73,3 +73,11 @@
     padding-inline: 10px;
   }
 }
+
+
+
+
+/* json background */
+.w-json-view-container{
+  background: transparent !important;
+}
