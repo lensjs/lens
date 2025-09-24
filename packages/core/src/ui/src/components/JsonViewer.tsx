@@ -31,14 +31,14 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data }) => {
         <CopyTypeButton data={data} />
         <button
           onClick={copyToClipboard}
-          className={`p-2 rounded-md transition-colors ${
+          className={`p-1 rounded-md transition-colors ${
             copied
               ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
               : "bg-white text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 dark:bg-slate-800 dark:text-neutral-400 dark:hover:text-neutral-300 dark:hover:bg-slate-700"
           }`}
           title={copied ? "Copied!" : "Copy to clipboard"}
         >
-          {copied ? <Check size={15} /> : <Copy />}
+          {copied ? <Check size={14} /> : <Copy size={14} />}
         </button>
       </div>
       <div className="whitespace-pre-wrap pr-20 text-neutral-800 dark:text-neutral-200 min-h-10">
