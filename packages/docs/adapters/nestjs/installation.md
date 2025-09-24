@@ -2,29 +2,30 @@
 
 The **NestJS adapter** seamlessly integrates LensJS into your NestJS application.
 
-first you need to create a new nestjs project by follow the [NestJS Quick Start](https://docs.nestjs.com/first-steps#setup)
+If you didn't already, you can create a new nestjs project by following the [NestJS Quick Start](https://docs.nestjs.com/first-steps#setup)
 
-after that you need to install lensjs for your project
+Then you can install lens's nestjs adapter in your project:
 
 ```bash
 npm install @lensjs/nestjs 
 ```
 
-and based on your adapter you need to install the corresponding dependency:
+NestJS can run on top of Express or Fastify as its HTTP server.
+Depending on which one you choose, you’ll need to install the corresponding package.
 
-For express:
+Using Express (default):
+
 ```bash
 npm install @lensjs/express
 ```
-For fastify:
 
+Using Fastify:
 
 ```bash
-npm install fastify
+npm install @lensjs/fastify
 ```
 
-minimal setup for you project if you are depending on expressjs 
-
+A minimal setup with express would look something like this:
 
 ```ts
 import { NestFactory } from '@nestjs/core';
@@ -41,34 +42,13 @@ async function bootstrap() {
 bootstrap();
 ```
 
-
-and if you are using fastify you need only to pass the adapter 
+And for fastify, you only need to pass the adapter property:
 
 ```ts
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module.js';
-import { lens } from '@lensjs/nestjs';
-import {
-  FastifyAdapter,
-  NestFastifyApplication,
-} from '@nestjs/platform-fastify';
-import { createSequelizeHandler } from '@lensjs/watchers';
-
-async function bootstrap() {
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    new FastifyAdapter(),
-  );
-
-  await lens({
-    adapter: 'fastify', // Note here the adapter is fastify
-    app,
-  });
-
-  await app.listen(process.env.PORT ?? 3000);
-}
-
-bootstrap();
+await lens({
+  adapter: 'fastify', 
+  app,
+});
 ```
 
 ### Next Steps
