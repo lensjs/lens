@@ -1,5 +1,11 @@
 # @lensjs/core
 
+## 2.2.2
+
+### Patch Changes
+
+- Improve Request Method Badges Colors
+
 ## 2.2.1
 
 ### Patch Changes

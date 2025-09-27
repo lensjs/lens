@@ -1,5 +1,13 @@
 # @lensjs/express
 
+## 1.3.3
+
+### Patch Changes
+
+- Updated dependencies
+  - @lensjs/core@2.2.2
+  - @lensjs/watchers@1.0.18
+
 ## 1.3.2
 
 ### Patch Changes
