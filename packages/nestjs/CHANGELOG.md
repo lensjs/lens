@@ -1,5 +1,14 @@
 # @lensjs/nestjs
 
+## 2.0.3
+
+### Patch Changes
+
+- Updated dependencies
+  - @lensjs/core@2.2.2
+  - @lensjs/express@1.3.3
+  - @lensjs/fastify@1.0.3
+
 ## 2.0.2
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # example-express
 
+## 1.1.3
+
+### Patch Changes
+
+- Updated dependencies
+  - @lensjs/core@2.2.2
+  - @lensjs/express@1.3.3
+  - @lensjs/watchers@1.0.18
+
 ## 1.1.2
 
 ### Patch Changes

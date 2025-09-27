@@ -1,5 +1,11 @@
 # example-adonis
 
+## 1.1.3
+
+### Patch Changes
+
+- @lensjs/adonis@1.2.4
+
 ## 1.1.2
 
 ### Patch Changes
