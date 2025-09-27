@@ -135,6 +135,10 @@ export default defineConfig({
           },
         ],
       },
+      {
+        text: "UI Interaction",
+        link: "/ui-interaction",
+      },
     ],
 
     socialLinks: [{ icon: "github", link: "https://github.com/lensjs/lens" }],
