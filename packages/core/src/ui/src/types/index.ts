@@ -11,7 +11,7 @@ export type LensConfig = {
 };
 
 export type LensEntryType = "request" | "query" | "cache";
-
+export type LanguageTypeOption = "ts" | "dart";
 export type PaginationParams = {
   page: number;
   perPage: number;
