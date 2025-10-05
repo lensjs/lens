@@ -75,8 +75,12 @@ describe("RequestWatcher", () => {
         },
         data: {
           ...requestEntry.request,
+          headers: { "content-type": "application/json" },
           user: requestEntry.user,
-          response: requestEntry.response,
+          response: {
+            ...requestEntry.response,
+            headers: { "x-custom-header": "test" },
+          },
         },
       });
     });
@@ -112,8 +116,9 @@ describe("RequestWatcher", () => {
         },
         data: {
           ...requestEntry.request,
+          headers: {},
           user: undefined,
-          response: undefined,
+          response: { headers: {} },
         },
       });
     });
@@ -153,8 +158,12 @@ describe("RequestWatcher", () => {
         },
         data: {
           ...requestEntry.request,
+          headers: { authorization: "*******" },
           user: requestEntry.user,
-          response: requestEntry.response,
+          response: {
+            ...requestEntry.response,
+            headers: { "content-length": "20" },
+          },
         },
       });
     });

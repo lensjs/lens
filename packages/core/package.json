@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@lensjs/date": "workspace:*",
+    "denque": "^2.1.0",
     "libsql": "^0.5.22",
     "luxon": "^3.7.2",
     "rimraf": "^6.0.1",

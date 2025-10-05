@@ -73,7 +73,7 @@ describe('Lens', () => {
     Lens.setAdapter(mockAdapter);
     Lens.watch(mockWatcher);
 
-    await Lens.start({ basePath: 'test', appName: 'TestApp', enabled: true });
+    await Lens.start({ path: 'test', appName: 'TestApp', enabled: true });
 
     expect(mockAdapter.setWatchers).toHaveBeenCalledWith([mockWatcher]);
     expect(mockAdapter.setup).toHaveBeenCalled();
@@ -83,7 +83,7 @@ describe('Lens', () => {
 
   it('should not start if not enabled', async () => {
     Lens.setAdapter(mockAdapter);
-    await Lens.start({ basePath: 'test', appName: 'TestApp', enabled: false });
+    await Lens.start({ path: 'test', appName: 'TestApp', enabled: false });
 
     expect(mockAdapter.setup).not.toHaveBeenCalled();
   });

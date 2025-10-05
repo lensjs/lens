@@ -10,13 +10,14 @@ import type {
 } from "../types/index.ts";
 import { getUiConfig } from "../context/context";
 import Container from "../context/container";
-import { BetterSqliteStore } from "../stores/index";
+import { QueuedSqliteStore } from "../stores/index";
 import { getMeta } from "../utils/index";
 
 export default class Lens {
   private static watchers: Map<WatcherTypeEnum, Watcher> = new Map();
   private static store: Store;
   private static adapter: Adapter;
+  private static config: LensConfig;
 
   static watch(watcher: Watcher): typeof Lens {
     this.watchers.set(watcher.name, watcher);
@@ -30,7 +31,7 @@ export default class Lens {
 
   static async start(
     config: LensConfig = {
-      basePath: "lens",
+      path: "lens",
       appName: "Lens",
       enabled: true,
     },
@@ -38,21 +39,23 @@ export default class Lens {
     if (!config.enabled) {
       return;
     }
-    await this.bindContainerDeps(config);
+
+    this.config = config;
+    await this.bindContainerDeps();
 
     let adapter = this.getAdapter();
 
     adapter.setWatchers(Array.from(this.watchers.values())).setup();
 
     const { apiRoutes } = this.getRoutes({
-      basePath: config.basePath,
+      path: config.path,
     });
 
     adapter.registerRoutes(apiRoutes);
 
     const uiPath = this.getUiPath();
 
-    adapter.serveUI(uiPath, config.basePath, getUiConfig());
+    adapter.serveUI(uiPath, config.path, getUiConfig());
   }
 
   static setStore(store: Store): typeof Lens {
@@ -83,7 +86,7 @@ export default class Lens {
     return path.resolve(this.normalizeDirName(__dirname), "ui");
   }
 
-  public static getRoutes({ basePath }: { basePath: string }) {
+  public static getRoutes({ path }: { path: string }) {
     const apiRoutes = [
       {
         method: "GET" as const,
@@ -92,55 +95,55 @@ export default class Lens {
       },
       {
         method: "GET" as const,
-        path: `/${basePath}/api/requests`,
+        path: `/${path}/api/requests`,
         handler: async (data: RouteDefinitionHandler) =>
           await ApiController.getRequests(data),
       },
       {
         method: "GET" as const,
-        path: `/${basePath}/api/requests/:id`,
+        path: `/${path}/api/requests/:id`,
         handler: async (data: RouteDefinitionHandler) =>
           await ApiController.getRequest(data),
       },
       {
         method: "GET" as const,
-        path: `/${basePath}/api/queries`,
+        path: `/${path}/api/queries`,
         handler: async (data: RouteDefinitionHandler) =>
           await ApiController.getQueries(data),
       },
       {
         method: "GET" as const,
-        path: `/${basePath}/api/queries/:id`,
+        path: `/${path}/api/queries/:id`,
         handler: async (data: RouteDefinitionHandler) =>
           await ApiController.getQuery(data),
       },
       {
         method: "GET" as const,
-        path: `/${basePath}/api/cache`,
+        path: `/${path}/api/cache`,
         handler: async (data: RouteDefinitionHandler) =>
           await ApiController.getCacheEntries(data),
       },
       {
         method: "GET" as const,
-        path: `/${basePath}/api/cache/:id`,
+        path: `/${path}/api/cache/:id`,
         handler: async (data: RouteDefinitionHandler) =>
           await ApiController.getCacheEntry(data),
       },
       {
         method: "GET" as const,
-        path: `/${basePath}/api/exceptions`,
+        path: `/${path}/api/exceptions`,
         handler: async (data: RouteDefinitionHandler) =>
           await ApiController.getExceptions(data),
       },
       {
         method: "GET" as const,
-        path: `/${basePath}/api/exceptions/:id`,
+        path: `/${path}/api/exceptions/:id`,
         handler: async (data: RouteDefinitionHandler) =>
           await ApiController.getException(data),
       },
       {
         method: "DELETE" as const,
-        path: `/${basePath}/api/truncate`,
+        path: `/${path}/api/truncate`,
         handler: async () => await ApiController.truncate(),
       },
     ];
@@ -148,26 +151,26 @@ export default class Lens {
     return { apiRoutes };
   }
 
-  private static async bindContainerDeps(config: LensConfig) {
+  private static async bindContainerDeps() {
     const dbStore = await this.getStore();
     Container.singleton("store", () => dbStore);
     Container.singleton("uiConfig", () => {
       return {
-        appName: config.appName,
-        path: `/${config.basePath}`,
+        appName: this.config.appName,
+        path: `/${this.config.path}`,
         api: {
-          requests: `/${config.basePath}/api/requests`,
-          queries: `/${config.basePath}/api/queries`,
-          cache: `/${config.basePath}/api/cache`,
-          exceptions: `/${config.basePath}/api/exceptions`,
-          truncate: `/${config.basePath}/api/truncate`,
+          requests: `/${this.config.path}/api/requests`,
+          queries: `/${this.config.path}/api/queries`,
+          cache: `/${this.config.path}/api/cache`,
+          exceptions: `/${this.config.path}/api/exceptions`,
+          truncate: `/${this.config.path}/api/truncate`,
         },
       };
     });
   }
 
   private static async getDefaultStore(): Promise<Store> {
-    const store = new BetterSqliteStore();
+    const store = new QueuedSqliteStore(this.config.storeQueueConfig);
     await store.initialize();
 
     return store;

@@ -33,7 +33,7 @@ describe('ApiController', () => {
     (getStore as Mock).mockReturnValue(mockStore);
     (getUiConfig as Mock).mockReturnValue({
       appName: 'TestApp',
-      basePath: '/lens',
+      path: '/lens',
       enabled: true,
     });
     vi.clearAllMocks();
@@ -266,7 +266,7 @@ describe('ApiController', () => {
 
   describe('fetchUiConfig', () => {
     it('should return the UI config', () => {
-      const mockUiConfig = { appName: 'TestApp', basePath: '/lens', enabled: true };
+      const mockUiConfig = { appName: 'TestApp', path: '/lens', enabled: true };
       (getUiConfig as Mock).mockReturnValue(mockUiConfig);
 
       const result = ApiController.fetchUiConfig();

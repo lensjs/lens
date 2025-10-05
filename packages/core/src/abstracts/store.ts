@@ -7,6 +7,7 @@ import type {
 
 type MinimalPaginatePromise = Promise<Paginator<Omit<LensEntry, "data">[]>>;
 export default abstract class Store {
+  constructor(...args: any[]) {}
   abstract initialize(): Promise<void>;
   abstract save(entry: {
     id?: string;

@@ -36,9 +36,7 @@ export function interpolateQuery(query: string, bindings: any): string {
     }
 
     if (Array.isArray(value)) {
-      return value
-        .map((v) => formatValue(v))
-        .join(", ");
+      return value.map((v) => formatValue(v)).join(", ");
     }
 
     if (typeof value === "object") {
@@ -174,3 +172,5 @@ export function prettyHrTime(
 export function normalizePath(path: string) {
   return path.startsWith("/") ? path : `/${path}`;
 }
+
+export * from "./compose";

@@ -99,9 +99,14 @@ export enum WatcherTypeEnum {
 }
 
 export type LensConfig = {
-  basePath: string;
+  path: string;
   appName: string;
   enabled: boolean;
+  storeQueueConfig?: QueuedStoreConfig;
+  hiddenParams?: {
+    headers?: string[];
+    bodyParams?: string[];
+  };
 };
 
 export type LensEntry = {
@@ -153,3 +158,11 @@ export type HttpMethod =
   | "HEAD"
   | "OPTIONS";
 export type RouteHttpMethod = "get" | "post" | "put" | "delete" | "patch";
+export type Constructor = new (...args: any[]) => any;
+
+export interface QueuedStoreConfig {
+  batchSize?: number;
+  processIntervalMs?: number;
+  warnThreshold?: number;
+  preallocate?: boolean;
+}
