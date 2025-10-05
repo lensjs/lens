@@ -224,7 +224,7 @@ export class ExpressAdapter extends LensAdapter {
           : null,
       };
 
-      await requestWatcher.log(logPayload);
+      await requestWatcher.log(logPayload, this.config.hiddenParams);
     } catch (err) {
       console.error("Error finalizing request log:", err);
     }
