@@ -88,7 +88,7 @@ export const lens = async (config: FastifyAdapterConfig) => {
   await Lens.setAdapter(adapter).setWatchers(watchers).start({
     appName: mergedConfig.appName,
     enabled: mergedConfig.enabled,
-    basePath: normalizedPath,
+    path: normalizedPath,
   });
 
   const exceptionWatcher = watchers.find(

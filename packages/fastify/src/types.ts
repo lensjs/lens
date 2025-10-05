@@ -1,13 +1,10 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import type { QueryWatcherHandler } from "@lensjs/watchers";
-import type { UserEntry } from "@lensjs/core";
+import type { LensConfig, UserEntry } from "@lensjs/core";
 import type { SendOptions } from "@fastify/static";
 
 export type FastifyAdapterConfig = {
   app: FastifyInstance;
-  appName?: string;
-  enabled?: boolean;
-  path?: string;
   ignoredPaths?: RegExp[];
   onlyPaths?: RegExp[];
   requestWatcherEnabled?: boolean;
@@ -20,7 +17,7 @@ export type FastifyAdapterConfig = {
   };
   isAuthenticated?: (request: FastifyRequest) => Promise<boolean>;
   getUser?: (request: FastifyRequest) => Promise<UserEntry>;
-};
+} & Partial<LensConfig>;
 
 export type RequiredFastifyAdapterConfig = Required<FastifyAdapterConfig> & {
   queryWatcher?: FastifyAdapterConfig["queryWatcher"];
