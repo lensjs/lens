@@ -1,5 +1,17 @@
 # @lensjs/express
 
+## 1.4.0
+
+### Minor Changes
+
+- e3dbe2d: Hide Sensitive Request Data And change Default Store
+
+### Patch Changes
+
+- Updated dependencies [e3dbe2d]
+  - @lensjs/core@2.3.0
+  - @lensjs/watchers@1.1.0
+
 ## 1.3.3
 
 ### Patch Changes

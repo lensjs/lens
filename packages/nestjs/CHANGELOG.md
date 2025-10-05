@@ -1,5 +1,18 @@
 # @lensjs/nestjs
 
+## 3.0.0
+
+### Minor Changes
+
+- e3dbe2d: Hide Sensitive Request Data And change Default Store
+
+### Patch Changes
+
+- Updated dependencies [e3dbe2d]
+  - @lensjs/core@2.3.0
+  - @lensjs/express@1.4.0
+  - @lensjs/fastify@1.1.0
+
 ## 2.0.3
 
 ### Patch Changes

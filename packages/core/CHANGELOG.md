@@ -1,5 +1,11 @@
 # @lensjs/core
 
+## 2.3.0
+
+### Minor Changes
+
+- e3dbe2d: Hide Sensitive Request Data And change Default Store
+
 ## 2.2.2
 
 ### Patch Changes
