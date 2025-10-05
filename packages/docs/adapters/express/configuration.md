@@ -76,7 +76,7 @@ await lens({
   // Optional: An array of regex patterns to exclusively watch. If provided, only routes matching these patterns will be monitored.
   onlyPaths: [/^\/api/],
 
-  // Optional: An asynchronous function to determine if a user is authenticated to access the Lens dashboard.
+  // Optional: An asynchronous function to determine if current request is authenticated.
   isAuthenticated: async (req: Request) => {
     const jwtToken = req.headers["authorization"]?.split(" ")[1];
     const jwtSecret = "secret";

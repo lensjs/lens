@@ -133,7 +133,8 @@ const lensConfig = defineConfig({
       provider: 'sqlite',                                 // The database provider for query watching (e.g., 'sqlite', 'mysql').
     }
   },
-  // Optional: A function to determine if the user is authenticated to access the Lens dashboard.
+
+  // Optional: An asynchronous function to determine if current request is authenticated.
   isAuthenticated: async (ctx) => {
     return await ctx.auth?.check()
   },
