@@ -510,6 +510,7 @@ describe("FastifyAdapter", () => {
           }),
           user: null,
         }),
+        undefined,
       );
     });
 
@@ -603,6 +604,7 @@ describe("FastifyAdapter", () => {
           }),
           user: { id: "user123", name: "Test User" },
         }),
+        undefined,
       );
     });
   });

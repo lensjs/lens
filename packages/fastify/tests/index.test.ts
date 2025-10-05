@@ -169,7 +169,7 @@ describe('lens', () => {
     expect(Lens.start).toHaveBeenCalledWith({
       appName: 'Lens',
       enabled: true,
-      basePath: '/lens',
+      path: '/lens',
     });
 
     expect(mockAdapterInstance.setConfig).toHaveBeenCalledWith(
@@ -207,7 +207,7 @@ describe('lens', () => {
     expect(Lens.start).toHaveBeenCalledWith({
       appName: 'MyCustomLens',
       enabled: false,
-      basePath: '/custom-lens',
+      path: '/custom-lens',
     });
 
     expect(mockAdapterInstance.setConfig).toHaveBeenCalledWith(
