@@ -593,7 +593,7 @@ describe("ExpressAdapter", () => {
       expect(mockIsAuthenticated).toHaveBeenCalledWith(req);
       expect(mockGetUser).toHaveBeenCalledWith(req);
       expect(mockRequestWatcher.log).toHaveBeenCalledWith({
-        request: expect.objectContaining({
+        request: {
           id: "mock-context-req-id",
           method: "GET",
           duration: "100ms",
@@ -601,13 +601,15 @@ describe("ExpressAdapter", () => {
           status: 200,
           ip: "127.0.0.1",
           createdAt: "2025-01-01T00:00:00.000Z",
-        }),
+          headers: {},
+          body: {},
+        },
         response: {
           json: { result: "ok" },
           headers: { "Content-Type": "application/json" },
         },
         user: { id: "user-final", name: "Final User" },
-      });
+      }, undefined);
     });
 
     it("should log request details without user info if not authenticated", async () => {
@@ -645,11 +647,24 @@ describe("ExpressAdapter", () => {
 
       expect(mockIsAuthenticated).toHaveBeenCalledWith(req);
       expect(mockGetUser).not.toHaveBeenCalled();
-      expect(mockRequestWatcher.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          user: null,
-        }),
-      );
+      expect(mockRequestWatcher.log).toHaveBeenCalledWith({
+        request: {
+          id: "mock-context-req-id",
+          method: "GET",
+          duration: "100ms",
+          path: "/final",
+          status: 200,
+          ip: "127.0.0.1",
+          createdAt: "2025-01-01T00:00:00.000Z",
+          headers: {},
+          body: {},
+        },
+        response: {
+          json: { result: "ok" },
+          headers: {},
+        },
+        user: null,
+      }, undefined);
     });
 
     it("should handle errors during logging gracefully", async () => {
@@ -720,13 +735,24 @@ describe("ExpressAdapter", () => {
         start,
       );
 
-      expect(mockRequestWatcher.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          request: expect.objectContaining({
-            id: "context-specific-id",
-          }),
-        }),
-      );
+      expect(mockRequestWatcher.log).toHaveBeenCalledWith({
+        request: {
+          id: "context-specific-id",
+          method: "GET",
+          duration: "100ms",
+          path: "/context-id",
+          status: 200,
+          ip: "127.0.0.1",
+          createdAt: "2025-01-01T00:00:00.000Z",
+          headers: {},
+          body: {},
+        },
+        response: {
+          json: null,
+          headers: {},
+        },
+        user: null,
+      }, undefined);
     });
 
     it("should generate new requestId if not in context", async () => {
@@ -763,13 +789,24 @@ describe("ExpressAdapter", () => {
       );
 
       expect(lensUtils.generateRandomUuid).toHaveBeenCalled();
-      expect(mockRequestWatcher.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          request: expect.objectContaining({
-            id: "new-generated-uuid",
-          }),
-        }),
-      );
+      expect(mockRequestWatcher.log).toHaveBeenCalledWith({
+        request: {
+          id: "new-generated-uuid",
+          method: "GET",
+          duration: "100ms",
+          path: "/no-context-id",
+          status: 200,
+          ip: "127.0.0.1",
+          createdAt: "2025-01-01T00:00:00.000Z",
+          headers: {},
+          body: {},
+        },
+        response: {
+          json: null,
+          headers: {},
+        },
+        user: null,
+      }, undefined);
     });
 
     it("should handle undefined req.body and req.socket.remoteAddress gracefully", async () => {
@@ -798,14 +835,24 @@ describe("ExpressAdapter", () => {
         start,
       );
 
-      expect(mockRequestWatcher.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          request: expect.objectContaining({
-            body: {},
-            ip: "",
-          }),
-        }),
-      );
+      expect(mockRequestWatcher.log).toHaveBeenCalledWith({
+        request: {
+          id: "mock-uuid",
+          method: "POST",
+          duration: "100ms",
+          path: "/no-body-ip",
+          status: 200,
+          ip: "",
+          createdAt: "2025-01-01T00:00:00.000Z",
+          headers: {},
+          body: {},
+        },
+        response: {
+          json: null,
+          headers: {},
+        },
+        user: null,
+      }, undefined);
     });
 
     it("should log error if isAuthenticated throws", async () => {

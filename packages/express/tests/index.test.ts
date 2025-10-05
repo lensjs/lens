@@ -101,7 +101,7 @@ describe("lens()", () => {
     expect(Lens.start).toHaveBeenCalledWith({
       appName: "Lens",
       enabled: true,
-      basePath: "/lens",
+      path: "/lens",
     });
   });
 
