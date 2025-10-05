@@ -19,6 +19,23 @@ const lensConfig = defineConfig({
       provider: 'sqlite', // Change to your database provider
     }
   },
+  hiddenParams: {
+    headers: [
+      'Authorization',
+      'Basic'
+    ],
+    bodyParams: [
+      'password',
+      'passwordConfirmation',
+      'secret',
+      'password_confirmation'
+    ],
+  },
+  storeQueueConfig: {
+    batchSize: 500,
+    processIntervalMs: 500,
+    warnThreshold: 100_000,
+  },
   // Optional
   isAuthenticated: async (ctx) => {
     return await ctx.auth?.check()

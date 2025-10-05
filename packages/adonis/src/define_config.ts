@@ -1,6 +1,7 @@
 import { configProvider } from '@adonisjs/core'
 import { HttpContext } from '@adonisjs/core/http'
 import { QueryType, UserEntry } from '../../core/dist/types/index.js'
+import type {LensConfig as BaseLensConfig} from '@lensjs/core'
 
 type AdonisQueryType = Extract<
   QueryType,
@@ -8,9 +9,6 @@ type AdonisQueryType = Extract<
 >;
 
 export type LensConfig = {
-  appName: string
-  path: string
-  enabled: boolean
   ignoredPaths: RegExp[]
   onlyPaths: RegExp[]
   watchers: {
@@ -24,7 +22,7 @@ export type LensConfig = {
   },
   isAuthenticated?: (ctx: HttpContext) => Promise<boolean>,
   getUser?: (ctx: HttpContext) => Promise<UserEntry>,
-}
+} & BaseLensConfig
 
 export function defineConfig(config: LensConfig) {
   return configProvider.create(async () => {

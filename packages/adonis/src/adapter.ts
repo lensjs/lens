@@ -41,7 +41,7 @@ export default class AdonisAdapter extends LensAdapter {
         switch (watcher.name) {
           case WatcherTypeEnum.REQUEST:
             this.isRequestWatcherEnabled = true
-            this.watchRequests(watcher)
+            this.watchRequests(watcher as unknown as RequestWatcher)
             break
           case WatcherTypeEnum.QUERY:
             this.queryWatcher = watcher as unknown as QueryWatcher
@@ -102,7 +102,7 @@ export default class AdonisAdapter extends LensAdapter {
         user: await self.getUserFromContext(event.ctx),
       }
 
-      await requestWatcher.log(logPayload)
+      await requestWatcher.log(logPayload, self.config.hiddenParams)
     })
   }
 
