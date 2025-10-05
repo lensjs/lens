@@ -150,6 +150,34 @@ const lensConfig = defineConfig({
       email: user.email,
     }
   },
+
+  /**
+   * Optional: Configuration to hide sensitive request parameters or headers from being displayed in Lens.
+   * This is useful for security and privacy, preventing sensitive data like passwords or authorization tokens
+   * from appearing in the monitoring dashboard.
+   */
+  hiddenParams: {
+    headers: [
+      'Authorization',
+      'Basic',
+    ],
+    bodyParams: [
+      'password',
+      'passwordConfirmation',
+      'secret',
+      'password_confirmation'
+    ],
+  },
+
+  /**
+   * Optional: Configuration for the queued store, which buffers data before writing to the database.
+   * This helps optimize performance by reducing the frequency of direct database write operations.
+   */
+  storeQueueConfig: {
+    batchSize: 100, // The number of entries to process in a single batch.
+    processIntervalMs: 2_000, // The interval (in milliseconds) at which the queue is processed.
+    warnThreshold: 100_000, // A warning will be logged if the queue size exceeds this threshold.
+  },
 })
 
 export default lensConfig
