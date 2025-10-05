@@ -40,3 +40,6 @@ database.sqlite
 .npmrc
 .turbo
 nest-demo
+
+# Release documentation
+RELEASE_STEPS.md
