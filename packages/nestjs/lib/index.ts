@@ -108,6 +108,6 @@ export async function lens(config: NestLensConfig) {
   await Lens.setAdapter(adapter).setWatchers(watchers).start({
     appName: mergedConfig.appName,
     enabled: mergedConfig.enabled,
-    basePath: normalizedPath,
+    path: normalizedPath,
   });
 }
