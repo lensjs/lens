@@ -38,6 +38,14 @@ const RequestDetails = ({ request }: { request: OneRequest }) => {
 
   const requestRelatedTabls: TabItem[] = [
     {
+      id: "request-exceptions",
+      label: `Exceptions (${request.exceptions.length})`,
+      shouldShow: request.exceptions.length > 0,
+      content: (
+        <Table columns={getExceptionsColumns()} data={request.exceptions} />
+      ),
+    },
+    {
       id: "request-queries",
       label: `Queries (${request?.queries?.length})`,
       shouldShow: request?.queries?.length > 0,
@@ -49,14 +57,6 @@ const RequestDetails = ({ request }: { request: OneRequest }) => {
       shouldShow: request?.cacheEntries.length > 0,
       content: (
         <Table columns={getCacheColumns()} data={request?.cacheEntries} />
-      ),
-    },
-    {
-      id: "request-exceptions",
-      label: `Exceptions (${request.exceptions.length})`,
-      shouldShow: request.exceptions.length > 0,
-      content: (
-        <Table columns={getExceptionsColumns()} data={request.exceptions} />
       ),
     },
   ];

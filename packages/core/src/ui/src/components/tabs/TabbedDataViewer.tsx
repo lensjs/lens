@@ -1,8 +1,6 @@
 "use client";
 
-import type React from "react";
-import { useState } from "react";
-import JsonViewer from "../JsonViewer";
+import React, { useState, Suspense } from "react";
 
 export interface TabbedDataProps {
   tabs: TabItem[];
@@ -18,23 +16,28 @@ export interface TabItem {
   shouldShow?: boolean;
 }
 
+// Lazy load JsonViewer
+const JsonViewer = React.lazy(() => import("../JsonViewer"));
+
 const TabbedDataViewer: React.FC<TabbedDataProps> = ({
   tabs,
   title,
   defaultActiveTab,
 }) => {
-  tabs = tabs.filter((tab) => tab.shouldShow === undefined || tab.shouldShow);
-
-  const [activeTab, setActiveTab] = useState<string>(
-    defaultActiveTab || tabs[0]?.id || "",
+  const visibleTabs = tabs.filter(
+    (tab) => tab.shouldShow === undefined || tab.shouldShow
   );
 
-  if (!tabs.length) {
+  const [activeTab, setActiveTab] = useState<string>(
+    defaultActiveTab || visibleTabs[0]?.id || ""
+  );
+
+  if (!visibleTabs.length) {
     return null;
   }
 
   return (
-    <div className="border  border-neutral-200 dark:border-neutral-700 rounded-[15px] shadow-sm">
+    <div className="border border-neutral-200 dark:border-neutral-700 rounded-[15px] shadow-sm">
       {/* Header */}
       {title && (
         <div className="px-6 py-4 rounded-t-[15px] border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900">
@@ -47,7 +50,7 @@ const TabbedDataViewer: React.FC<TabbedDataProps> = ({
       {/* Tabs */}
       <div className="border-b rounded-[15px] border-neutral-200 dark:border-neutral-700">
         <nav className="flex space-x-8 px-6" aria-label="Tabs">
-          {tabs.map((tab) => (
+          {visibleTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -63,8 +66,9 @@ const TabbedDataViewer: React.FC<TabbedDataProps> = ({
         </nav>
       </div>
 
-      <div className={"p-6 "}>
-        {tabs.map((tab) => (
+      {/* Content */}
+      <div className="p-6">
+        {visibleTabs.map((tab) => (
           <div
             key={tab.id}
             className={activeTab === tab.id ? "block" : "hidden"}
@@ -72,7 +76,11 @@ const TabbedDataViewer: React.FC<TabbedDataProps> = ({
             {tab.content ? (
               <div>{tab.content}</div>
             ) : (
-              <>{tab.data && <JsonViewer data={tab.data} />}</>
+              tab.data && (
+                <Suspense fallback={<div>Loading viewer…</div>}>
+                  <JsonViewer data={tab.data} />
+                </Suspense>
+              )
             )}
           </div>
         ))}

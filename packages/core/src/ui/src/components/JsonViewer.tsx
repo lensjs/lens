@@ -5,7 +5,6 @@ import { useState } from "react";
 import JsonView from "@uiw/react-json-view";
 import { nordTheme } from "@uiw/react-json-view/nord";
 import { Check, Copy } from "lucide-react";
-import CopyTypeButton from "./CopyTypeButton";
 
 interface JsonViewerProps {
   data: Record<string, unknown> | string | string[];
@@ -28,7 +27,6 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data }) => {
   return (
     <div className="bg-neutral-50 dark:bg-slate-900 rounded-lg p-4 font-mono text-sm overflow-x-auto overflow-y-visible relative">
       <div className="absolute top-3 right-3 flex gap-2">
-        <CopyTypeButton data={data} />
         <button
           onClick={copyToClipboard}
           className={`p-1 rounded-md transition-colors ${
