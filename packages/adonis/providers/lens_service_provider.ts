@@ -51,6 +51,8 @@ export default class LensServiceProvider {
 
     if (config.watchers.exceptions) {
       this.app.container.bindValue('watchExceptions', async (error, ctx) => {
+        if (!config.enabled) return
+
         const payload = lensExceptionUtils.constructErrorObject(error)
         const requestId = ctx.request.lensEntry?.requestId
 
@@ -76,7 +78,7 @@ export default class LensServiceProvider {
         .setOnlyPaths(config.onlyPaths)
 
       await Lens.setWatchers(allowedWatchers).setAdapter(adapter).start({
-        basePath: normalizedPath,
+        path: normalizedPath,
         enabled: config.enabled,
         appName: config.appName,
       })
