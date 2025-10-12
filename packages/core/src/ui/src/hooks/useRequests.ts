@@ -79,11 +79,19 @@ export default function useRequests() {
     }),
     [requests, meta, loading, getAllRequests]
   );
-
+  const [search, setSearch] = useState("");
+  const filterRequests =  (row:RequestTableRow) =>(
+        row.data.method.toLowerCase().includes(search.toLowerCase()) ||
+        row.data.path.toLowerCase().includes(search.toLowerCase()) ||
+        row.data.status.toString().includes(search.toLowerCase())
+    )
   return {
     loadMoreRequests,
     fetchRequests,
     fetchRequest,
     request,
+    search,
+    filterRequests,
+    setSearch
   };
 }
