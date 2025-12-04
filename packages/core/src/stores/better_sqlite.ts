@@ -70,6 +70,12 @@ export default class BetterSqliteStore extends Store {
     return await this.paginate<T>(WatcherTypeEnum.EXCEPTION, pagination, false);
   }
 
+  override async getAllMails<T extends Omit<LensEntry, "data">[]>(
+    pagination: PaginationParams,
+  ) {
+    return await this.paginate<T>(WatcherTypeEnum.MAIL, pagination, false);
+  }
+
   public async allByRequestId(
     requestId: string,
     type: WatcherTypeEnum,

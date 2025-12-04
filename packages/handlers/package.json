@@ -24,6 +24,7 @@
   "devDependencies": {
     "@lensjs/typescript-config": "workspace:*",
     "kysely": "^0.28.5",
+    "nodemailer": "^7.0.11",
     "prisma": "^6.15.0",
     "vitest": "^3.2.4"
   },

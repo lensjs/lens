@@ -7,7 +7,7 @@ import type {
 
 type MinimalPaginatePromise = Promise<Paginator<Omit<LensEntry, "data">[]>>;
 export default abstract class Store {
-  constructor(...args: any[]) {}
+  constructor(..._: any[]) {}
   abstract initialize(): Promise<void>;
   abstract save(entry: {
     id?: string;
@@ -41,6 +41,12 @@ export default abstract class Store {
   abstract count(type: WatcherTypeEnum): Promise<number>;
 
   getAllExceptions(
+    _paginationParams: PaginationParams,
+  ): MinimalPaginatePromise {
+    return this.defaultMinimalPaginate();
+  }
+
+  getAllMails(
     _paginationParams: PaginationParams,
   ): MinimalPaginatePromise {
     return this.defaultMinimalPaginate();

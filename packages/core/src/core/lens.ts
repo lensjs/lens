@@ -142,6 +142,18 @@ export default class Lens {
           await ApiController.getException(data),
       },
       {
+        method: "GET" as const,
+        path: `/${path}/api/mails`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getMails(data),
+      },
+      {
+        method: "GET" as const,
+        path: `/${path}/api/mails/:id`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getMail(data),
+      },
+      {
         method: "DELETE" as const,
         path: `/${path}/api/truncate`,
         handler: async () => await ApiController.truncate(),

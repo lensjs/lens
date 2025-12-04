@@ -62,6 +62,21 @@ export type ExceptionEntry = {
   originalStack?: string | null;
 };
 
+export type MailAttachment = {
+  filename: string;
+  content: string;
+  contentType: string;
+};
+
+export type MailEntry = {
+  from: string;
+  to: string;
+  subject: string;
+  text?: string;
+  html?: string;
+  attachments?: MailAttachment | MailAttachment[];
+};
+
 export type UserEntry = {
   id: number | string;
   name: string;
@@ -96,6 +111,7 @@ export enum WatcherTypeEnum {
   QUERY = "query",
   CACHE = "cache",
   EXCEPTION = "exception",
+  MAIL = "mail",
 }
 
 export type LensConfig = {

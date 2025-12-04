@@ -4,10 +4,17 @@ import { Sequelize, DataTypes, Model } from "sequelize";
 import { createSequelizeHandler, watcherEmitter } from "@lensjs/watchers";
 import { lens } from "@lensjs/express";
 import MemoryCache from "./concrete/cache/memory_cache";
+import * as nodemailer from "nodemailer";
+import dotenv from "dotenv";
 
 const app = express();
 const port = 3000;
 const cache = new MemoryCache();
+
+// Load .env file
+dotenv.config();
+
+// Sequelize
 const sequelize = new Sequelize({
   dialect: "sqlite",
   storage: "./random.db",
@@ -32,7 +39,7 @@ const { handleExceptions } = await lens({
     handler: createSequelizeHandler({ provider: "sqlite" }),
   },
   isAuthenticated: async (_req) => {
-    return true;
+    return false;
   },
   getUser: async (_req) => {
     return {
@@ -43,6 +50,7 @@ const { handleExceptions } = await lens({
   },
 });
 
+// Qyery Testing
 class User extends Model {
   declare id: number;
   declare name: string;
@@ -131,6 +139,34 @@ class MyRandomClass {
 
 app.get("/throw-error", async (_, res) => {
   new MyRandomClass().throwsErrors();
+});
+
+// Mail Testing
+const mailer = nodemailer.createTransport({
+  host: process.env.MAIL_HOST as string,
+  port: +(process.env.MAIL_PORT as string),
+  from: process.env.MAIL_FROM_ADDRESS,
+  secure: true,
+  auth: {
+    user: process.env.MAIL_USERNAME as string,
+    pass: process.env.MAIL_PASSWORD as string,
+  },
+  debug: false,
+  logger: false,
+});
+
+await mailer.verify();
+
+app.get("/send-mail", async (_, res) => {
+  const response = await mailer.sendMail({
+    to: process.env.MAIL_TO_ADDRESS,
+    subject: "Test Email",
+    text: "This is a test email",
+  });
+
+    console.log('messageId', response.messageId)
+
+  return res.json({ message: "Email sent successfully" });
 });
 
 handleExceptions();

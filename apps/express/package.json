@@ -12,21 +12,23 @@
     "@lensjs/express": "workspace:*",
     "@lensjs/watchers": "workspace:*",
     "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.3",
+    "@types/express": "^5.0.6",
     "cors": "^2.8.5",
-    "dotenv": "^17.2.1",
+    "dotenv": "^17.2.3",
     "emittery": "^1.2.0",
-    "express": "^5.1.0",
+    "express": "^5.2.1",
+    "nodemailer": "^7.0.11",
     "sequelize": "^6.37.7",
     "sqlite3": "^5.1.7",
     "utf-8-validate": "^6.0.5"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "ioredis": "^5.7.0",
-    "nodemon": "^3.1.10",
-    "tsx": "^4.20.5",
-    "typescript": "^5.9.2"
+    "@types/nodemailer": "^7.0.4",
+    "ioredis": "^5.8.2",
+    "nodemon": "^3.1.11",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   },
   "trustedDependencies": [
     "utf-8-validate"
