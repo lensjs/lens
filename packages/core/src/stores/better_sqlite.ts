@@ -9,6 +9,8 @@ import Database from "libsql";
 import { nowISO } from "@lensjs/date";
 
 const TABLE_NAME = "lens_entries";
+const BYTES_IN_GB = 1024 * 1024 * 1024;
+const PRUNE_BATCH_SIZE = 1000;
 
 export default class BetterSqliteStore extends Store {
   protected connection!: Database.Database;
@@ -44,6 +46,8 @@ export default class BetterSqliteStore extends Store {
         lens_entry_id: entry.requestId || null,
         minimalData: this.stringifyData(entry.minimal_data ?? {}),
       });
+
+    this.maybePruneDatabase();
   }
 
   override async getAllQueries<T extends LensEntry[]>(
@@ -165,6 +169,58 @@ export default class BetterSqliteStore extends Store {
     this.connection.exec(createTable);
     this.connection.exec(createIndex);
     this.connection.exec(lensEntryIdIndex);
+  }
+
+  private maybePruneDatabase() {
+    const maxGb = this.storeConfig?.dbMaxSizeGb;
+    const pruneGb = this.storeConfig?.dbPruneSizeGb;
+
+    if (!maxGb || !pruneGb) return;
+
+    const maxBytes = maxGb * BYTES_IN_GB;
+    const pruneBytes = pruneGb * BYTES_IN_GB;
+
+    if (maxBytes <= 0 || pruneBytes <= 0) return;
+
+    const targetBytes = Math.max(0, maxBytes - pruneBytes);
+
+    let usedBytes = this.getDatabaseUsedBytes();
+
+    if (usedBytes < maxBytes) return;
+
+    while (usedBytes > targetBytes) {
+      const deletedRows = this.deleteOldestEntries(PRUNE_BATCH_SIZE);
+      if (deletedRows === 0) break;
+      usedBytes = this.getDatabaseUsedBytes();
+    }
+
+    this.connection.exec("PRAGMA wal_checkpoint(TRUNCATE);");
+  }
+
+  private getDatabaseUsedBytes() {
+    const pageSizeResult = this.connection
+      .prepare("PRAGMA page_size;")
+      .get() as { page_size: number };
+    const pageCountResult = this.connection
+      .prepare("PRAGMA page_count;")
+      .get() as { page_count: number };
+    const freelistCountResult = this.connection
+      .prepare("PRAGMA freelist_count;")
+      .get() as { freelist_count: number };
+    const usedPages =
+      pageCountResult.page_count - freelistCountResult.freelist_count;
+
+    return usedPages * pageSizeResult.page_size;
+  }
+
+  private deleteOldestEntries(batchSize: number) {
+    const result = this.connection
+      .prepare(
+        `DELETE FROM ${TABLE_NAME} WHERE id IN (SELECT id FROM ${TABLE_NAME} ORDER BY created_at ASC LIMIT ?)`,
+      )
+      .run(batchSize) as { changes?: number };
+
+    return Number(result.changes ?? 0);
   }
 
   protected mapRow(row: any, includeFullData = true): LensEntry {

@@ -3,10 +3,12 @@ import type {
   Paginator,
   LensEntry,
   WatcherTypeEnum,
+  QueuedStoreConfig,
 } from "../types";
 
 type MinimalPaginatePromise = Promise<Paginator<Omit<LensEntry, "data">[]>>;
 export default abstract class Store {
+  protected storeConfig?: QueuedStoreConfig;
   constructor(...args: any[]) {}
   abstract initialize(): Promise<void>;
   abstract save(entry: {

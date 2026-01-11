@@ -165,4 +165,6 @@ export interface QueuedStoreConfig {
   processIntervalMs?: number;
   warnThreshold?: number;
   preallocate?: boolean;
+  dbMaxSizeGb?: number;
+  dbPruneSizeGb?: number;
 }
