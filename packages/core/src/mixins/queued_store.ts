@@ -27,6 +27,7 @@ export function QueuedStore<TBase extends Constructor>(Base: TBase) {
       super(...args);
 
       const config: QueuedStoreConfig = args[0] || {};
+      this.storeConfig = config;
       this.BATCH_SIZE = config.batchSize ?? 100;
       this.PROCESS_INTERVAL_MS = config.processIntervalMs ?? 100;
       this.WARN_THRESHOLD = config.warnThreshold ?? 100_000;
