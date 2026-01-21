@@ -1,5 +1,11 @@
 # @lensjs/core
 
+## 2.3.1
+
+### Patch Changes
+
+- cd331c0: fix isESM utility
+
 ## 2.3.0
 
 ### Minor Changes
