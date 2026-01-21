@@ -94,7 +94,7 @@ export function getMeta(metaUrl?: string): {
   __filename: string;
   __dirname: string;
 } {
-  const isESM = typeof __dirname === "undefined";
+  const isESM = typeof __dirname === "undefined" || typeof __filename === "undefined";
 
   if (isESM) {
     if (!metaUrl) {
