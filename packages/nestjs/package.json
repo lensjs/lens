@@ -30,7 +30,7 @@
     "@lensjs/date": "workspace:*"
   },
   "devDependencies": {
-    "@fastify/static": "8.2.0",
+    "@fastify/static": "9.0.0",
     "@lensjs/express": "workspace:*",
     "@lensjs/fastify": "workspace:*",
     "@lensjs/watchers": "workspace:*",
