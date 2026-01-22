@@ -21,7 +21,7 @@
     "husky": "^9.1.7",
     "prettier": "^3.6.2",
     "syncpack": "14.0.0-alpha.19",
-    "tsup": "^8.5.0",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "conventional-changelog-cli": "^5.0.0"
   },

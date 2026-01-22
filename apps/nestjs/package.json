@@ -25,7 +25,7 @@
     "@nestjs/platform-fastify": "11.1.6",
     "@nestjs/serve-static": "^5.0.3",
     "@prisma/client": "^6.16.2",
-    "cache-manager": "^7.2.0",
+    "cache-manager": "^7.2.8",
     "express": "^5.1.0",
     "kysely": "^0.28.5",
     "mysql2": "^3.15.0",
