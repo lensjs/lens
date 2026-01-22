@@ -42,7 +42,7 @@
     "@swc/core": "1.13.5",
     "@types/luxon": "^3.7.1",
     "@types/node": "^24.3.0",
-    "eslint": "^9.34.0",
+    "eslint": "^9.39.2",
     "hot-hook": "^0.4.0",
     "pino-pretty": "^13.1.1",
     "prettier": "^3.6.2",
