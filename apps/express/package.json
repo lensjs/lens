@@ -25,7 +25,7 @@
     "@types/bun": "latest",
     "ioredis": "^5.7.0",
     "nodemon": "^3.1.10",
-    "tsx": "^4.20.5",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.2"
   },
   "trustedDependencies": [
