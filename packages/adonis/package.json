@@ -46,7 +46,7 @@
     "@adonisjs/lucid": "^21.8.0",
     "@adonisjs/prettier-config": "^1.4.5",
     "@adonisjs/tsconfig": "^1.4.1",
-    "@japa/assert": "^4.1.1",
+    "@japa/assert": "^4.2.0",
     "@japa/runner": "^4.4.0",
     "@swc/core": "^1.13.5",
     "@types/node": "^24.3.0",
