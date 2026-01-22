@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@lensjs/date": "workspace:*",
-    "@tailwindcss/vite": "^4.1.12",
+    "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-query": "^5.85.5",
     "@uiw/react-json-view": "2.0.0-alpha.37",
     "dayjs": "^1.11.18",
