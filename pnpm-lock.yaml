@@ -535,8 +535,8 @@ importers:
         specifier: ^15.6.6
         version: 15.6.6(react@19.1.1)
       tailwindcss:
-        specifier: ^4.1.12
-        version: 4.1.12
+        specifier: ^4.1.18
+        version: 4.1.18
     devDependencies:
       '@eslint/js':
         specifier: ^10.0.0
@@ -9132,6 +9132,9 @@ packages:
 
   tailwindcss@4.1.13:
     resolution: {integrity: sha512-i+zidfmTqtwquj4hMEwdjshYYgMbOrPzb9a0M3ZgNa0JMoZeFC6bxZvO8yr8ozS6ix2SDz0+mvryPeBs2TFE+w==}
+
+  tailwindcss@4.1.18:
+    resolution: {integrity: sha512-4+Z+0yiYyEtUVCScyfHCxOYP06L5Ne+JiHhY2IjR2KWMIWhJOYZKLSGZaP5HkZ8+bY0cxfzwDE5uOmzFXyIwxw==}
 
   tapable@2.2.3:
     resolution: {integrity: sha512-ZL6DDuAlRlLGghwcfmSn9sK3Hr6ArtyudlSAiCqQ6IfE+b+HHbydbYDIG15IfS5do+7XQQBdBiubF/cV2dnDzg==}
@@ -19325,6 +19328,8 @@ snapshots:
   tailwindcss@4.1.12: {}
 
   tailwindcss@4.1.13: {}
+
+  tailwindcss@4.1.18: {}
 
   tapable@2.2.3: {}
 
