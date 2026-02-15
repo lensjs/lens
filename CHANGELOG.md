@@ -1,4 +1,4 @@
-#  (2025-10-05)
+#  (2026-02-15)
 
 
 ### Bug Fixes
@@ -16,7 +16,9 @@
 * **fastify:** losing context between requests ([36235c2](https://github.com/lensjs/lens/commit/36235c20fcba40c9b94262d87ac05600bd71c9e9))
 * fix types ([99df1f3](https://github.com/lensjs/lens/commit/99df1f37583316a7f873e4a1ff7da13a77f45aa0))
 * fixing type error ([0bc241a](https://github.com/lensjs/lens/commit/0bc241ab56ae9f8d4315484fb8e42f70b0818c45))
+* handle both __dirname and __filename undefined in getMeta function ([08cfc43](https://github.com/lensjs/lens/commit/08cfc43fb79c6b44d8a83b160c21fa48124c2797))
 * **handlers:** incorrect normalizePayload parsing ([6387aeb](https://github.com/lensjs/lens/commit/6387aebe340ccdab1df93138115c44d4f1795bfb))
+* isESM utility ([cd331c0](https://github.com/lensjs/lens/commit/cd331c0ca2b955857feb1ba654b4111de388dcd3))
 * modify pnpm install command to avoid frozen lockfile ([37e58e4](https://github.com/lensjs/lens/commit/37e58e45c7f4225ae1ca400ce67c6f12f62178a9))
 * **nestjs:** pass registerErrorHandler options when using fastify adapter ([f7d2028](https://github.com/lensjs/lens/commit/f7d20286c012571f1765536c76087211bc670365))
 * parseBody in express adapter ([a68573e](https://github.com/lensjs/lens/commit/a68573eea6f2cff65ff670a19374778c4d3e6744))
@@ -35,6 +37,8 @@
 * add cache watcher ([64887b2](https://github.com/lensjs/lens/commit/64887b25afb74d5a87ef74cfb97b5ae5b9993f78))
 * add changelog-cli package ([c3c9a47](https://github.com/lensjs/lens/commit/c3c9a474910bb180106370d2b7fea6d26d824ade))
 * add exception watcher ([1b97bdd](https://github.com/lensjs/lens/commit/1b97bdd0dcda98ca899ac2f1458e8fc2af2840ab))
+* add getRequestIp to resolve custom client ip ([#37](https://github.com/lensjs/lens/issues/37)) ([25c75a1](https://github.com/lensjs/lens/commit/25c75a12cf621741115a1251fd2e71a83572c073))
+* add sqlite size-based pruning config ([4d3e4ef](https://github.com/lensjs/lens/commit/4d3e4efe0ebe5a71f4152923e86ebb6fa3911576))
 * adding config in header ([04aeda5](https://github.com/lensjs/lens/commit/04aeda5d8f34a712bd5e985c3bab5e53a27cecc6))
 * adding dart support ([f30e206](https://github.com/lensjs/lens/commit/f30e206a6ac7659ea01bf4090dc326f41dd9a032))
 * adding more lang support and quicktype-core package ([17d9e62](https://github.com/lensjs/lens/commit/17d9e62f69091a844077df8cea987763db3f2b9e))
@@ -61,6 +65,7 @@
 
 ### Reverts
 
+* Revert "Merge pull request #23 from lensjs/dependabot/npm_and_yarn/nestjs/cli-11.0.16" ([39cec50](https://github.com/lensjs/lens/commit/39cec500ab54d9daa957324f973859597c075072)), closes [#23](https://github.com/lensjs/lens/issues/23)
 * **ui:** drop types component ([c1ce560](https://github.com/lensjs/lens/commit/c1ce56075b2f82b98b7cb663ec7907508fbd5d21))
 
 
