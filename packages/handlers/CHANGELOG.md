@@ -1,5 +1,13 @@
 # @lensjs/watchers
 
+## 1.1.2
+
+### Patch Changes
+
+- introduce getRequestIp method and correctly capture client ip behind reverse proxy
+- Updated dependencies
+  - @lensjs/core@2.3.2
+
 ## 1.1.1
 
 ### Patch Changes

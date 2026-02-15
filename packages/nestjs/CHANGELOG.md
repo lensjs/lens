@@ -1,5 +1,15 @@
 # @lensjs/nestjs
 
+## 2.1.2
+
+### Patch Changes
+
+- introduce getRequestIp method and correctly capture client ip behind reverse proxy
+- Updated dependencies
+  - @lensjs/core@2.3.2
+  - @lensjs/express@1.4.2
+  - @lensjs/fastify@1.1.2
+
 ## 2.1.1
 
 ### Patch Changes
