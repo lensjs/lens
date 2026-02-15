@@ -16,10 +16,12 @@ export type ExpressAdapterConfig = {
   };
   isAuthenticated?: (request: Request) => Promise<boolean>;
   getUser?: (request: Request) => Promise<UserEntry>;
+  getRequestIp?: (request: Request) => string;
 } & Partial<LensConfig>;
 
 export type RequiredExpressAdapterConfig = Required<ExpressAdapterConfig> & {
   queryWatcher?: ExpressAdapterConfig["queryWatcher"];
   isAuthenticated?: ExpressAdapterConfig["isAuthenticated"];
   getUser?: ExpressAdapterConfig["getUser"];
+  getRequestIp?: (request: Request) => string;
 };

@@ -84,6 +84,14 @@ await lens({
     return jwtToken === getValidJwtToken(jwtToken, jwtSecret);
   },
 
+  // Optional: Override how the client IP address is resolved.
+  // Use this if your app runs behind a custom proxy setup or uses
+  // non-standard forwarding headers.
+  //
+  // If omitted, Lens falls back to its built-in IP resolver,
+  // which detects the IP using proxy headers and socket data.
+  getRequestIp: (req: Request) => {return req.ip || ""},
+
   // Optional: An asynchronous function to resolve and attach user information to Lens events/logs.
   getUser: async (req: Request) => {
     // Replace with your actual user retrieval logic

@@ -17,12 +17,14 @@ export type FastifyAdapterConfig = {
   };
   isAuthenticated?: (request: FastifyRequest) => Promise<boolean>;
   getUser?: (request: FastifyRequest) => Promise<UserEntry>;
+  getRequestIp?: (request: FastifyRequest) => string;
 } & Partial<LensConfig>;
 
 export type RequiredFastifyAdapterConfig = Required<FastifyAdapterConfig> & {
   queryWatcher?: FastifyAdapterConfig["queryWatcher"];
   isAuthenticated?: FastifyAdapterConfig["isAuthenticated"];
   getUser?: FastifyAdapterConfig["getUser"];
+  getRequestIp?: (request: FastifyRequest) => string;
 };
 
 declare module "fastify" {

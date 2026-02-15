@@ -79,7 +79,7 @@ export class ExpressAdapter extends LensAdapter {
     );
 
     this.app.get(this.normalizePath(`${spaRoute}/favicon.ico`), (_, res) =>
-      res.sendFile('favicon.ico', {root: uiPath}),
+      res.sendFile("favicon.ico", { root: uiPath }),
     );
 
     this.app.get(new RegExp(`^/${spaRoute}(?!/api)(/.*)?$`), (req, res) => {
@@ -212,7 +212,7 @@ export class ExpressAdapter extends LensAdapter {
           headers: req.headers,
           body: req.body ?? {},
           status: res.statusCode,
-          ip: req.socket?.remoteAddress ?? "",
+          ip: this.config.getRequestIp?.(req) ?? this.getIp(req),
           createdAt: nowISO(),
         },
         response: {
@@ -244,5 +244,34 @@ export class ExpressAdapter extends LensAdapter {
     } catch (_e) {
       return body;
     }
+  }
+
+  private getIp(req: Request): string {
+    if (req.ip) return this.normalizeIp(req.ip);
+
+    const xff = req.headers["x-forwarded-for"];
+
+    if (typeof xff === "string") {
+      const [ip] = xff.split(",");
+
+      return this.normalizeIp(ip?.trim() ?? "");
+    }
+
+    if (Array.isArray(xff) && xff.length > 0) {
+      const ips = xff[0]?.split(",");
+
+      if (ips && ips.length > 0) {
+        return this.normalizeIp(ips[0]?.trim() ?? "");
+      }
+    }
+
+    return this.normalizeIp(req.socket?.remoteAddress ?? "");
+  }
+
+  private normalizeIp(ip: string): string {
+    if (ip.startsWith("::ffff:")) {
+      return ip.replace("::ffff:", "");
+    }
+    return ip;
   }
 }

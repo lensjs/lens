@@ -196,7 +196,7 @@ export class FastifyAdapter extends LensAdapter {
           headers: request.headers,
           body: request.body ?? {},
           status: reply.statusCode,
-          ip: request.ip ?? "",
+          ip: this.config.getRequestIp?.(request) ?? this.getIp(request),
           createdAt: nowISO(),
         },
         response: {
@@ -259,5 +259,34 @@ export class FastifyAdapter extends LensAdapter {
     } catch (_e) {
       return body;
     }
+  }
+
+  private getIp(req: FastifyRequest): string {
+    if (req.ip) return this.normalizeIp(req.ip);
+
+    const xff = req.headers["x-forwarded-for"];
+
+    if (typeof xff === "string") {
+      const [ip] = xff.split(",");
+
+      return this.normalizeIp(ip?.trim() ?? "");
+    }
+
+    if (Array.isArray(xff) && xff.length > 0) {
+      const ips = xff[0]?.split(",");
+
+      if (ips && ips.length > 0) {
+        return this.normalizeIp(ips[0]?.trim() ?? "");
+      }
+    }
+
+    return this.normalizeIp(req.socket?.remoteAddress ?? "");
+  }
+
+  private normalizeIp(ip: string): string {
+    if (ip.startsWith("::ffff:")) {
+      return ip.replace("::ffff:", "");
+    }
+    return ip;
   }
 }
