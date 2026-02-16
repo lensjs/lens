@@ -33,7 +33,7 @@
     "@vitejs/plugin-react-swc": "^4.2.3",
     "cross-env": "^10.0.0",
     "eslint": "^9.39.2",
-    "eslint-plugin-react-hooks": "^6.0.0",
+    "eslint-plugin-react-hooks": "^6.1.1",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.5.0",
     "sass-embedded": "^1.97.3",
