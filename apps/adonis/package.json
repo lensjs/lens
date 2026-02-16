@@ -35,7 +35,7 @@
     "@adonisjs/prettier-config": "^1.4.5",
     "@adonisjs/tsconfig": "^1.4.1",
     "@faker-js/faker": "^10.0.0",
-    "@japa/api-client": "^3.1.0",
+    "@japa/api-client": "^3.2.1",
     "@japa/assert": "^4.2.0",
     "@japa/plugin-adonisjs": "^4.0.0",
     "@japa/runner": "^5.3.0",
