@@ -39,7 +39,7 @@
     "rimraf": "^6.1.3",
     "sql-formatter": "^15.7.1",
     "stack-utils": "^2.0.6",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.4.1"
   },
   "gitHead": "a229fde5700970ec290ff31f1e3b7d84cc56d325"
 }
