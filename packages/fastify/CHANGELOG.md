@@ -1,5 +1,13 @@
 # @lensjs/fastify
 
+## 1.1.3
+
+### Patch Changes
+
+- Updated dependencies
+  - @lensjs/core@2.4.0
+  - @lensjs/watchers@1.1.3
+
 ## 1.1.2
 
 ### Patch Changes

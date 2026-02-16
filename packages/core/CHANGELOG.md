@@ -1,5 +1,11 @@
 # @lensjs/core
 
+## 2.4.0
+
+### Minor Changes
+
+- Add client side search in requests page
+
 ## 2.3.2
 
 ### Patch Changes

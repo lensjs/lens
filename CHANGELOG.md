@@ -1,4 +1,4 @@
-#  (2026-02-15)
+#  (2026-02-16)
 
 
 ### Bug Fixes
@@ -37,11 +37,12 @@
 * add cache watcher ([64887b2](https://github.com/lensjs/lens/commit/64887b25afb74d5a87ef74cfb97b5ae5b9993f78))
 * add changelog-cli package ([c3c9a47](https://github.com/lensjs/lens/commit/c3c9a474910bb180106370d2b7fea6d26d824ade))
 * add exception watcher ([1b97bdd](https://github.com/lensjs/lens/commit/1b97bdd0dcda98ca899ac2f1458e8fc2af2840ab))
-* add getRequestIp to resolve custom client ip ([#37](https://github.com/lensjs/lens/issues/37)) ([25c75a1](https://github.com/lensjs/lens/commit/25c75a12cf621741115a1251fd2e71a83572c073))
+* add getRequestIp to resolve custom client ip ([#37](https://github.com/lensjs/lens/issues/37)) ([92af02e](https://github.com/lensjs/lens/commit/92af02e5493be0810f58a5f5d1541b1a927a4721))
 * add sqlite size-based pruning config ([4d3e4ef](https://github.com/lensjs/lens/commit/4d3e4efe0ebe5a71f4152923e86ebb6fa3911576))
 * adding config in header ([04aeda5](https://github.com/lensjs/lens/commit/04aeda5d8f34a712bd5e985c3bab5e53a27cecc6))
 * adding dart support ([f30e206](https://github.com/lensjs/lens/commit/f30e206a6ac7659ea01bf4090dc326f41dd9a032))
 * adding more lang support and quicktype-core package ([17d9e62](https://github.com/lensjs/lens/commit/17d9e62f69091a844077df8cea987763db3f2b9e))
+* adding search filter for requests ([e846424](https://github.com/lensjs/lens/commit/e846424916fa6551cd2918cda5749279ca6f29a6))
 * adding ts type copy ([5acda34](https://github.com/lensjs/lens/commit/5acda349e8eb99d52072f53e82dbe656c5413a63))
 * **adonis:** add queuedStore and hiddenParams configurations ([a5dde7c](https://github.com/lensjs/lens/commit/a5dde7cf491a64d4f9d74db0be45ed19b87c2595))
 * **apps-fastify:** cache demo for testing ([30bfe29](https://github.com/lensjs/lens/commit/30bfe29762debf171dd6c7dbc36b2624061403ad))
