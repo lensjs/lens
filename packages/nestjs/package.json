@@ -1,6 +1,6 @@
 {
   "name": "@lensjs/nestjs",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "NestJS adapter for LensJS",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -47,8 +47,8 @@
   },
   "peerDependencies": {
     "@fastify/static": "^8.0.4",
-    "@lensjs/express": "^1.4.2",
-    "@lensjs/fastify": "^1.1.2",
+    "@lensjs/express": "^1.4.3",
+    "@lensjs/fastify": "^1.1.3",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "@nestjs/core": "^10.0.0 || ^11.0.0",
     "express": "^5.0.1",
