@@ -1,5 +1,12 @@
 # @lensjs/adonis
 
+## 1.3.4
+
+### Patch Changes
+
+- Updated dependencies
+  - @lensjs/core@2.5.0
+
 ## 1.3.3
 
 ### Patch Changes
