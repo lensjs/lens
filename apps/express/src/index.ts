@@ -4,6 +4,8 @@ import { Sequelize, DataTypes, Model } from "sequelize";
 import { createSequelizeHandler, watcherEmitter } from "@lensjs/watchers";
 import { lens } from "@lensjs/express";
 import MemoryCache from "./concrete/cache/memory_cache";
+import nodemailer from "nodemailer";
+import { sendEmail } from "./concrete/mail/nodemailer";
 
 const app = express();
 const port = 3000;
@@ -15,6 +17,17 @@ const sequelize = new Sequelize({
   logQueryParameters: true,
   logging: (sql, timing) => {
     watcherEmitter.emit("sequelizeQuery", { sql, timing });
+  },
+});
+
+const testEmailAccount = await nodemailer.createTestAccount();
+const mailTransporter = nodemailer.createTransport({
+  host: testEmailAccount.smtp.host,
+  port: testEmailAccount.smtp.port,
+  secure: testEmailAccount.smtp.secure,
+  auth: {
+    user: testEmailAccount.user,
+    pass: testEmailAccount.pass,
   },
 });
 
@@ -131,6 +144,18 @@ class MyRandomClass {
 
 app.get("/throw-error", async (_, res) => {
   new MyRandomClass().throwsErrors();
+});
+
+app.get("/send-email", async (_, res) => {
+  const info = await sendEmail(mailTransporter, {
+    from: '"Mohamed Attar" <mohamedattar@gmail.com>',
+    to: "random@gmail.com",
+    subject: "Template Email",
+    text: "This is test email sent via test account",
+    html: "<p> this is good</p>",
+  });
+
+  res.json(info);
 });
 
 handleExceptions();

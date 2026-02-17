@@ -1,8 +1,9 @@
 import { EventEmitter } from "events";
-import { CacheEntry } from "../types";
+import { CacheEntry, MailEntry } from "../types";
 
 type LensEvents = {
   cache: CacheEntry;
+  mail: MailEntry;
 };
 
 class TypedEventEmitter<T extends Record<string, any>> {
