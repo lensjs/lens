@@ -24,7 +24,7 @@
   "devDependencies": {
     "@types/bun": "latest",
     "ioredis": "^5.7.0",
-    "nodemon": "^3.1.10",
+    "nodemon": "^3.1.11",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   },
