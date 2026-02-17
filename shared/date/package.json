@@ -24,7 +24,7 @@
     "vitest": "^2.0.0"
   },
   "dependencies": {
-    "luxon": "^3.7.1"
+    "luxon": "^3.7.2"
   },
   "publishConfig": {
     "access": "public"
