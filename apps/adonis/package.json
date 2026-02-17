@@ -62,7 +62,7 @@
     "bindings": "^1.5.0",
     "dayjs": "^1.11.19",
     "libsql": "^0.5.20",
-    "luxon": "^3.7.1",
+    "luxon": "^3.7.2",
     "reflect-metadata": "^0.2.2",
     "sqlite3": "^5.1.7"
   },
