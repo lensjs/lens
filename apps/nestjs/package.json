@@ -19,7 +19,7 @@
     "@lensjs/watchers": "workspace:*",
     "@nestjs/cache-manager": "^3.1.0",
     "@nestjs/common": "^11.1.6",
-    "@nestjs/config": "^4.0.2",
+    "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.1.13",
     "@nestjs/platform-express": "^11.1.6",
     "@nestjs/platform-fastify": "11.1.6",
