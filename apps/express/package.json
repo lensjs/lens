@@ -12,11 +12,11 @@
     "@lensjs/express": "workspace:*",
     "@lensjs/watchers": "workspace:*",
     "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.3",
+    "@types/express": "^5.0.6",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "emittery": "^1.2.0",
-    "express": "^5.1.0",
+    "express": "^5.2.1",
     "sequelize": "^6.37.7",
     "sqlite3": "^5.1.7",
     "utf-8-validate": "^6.0.5"
