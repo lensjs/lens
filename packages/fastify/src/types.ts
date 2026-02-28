@@ -10,6 +10,7 @@ export type FastifyAdapterConfig = {
   requestWatcherEnabled?: boolean;
   cacheWatcherEnabled?: boolean;
   exceptionWatcherEnabled?: boolean;
+  mailWatcherEnabled?: boolean;
   registerErrorHandler?: boolean;
   queryWatcher?: {
     enabled: boolean;

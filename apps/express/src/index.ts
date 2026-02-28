@@ -153,7 +153,7 @@ app.get("/send-email", async (_, res) => {
     to: "random@gmail.com",
     subject: "Template Email",
     raw: {
-      path: "/home/elattar/workspace/lens/len/sample4.eml",
+      path: "/home/elattar/workspace/lens/len/sample5.eml",
     },
   });
 

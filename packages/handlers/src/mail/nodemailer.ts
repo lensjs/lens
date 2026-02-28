@@ -354,9 +354,11 @@ export async function buildMimeParts(options: any): Promise<MimePart> {
     const resolved = await resolveContent(
       options.icalEvent.raw || options.icalEvent,
     );
+    const method = (options.icalEvent.method || "PUBLISH").toUpperCase();
     alternatives.push({
-      contentType: "text/calendar",
+      contentType: `text/calendar; method=${method}`,
       transferEncoding: resolved?.transferEncoding,
+      filename: options.icalEvent.filename || "invite.ics",
       body: resolved?.body,
       size: resolved?.body
         ? Buffer.byteLength(

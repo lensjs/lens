@@ -52,7 +52,7 @@ export class ExpressAdapter extends LensAdapter {
           break;
         case WatcherTypeEnum.MAIL:
           if (this.config.mailWatcherEnabled) {
-            void this.watchEmails(watcher as MailWatcher);
+            void this.watchMail(watcher as MailWatcher);
           }
           break;
       }
@@ -109,7 +109,7 @@ export class ExpressAdapter extends LensAdapter {
     });
   }
 
-  private async watchEmails(watcher: MailWatcher) {
+  private async watchMail(watcher: MailWatcher) {
     if (!this.config.mailWatcherEnabled) return;
 
     lensEmitter.on("mail", async (data) => {

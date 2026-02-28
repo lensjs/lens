@@ -136,6 +136,7 @@ export type OneRequest = {
   queries: GenericLensEntry<QueryEntry>[];
   cacheEntries: GenericLensEntry<CacheEntry>[];
   exceptions: ExceptionTableRow[];
+  emails: MailTableRow[];
 };
 export type QueryTableRow = GenericLensEntry<QueryEntry>;
 export type OneQuery = GenericLensEntry<QueryEntry>;

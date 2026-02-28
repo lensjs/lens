@@ -7,6 +7,7 @@ import type { OneRequest } from "../../types";
 import getColumns from "../queries/columns";
 import getExceptionsColumns from "../exceptions/columns";
 import getCacheColumns from "../cache/columns";
+import getMailColumns from "../mail/columns";
 import BasicRequestDetails from "./BasicRequestDetails";
 
 const RequestDetails = ({ request }: { request: OneRequest }) => {
@@ -58,6 +59,12 @@ const RequestDetails = ({ request }: { request: OneRequest }) => {
       content: (
         <Table columns={getCacheColumns()} data={request?.cacheEntries} />
       ),
+    },
+    {
+      id: "request-emails",
+      label: `Emails (${request?.emails?.length || 0})`,
+      shouldShow: request?.emails?.length > 0,
+      content: <Table columns={getMailColumns()} data={request?.emails} />,
     },
   ];
 

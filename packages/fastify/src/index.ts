@@ -5,6 +5,7 @@ import {
   lensContext,
   lensUtils,
   LensWatcher,
+  MailWatcher,
   QueryWatcher,
   RequestWatcher,
 } from "@lensjs/core";
@@ -27,6 +28,7 @@ const defaultConfig = {
   cacheWatcherEnabled: false,
   exceptionWatcherEnabled: true,
   registerErrorHandler: true,
+  mailWatcherEnabled: false,
 };
 
 export const lens = async (config: FastifyAdapterConfig) => {
@@ -53,6 +55,10 @@ export const lens = async (config: FastifyAdapterConfig) => {
     {
       enabled: mergedConfig.exceptionWatcherEnabled,
       watcher: new ExceptionWatcher(),
+    },
+    {
+      enabled: mergedConfig.mailWatcherEnabled,
+      watcher: new MailWatcher(),
     },
   ];
 

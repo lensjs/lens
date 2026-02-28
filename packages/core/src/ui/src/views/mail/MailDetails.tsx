@@ -1,9 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import DetailPanel from "../../components/DetailPanel";
 import TabbedDataViewer from "../../components/tabs/TabbedDataViewer";
 import type { OneMail, Mailbox, MimePart, MailHeader } from "../../types";
 import { humanDifferentDate } from "@lensjs/date";
-import { Download, FileIcon } from "lucide-react";
+import { Download, FileIcon, Calendar, Copy, Check } from "lucide-react";
 
 type Attachment = {
   filename: string;
@@ -12,6 +12,40 @@ type Attachment = {
   transferEncoding?: string;
   size?: number;
   contentId?: string;
+};
+
+type CalendarEvent = {
+  method: string;
+  filename: string;
+  summary?: string;
+  start?: string;
+  end?: string;
+  location?: string;
+  raw: string;
+};
+
+const CopyButton = ({ value }: { value: string }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="p-1 hover:bg-slate-800 rounded transition-colors text-slate-500 hover:text-slate-300"
+      title="Copy to clipboard"
+    >
+      {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
+    </button>
+  );
 };
 
 const MailDetails = ({ mail }: { mail: OneMail }) => {
@@ -33,7 +67,7 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
 
   const decodeQuotedPrintable = (text: string) => {
     const bytes: number[] = [];
-    const tempText = text.replace(/=\r?\n/g, ""); // Remove soft line breaks
+    const tempText = text.replace(/=\r?\n/g, "");
     for (let i = 0; i < tempText.length; i++) {
       if (tempText[i] === "=" && /^[0-9A-F]{2}$/i.test(tempText.substring(i + 1, i + 3))) {
         bytes.push(parseInt(tempText.substring(i + 1, i + 3), 16));
@@ -88,12 +122,42 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
     }
   };
 
+  const parseIcs = (ics: string, method: string, filename: string): CalendarEvent => {
+    const unfolded = ics.replace(/\r?\n[ \t]/g, "");
+    const lines = unfolded.split(/\r?\n/);
+
+    const getVal = (key: string) => {
+        const line = lines.find(l => l.toUpperCase().startsWith(`${key.toUpperCase()}:`));
+        if (!line) return undefined;
+        const colonIndex = line.indexOf(":");
+        return line.slice(colonIndex + 1).trim();
+    };
+
+    const formatDate = (val?: string) => {
+        if (!val) return undefined;
+        const m = val.match(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z?/);
+        if (m) return `${m[1]}-${m[2]}-${m[3]} ${m[4]}:${m[5]}:${m[6]} UTC`;
+        return val;
+    };
+
+    return {
+        method,
+        filename,
+        summary: getVal("SUMMARY"),
+        start: formatDate(getVal("DTSTART")),
+        end: formatDate(getVal("DTEND")),
+        location: getVal("LOCATION"),
+        raw: ics
+    };
+  };
+
   const extractFromRaw = (
     fullEml: string,
     rootContentType: string,
-  ): { preview: { body: string; type: string } | null; attachments: Attachment[] } => {
+  ): { preview: { body: string; type: string } | null; attachments: Attachment[]; calendar?: CalendarEvent } => {
     let htmlPreview: { body: string; type: string } | null = null;
     let plainPreview: { body: string; type: string } | null = null;
+    let calendar: CalendarEvent | undefined = undefined;
     const collectedAttachments: Attachment[] = [];
 
     const getBoundary = (headerBlock: string) => {
@@ -129,7 +193,7 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
       
       for (let i = 1; i < segments.length; i++) {
         const segment = segments[i];
-        if (segment.trim().startsWith("--")) continue; // end boundary
+        if (segment.trim().startsWith("--")) continue;
 
         const partInfo = parsePartInfo(segment);
         if (!partInfo) continue;
@@ -139,6 +203,13 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
           if (innerBoundary && innerBoundary !== boundary) {
             traverseRaw(partInfo.body, innerBoundary);
           }
+        } else if (partInfo.contentType.includes("text/calendar")) {
+            const methodMatch = partInfo.headers.match(/method=([^;\r\n]+)/i);
+            const method = methodMatch ? methodMatch[1].toUpperCase() : "PUBLISH";
+            let body = partInfo.body;
+            if (partInfo.transferEncoding === "quoted-printable") body = decodeQuotedPrintable(body);
+            if (partInfo.transferEncoding === "base64") body = decodeBase64ToUTF8(body);
+            calendar = parseIcs(body, method, partInfo.filename);
         } else if (partInfo.disposition === "attachment" || (!partInfo.contentType.includes("text/html") && !partInfo.contentType.includes("text/plain"))) {
           collectedAttachments.push({
             filename: partInfo.filename,
@@ -173,32 +244,43 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
       htmlPreview = { body, type: info.contentType };
     }
 
-    return { preview: htmlPreview || plainPreview, attachments: collectedAttachments };
+    return { preview: htmlPreview || plainPreview, attachments: collectedAttachments, calendar };
   };
 
-  const findAllAttachments = (part: MimePart): Attachment[] => {
-    const collected: Attachment[] = [];
+  const findAllAttachmentsAndCalendar = (part: MimePart): { attachments: Attachment[], calendar?: CalendarEvent } => {
+    const attachments: Attachment[] = [];
+    let calendar: CalendarEvent | undefined = undefined;
+
     const traverse = (p: MimePart) => {
-      if (p.contentDisposition === "attachment" || (!p.contentType.includes("text/html") && !p.contentType.includes("text/plain") && !p.contentType.includes("multipart/"))) {
+      if (p.contentType.includes("text/calendar")) {
+          const methodMatch = p.contentType.match(/method=([^;\r\n]+)/i);
+          const method = methodMatch ? methodMatch[1].toUpperCase() : "PUBLISH";
+          let body = p.body || "";
+          if (p.transferEncoding === "base64") body = decodeBase64ToUTF8(body);
+          else if (p.transferEncoding === "quoted-printable") body = decodeQuotedPrintable(body);
+          calendar = parseIcs(body, method, p.filename || "invite.ics");
+      } else if (p.contentDisposition === "attachment" || (!p.contentType.includes("text/html") && !p.contentType.includes("text/plain") && !p.contentType.includes("multipart/"))) {
         if (p.body) {
-          collected.push({
+          attachments.push({
             filename: p.filename || "file",
             contentType: p.contentType,
             body: p.body,
             transferEncoding: p.transferEncoding,
             size: p.size,
-            contentId: p.contentId?.replace(/[<>]/g, "") // Clean CID
+            contentId: p.contentId?.replace(/[<>]/g, "")
           });
         }
       }
       if (p.parts) p.parts.forEach(traverse);
     };
     traverse(part);
-    return collected;
+    return { attachments, calendar };
   };
 
   const extractedData = useMemo(() => {
-    const attachments = findAllAttachments(data.mime);
+    const { attachments, calendar: treeCalendar } = findAllAttachmentsAndCalendar(data.mime);
+    let calendar = treeCalendar;
+
     const findBestPreviewPart = (part: MimePart): MimePart | null => {
         if (part.contentType.includes("text/html")) return part;
         if (part.contentType.includes("text/plain") && !part.contentDisposition) return part;
@@ -227,6 +309,7 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
     } else if (data.mime.body) {
         const rawRes = extractFromRaw(data.mime.body, data.mime.contentType);
         preview = rawRes.preview;
+        calendar = calendar || rawRes.calendar;
         if (attachments.length === 0) attachments.push(...rawRes.attachments);
     }
 
@@ -244,7 +327,7 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
         preview.body = html;
     }
 
-    return { preview, attachments };
+    return { preview, attachments, calendar };
   }, [data.mime]);
 
   const buildEmlReconstruction = () => {
@@ -258,7 +341,6 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
       return boxes.map(b => b.name ? `"${b.name}" <${b.address}>` : b.address).join(", ");
     };
 
-    // 1. Core Headers
     pushHeader("MIME-Version", "1.0");
     pushHeader("Date", data.date || new Date().toUTCString());
     pushHeader("Subject", data.subject);
@@ -268,7 +350,6 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
     if (data.replyTo && data.replyTo.length > 0) pushHeader("Reply-To", formatBoxes(data.replyTo));
     pushHeader("Message-ID", data.messageId);
 
-    // 2. Custom/Additional Headers
     data.headers.forEach((h: MailHeader) => {
       const protectedHeaders = ["mime-version", "date", "subject", "from", "to", "cc", "bcc", "reply-to", "message-id", "content-type"];
       if (!protectedHeaders.includes(h.name.toLowerCase())) {
@@ -276,7 +357,7 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
       }
     });
 
-    const buildPart = (part: MimePart, _boundary?: string): string => {
+    const buildPart = (part: MimePart): string => {
       const partLines: string[] = [];
 
       if (part.contentType.startsWith("multipart/")) {
@@ -287,7 +368,7 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
         if (part.parts) {
           part.parts.forEach(p => {
             partLines.push(`--${innerBoundary}`);
-            partLines.push(buildPart(p, innerBoundary));
+            partLines.push(buildPart(p));
           });
           partLines.push(`--${innerBoundary}--`);
         }
@@ -305,7 +386,6 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
       return partLines.join("\r\n");
     };
 
-    // Use the root structure if available, otherwise build basic
     const mimeContent = buildPart(data.mime);
     return lines.join("\r\n") + "\r\n" + mimeContent;
   };
@@ -332,7 +412,7 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
     URL.revokeObjectURL(url);
   };
 
-  const handleDownloadAttachment = (att: Attachment) => {
+  const handleDownloadAttachment = (att: Attachment | { body: string, filename: string, contentType: string, transferEncoding?: string }) => {
     let content: string | Uint8Array = att.body;
     if (att.transferEncoding === "base64") {
         const binaryStr = atob(att.body.replace(/\s/g, ""));
@@ -398,12 +478,12 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
                       <button
                         key={idx}
                         onClick={() => handleDownloadAttachment(att)}
-                        className="flex items-center gap-2 px-3 py-1 bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 border border-neutral-200 dark:border-neutral-600 rounded-full text-xs font-medium transition-colors max-w-xs overflow-hidden"
+                        className="flex items-center gap-2 px-3 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full text-xs font-medium transition-colors max-w-xs overflow-hidden"
                         title={`${att.filename} (${att.contentType})`}
                       >
-                          <FileIcon size={14} className="text-neutral-500" />
-                          <span className="truncate">{att.filename}</span>
-                          <Download size={12} className="text-neutral-400" />
+                          <FileIcon size={14} className="text-slate-400" />
+                          <span className="truncate text-slate-200">{att.filename}</span>
+                          <Download size={12} className="text-slate-500" />
                       </button>
                   ))}
               </div>
@@ -416,7 +496,7 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
       id: "preview",
       label: "Preview",
       content: extractedData.preview?.body ? (
-        <div className="border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden bg-white dark:bg-neutral-100">
+        <div className="border border-slate-800 rounded-lg overflow-hidden bg-slate-900">
           {extractedData.preview.type.includes("text/html") ? (
             <iframe
               title="Mail Preview"
@@ -425,14 +505,68 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
               sandbox="allow-popups allow-popups-to-escape-sandbox"
             />
           ) : (
-            <pre className="p-4 whitespace-pre-wrap font-sans text-sm text-neutral-900 bg-white">
+            <pre className="p-4 whitespace-pre-wrap font-sans text-sm text-slate-300 bg-slate-950">
               {extractedData.preview.body}
             </pre>
           )}
         </div>
       ) : (
-        <div className="text-center py-10 text-neutral-500">No preview available</div>
+        <div className="text-center py-10 text-slate-500">No preview available</div>
       ),
+    },
+    {
+        id: "calendar",
+        label: "Calendar",
+        shouldShow: !!extractedData.calendar,
+        content: extractedData.calendar && (
+            <div className="bg-slate-950 border border-slate-800 rounded-xl p-6 flex flex-col gap-6">
+                <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-blue-500/10 rounded-lg text-blue-400">
+                            <Calendar size={24} />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold text-slate-100">{extractedData.calendar.summary || "Calendar Event"}</h3>
+                            <p className="text-sm text-slate-400">Method: <span className="text-blue-400 font-mono font-bold uppercase">{extractedData.calendar.method}</span></p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => handleDownloadAttachment({ body: extractedData.calendar!.raw, filename: extractedData.calendar!.filename, contentType: "text/calendar" })}
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm font-medium border border-slate-700 transition-colors"
+                    >
+                        <Download size={16} />
+                        Download .ics
+                    </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-800/50">
+                        <span className="text-xs font-bold text-slate-500 uppercase block mb-1">Start Time</span>
+                        <span className="text-slate-200">{extractedData.calendar.start || "Not specified"}</span>
+                    </div>
+                    <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-800/50">
+                        <span className="text-xs font-bold text-slate-500 uppercase block mb-1">End Time</span>
+                        <span className="text-slate-200">{extractedData.calendar.end || "Not specified"}</span>
+                    </div>
+                    {extractedData.calendar.location && (
+                        <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-800/50 md:col-span-2">
+                            <span className="text-xs font-bold text-slate-500 uppercase block mb-1 flex items-center gap-2">
+                                Location
+                                <CopyButton value={extractedData.calendar.location} />
+                            </span>
+                            <span className="text-slate-200 break-all">{extractedData.calendar.location}</span>
+                        </div>
+                    )}
+                </div>
+
+                <div className="mt-2">
+                    <span className="text-xs font-bold text-slate-500 uppercase block mb-2">Raw Data</span>
+                    <pre className="bg-slate-900 p-4 rounded-lg text-xs text-slate-400 overflow-x-auto border border-slate-800">
+                        {extractedData.calendar.raw}
+                    </pre>
+                </div>
+            </div>
+        )
     },
     {
       id: "headers",
@@ -450,7 +584,7 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
   ];
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <DetailPanel title="Mail Summary" items={metadataItems} />
       <TabbedDataViewer tabs={tabs} defaultActiveTab="preview" />
     </div>

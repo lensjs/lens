@@ -9,6 +9,7 @@ import {
   CacheWatcher,
   lensEmitter,
   type HttpMethod,
+  MailWatcher,
 } from "@lensjs/core";
 import type { RequiredFastifyAdapterConfig } from "./types.ts";
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
@@ -47,6 +48,11 @@ export class FastifyAdapter extends LensAdapter {
         case WatcherTypeEnum.CACHE:
           if (this.config.cacheWatcherEnabled) {
             void this.watchCache(watcher as CacheWatcher);
+          }
+          break;
+        case WatcherTypeEnum.MAIL:
+          if (this.config.mailWatcherEnabled) {
+            void this.watchMail(watcher as MailWatcher);
           }
           break;
       }
@@ -101,6 +107,14 @@ export class FastifyAdapter extends LensAdapter {
     if (!this.config.cacheWatcherEnabled) return;
 
     lensEmitter.on("cache", async (data) => {
+      await watcher?.log(data);
+    });
+  }
+
+  private async watchMail(watcher: MailWatcher) {
+    if (!this.config.mailWatcherEnabled) return;
+
+    lensEmitter.on("mail", async (data) => {
       await watcher?.log(data);
     });
   }
