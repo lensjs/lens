@@ -40,6 +40,7 @@ app.use(
 const { handleExceptions } = await lens({
   app,
   cacheWatcherEnabled: true,
+  mailWatcherEnabled: true,
   queryWatcher: {
     enabled: true,
     handler: createSequelizeHandler({ provider: "sqlite" }),
@@ -151,8 +152,9 @@ app.get("/send-email", async (_, res) => {
     from: '"Mohamed Attar" <mohamedattar@gmail.com>',
     to: "random@gmail.com",
     subject: "Template Email",
-    text: "This is test email sent via test account",
-    html: "<p> this is good</p>",
+    raw: {
+      path: "/home/elattar/workspace/lens/len/sample.eml",
+    },
   });
 
   res.json(info);

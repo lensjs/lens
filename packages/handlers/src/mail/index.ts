@@ -1,1 +1,1 @@
-export * from "./nodemailer"
+export { logNodeMailerEntry } from "./nodemailer";

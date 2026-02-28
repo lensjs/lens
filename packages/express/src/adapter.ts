@@ -9,6 +9,7 @@ import {
   lensContext,
   CacheWatcher,
   lensEmitter,
+  MailWatcher,
 } from "@lensjs/core";
 import { RequiredExpressAdapterConfig } from "./types";
 import { Express, Request, Response } from "express";
@@ -47,6 +48,11 @@ export class ExpressAdapter extends LensAdapter {
         case WatcherTypeEnum.CACHE:
           if (this.config.cacheWatcherEnabled) {
             void this.watchCache(watcher as CacheWatcher);
+          }
+          break;
+        case WatcherTypeEnum.MAIL:
+          if (this.config.mailWatcherEnabled) {
+            void this.watchEmails(watcher as MailWatcher);
           }
           break;
       }
@@ -99,6 +105,14 @@ export class ExpressAdapter extends LensAdapter {
     if (!this.config.cacheWatcherEnabled) return;
 
     lensEmitter.on("cache", async (data) => {
+      await watcher?.log(data);
+    });
+  }
+
+  private async watchEmails(watcher: MailWatcher) {
+    if (!this.config.mailWatcherEnabled) return;
+
+    lensEmitter.on("mail", async (data) => {
       await watcher?.log(data);
     });
   }

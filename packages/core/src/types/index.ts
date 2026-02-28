@@ -87,38 +87,6 @@ export type RequestEntry = {
   user?: UserEntry | null;
 };
 
-export interface MailAddress {
-  name: string;
-  email: string;
-}
-export interface MailAttachment {
-  id: string;
-  filename: string;
-  contentType: string;
-  size: number;
-  contentId?: string; // for inline images
-  content?: string;
-}
-
-export type MailEntry = {
-  from: MailAddress;
-  to: MailAddress[];
-  cc?: MailAddress[];
-  bcc?: MailAddress[];
-  replyTo?: MailAddress[];
-  html?: string;
-  text?: string;
-  subject: string;
-  sentAt: string;
-  durationMs?: number;
-  status: "sent" | "failed" | "pending";
-  fullStatus: string;
-  attachments: MailAttachment[];
-  headers: Record<string, string>;
-  mailer: string;
-  driver: string;
-};
-
 export enum WatcherTypeEnum {
   REQUEST = "request",
   QUERY = "query",
@@ -197,3 +165,5 @@ export interface QueuedStoreConfig {
   dbMaxSizeGb?: number;
   dbPruneSizeGb?: number;
 }
+
+export * from './mail'

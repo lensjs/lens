@@ -13,7 +13,7 @@ export async function sendEmail<T extends NodeMailerTransporter>(
 ): Promise<SMTPTransport.SentMessageInfo> {
   const message = await transporter.sendMail(payload);
 
-  logNodeMailerEntry<T>(payload, message);
+  logNodeMailerEntry<T>('smtp', payload, message);
 
   return message;
 }

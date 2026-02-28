@@ -48,6 +48,10 @@ export default abstract class Store {
     return this.defaultMinimalPaginate();
   }
 
+  getAllEmails(_paginationParams: PaginationParams): MinimalPaginatePromise {
+    return this.defaultMinimalPaginate();
+  }
+
   protected stringifyData(data: Record<string, any> | string) {
     if (typeof data === "string") {
       return data;
