@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import type {
   ApiResponse,
   CacheTableRow,
@@ -5,11 +6,13 @@ import type {
   GenericLensEntry,
   OneCache,
   OneException,
+  OneMail,
   OneQuery,
   PaginatorMeta,
   QueryTableRow,
   RequestEntry,
   RequestTableRow,
+  MailTableRow,
 } from "../types";
 import { prepareApiUrl } from "../utils/api";
 import { useConfig } from "../utils/context";
@@ -23,99 +26,147 @@ export const DEFAULT_META: PaginatorMeta = {
 const useLensApi = () => {
   const config = useConfig();
 
-  async function fetchJson<TData>(
-    url: string,
-    options?: RequestInit,
-  ): Promise<ApiResponse<TData>> {
-    const res = await fetch(url, {
-      headers: { "Content-Type": "application/json" },
-      ...options,
-    });
+  const fetchJson = useCallback(
+    async function fetchJson<TData>(
+      url: string,
+      options?: RequestInit,
+    ): Promise<ApiResponse<TData>> {
+      const res = await fetch(url, {
+        headers: { "Content-Type": "application/json" },
+        ...options,
+      });
 
-    if (!res.ok) {
-      throw new Error(`Failed to fetch: ${url}`);
-    }
+      if (!res.ok) {
+        throw new Error(`Failed to fetch: ${url}`);
+      }
 
-    return res.json();
-  }
+      return res.json();
+    },
+    [],
+  );
 
-  const withQueryParams = (
-    endpoint: string,
-    params?: Record<string, unknown>,
-  ) => {
-    const searchParams = new URLSearchParams(
-      Object.entries(params || {}).reduce(
-        (acc, [key, value]) => {
-          if (value !== undefined && value !== null) {
-            acc[key] = String(value);
-          }
-          return acc;
-        },
-        {} as Record<string, string>,
-      ),
-    );
+  const withQueryParams = useCallback(
+    (endpoint: string, params?: Record<string, unknown>) => {
+      const searchParams = new URLSearchParams(
+        Object.entries(params || {}).reduce(
+          (acc, [key, value]) => {
+            if (value !== undefined && value !== null) {
+              acc[key] = String(value);
+            }
+            return acc;
+          },
+          {} as Record<string, string>,
+        ),
+      );
 
-    return `${endpoint}${searchParams.toString() ? `?${searchParams}` : ""}`;
-  };
+      return `${endpoint}${searchParams.toString() ? `?${searchParams}` : ""}`;
+    },
+    [],
+  );
 
-  const getAllRequests = async (page?: number) => {
-    return fetchJson<RequestTableRow[]>(
-      prepareApiUrl(
-        withQueryParams(config.api.requests, {
-          page,
-        }),
-      ),
-    );
-  };
+  const getAllRequests = useCallback(
+    async (page?: number) => {
+      return fetchJson<RequestTableRow[]>(
+        prepareApiUrl(
+          withQueryParams(config.api.requests, {
+            page,
+          }),
+        ),
+      );
+    },
+    [config.api.requests, fetchJson, withQueryParams],
+  );
 
-  const getRequestById = async (id: string) => {
-    return fetchJson<GenericLensEntry<RequestEntry>>(
-      prepareApiUrl(`${config.api.requests}/${id}`),
-    );
-  };
-  const getQueries = async (page: number) => {
-    return fetchJson<QueryTableRow[]>(
-      prepareApiUrl(
-        withQueryParams(config.api.queries, {
-          page,
-        }),
-      ),
-    );
-  };
+  const getRequestById = useCallback(
+    async (id: string) => {
+      return fetchJson<GenericLensEntry<RequestEntry>>(
+        prepareApiUrl(`${config.api.requests}/${id}`),
+      );
+    },
+    [config.api.requests, fetchJson],
+  );
 
-  const getQueryById = async (id: string) => {
-    return fetchJson<OneQuery>(prepareApiUrl(`${config.api.queries}/${id}`));
-  };
+  const getQueries = useCallback(
+    async (page: number) => {
+      return fetchJson<QueryTableRow[]>(
+        prepareApiUrl(
+          withQueryParams(config.api.queries, {
+            page,
+          }),
+        ),
+      );
+    },
+    [config.api.queries, fetchJson, withQueryParams],
+  );
 
-  const getCacheEntries = async (page?: number) => {
-    return fetchJson<CacheTableRow[]>(
-      prepareApiUrl(
-        withQueryParams(config.api.cache, {
-          page,
-        }),
-      ),
-    );
-  };
+  const getQueryById = useCallback(
+    async (id: string) => {
+      return fetchJson<OneQuery>(prepareApiUrl(`${config.api.queries}/${id}`));
+    },
+    [config.api.queries, fetchJson],
+  );
 
-  const getCacheEntryById = async (id: string) => {
-    return fetchJson<OneCache>(prepareApiUrl(`${config.api.cache}/${id}`));
-  };
+  const getCacheEntries = useCallback(
+    async (page?: number) => {
+      return fetchJson<CacheTableRow[]>(
+        prepareApiUrl(
+          withQueryParams(config.api.cache, {
+            page,
+          }),
+        ),
+      );
+    },
+    [config.api.cache, fetchJson, withQueryParams],
+  );
 
-  const getExceptions = async (page?: number) => {
-    return fetchJson<ExceptionTableRow[]>(
-      prepareApiUrl(
-        withQueryParams(config.api.exceptions, {
-          page,
-        }),
-      ),
-    );
-  };
+  const getCacheEntryById = useCallback(
+    async (id: string) => {
+      return fetchJson<OneCache>(prepareApiUrl(`${config.api.cache}/${id}`));
+    },
+    [config.api.cache, fetchJson],
+  );
 
-  const getExceptionById = async (id: string) => {
-    return fetchJson<OneException>(
-      prepareApiUrl(`${config.api.exceptions}/${id}`),
-    );
-  };
+  const getExceptions = useCallback(
+    async (page?: number) => {
+      return fetchJson<ExceptionTableRow[]>(
+        prepareApiUrl(
+          withQueryParams(config.api.exceptions, {
+            page,
+          }),
+        ),
+      );
+    },
+    [config.api.exceptions, fetchJson, withQueryParams],
+  );
+
+  const getExceptionById = useCallback(
+    async (id: string) => {
+      return fetchJson<OneException>(
+        prepareApiUrl(`${config.api.exceptions}/${id}`),
+      );
+    },
+    [config.api.exceptions, fetchJson],
+  );
+
+  const getAllMail = useCallback(
+    async (page?: number) => {
+      return fetchJson<MailTableRow[]>(
+        prepareApiUrl(
+          withQueryParams(config.api.mail, {
+            page,
+          }),
+        ),
+      );
+    },
+    [config.api.mail, fetchJson, withQueryParams],
+  );
+
+  const getMailById = useCallback(
+    async (id: string) => {
+      return fetchJson<OneMail>(prepareApiUrl(`${config.api.mail}/${id}`));
+    },
+    [config.api.mail, fetchJson],
+  );
 
   return {
     getAllRequests,
@@ -126,6 +177,8 @@ const useLensApi = () => {
     getCacheEntryById,
     getExceptions,
     getExceptionById,
+    getAllMail,
+    getMailById,
   };
 };
 

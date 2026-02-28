@@ -6,6 +6,8 @@ import type {
   QueryEntry,
   QueryTableRow,
   RequestTableRow,
+  MailTableRow,
+  OneMail,
 } from "../types";
 import { prepareApiUrl } from "../utils/api";
 import { useConfig } from "../utils/context";
@@ -117,6 +119,41 @@ export function useQueryById(
 
     queryFn: () =>
       fetchJson<QueryEntry>(prepareApiUrl(`${config.api.queries}/${id}`)),
+    ...{
+      enabled: !!id,
+      ...options,
+    },
+  });
+}
+
+export function useAllMail(
+  page?: number,
+  options?: UseQueryOptions<ApiResponse<MailTableRow[]>>,
+) {
+  const config = useConfig();
+  return useQuery<ApiResponse<MailTableRow[]>>({
+    queryKey: ["mails", page],
+    queryFn: () =>
+      fetchJson<MailTableRow[]>(
+        prepareApiUrl(
+          withQueryParams(config.api.mail, {
+            page,
+          }),
+        ),
+      ),
+    ...options,
+  });
+}
+
+export function useMailById(
+  id: string,
+  options?: UseQueryOptions<ApiResponse<OneMail>>,
+) {
+  const config = useConfig();
+  return useQuery<ApiResponse<OneMail>>({
+    queryKey: ["mail", id],
+    queryFn: async () =>
+      await fetchJson<OneMail>(prepareApiUrl(`${config.api.mail}/${id}`)),
     ...{
       enabled: !!id,
       ...options,

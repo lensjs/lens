@@ -183,6 +183,37 @@ function formatListUrl(val: any): string {
   return `<${url}>${comment}`;
 }
 
+/**
+ * Decodes RFC 2047 encoded-words (e.g., =?utf-8?B?...?= or =?utf-8?Q?...?=)
+ */
+export function decodeRFC2047(text: string): string {
+  return text.replace(/=\?([^?]+)\?([QB])\?([^?]+)\?=/gi, (_, charset, encoding, data) => {
+    if (encoding.toUpperCase() === "B") {
+      // Base64
+      try {
+        const bin = Buffer.from(data, "base64");
+        return new TextDecoder(charset).decode(bin);
+      } catch (e) {
+        return data;
+      }
+    } else {
+      // Quoted-Printable
+      const decoded = data
+        .replace(/_/g, " ")
+        .replace(/=([0-9A-F]{2})/gi, (__: string, hex: string) =>
+          String.fromCharCode(parseInt(hex, 16)),
+        );
+      try {
+        return new TextDecoder(charset).decode(
+          Uint8Array.from([...decoded].map((c) => c.charCodeAt(0))),
+        );
+      } catch (e) {
+        return decoded;
+      }
+    }
+  });
+}
+
 // ── Raw EML Parsing ──────────────────────────────────────────────────────────
 export function parseRawHeaders(raw: string | Buffer): MailHeader[] {
   const content = raw.toString();
@@ -200,7 +231,10 @@ export function parseRawHeaders(raw: string | Buffer): MailHeader[] {
     } else {
       const match = line.match(/^([^:]+):\s*(.*)$/);
       if (match && match[1] && match[2] !== undefined) {
-        currentHeader = { name: match[1], value: match[2] };
+        currentHeader = {
+          name: match[1],
+          value: decodeRFC2047(match[2]),
+        };
         headers.push(currentHeader);
       }
     }
