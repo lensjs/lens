@@ -416,16 +416,16 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
       id: "preview",
       label: "Preview",
       content: extractedData.preview?.body ? (
-        <div className="border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden bg-white">
+        <div className="border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden bg-white dark:bg-neutral-100">
           {extractedData.preview.type.includes("text/html") ? (
             <iframe
               title="Mail Preview"
               srcDoc={extractedData.preview.body}
-              className="w-full min-h-[500px] border-none"
+              className="w-full min-h-[500px] border-none bg-white"
               sandbox="allow-popups allow-popups-to-escape-sandbox"
             />
           ) : (
-            <pre className="p-4 whitespace-pre-wrap font-sans text-sm dark:text-neutral-300">
+            <pre className="p-4 whitespace-pre-wrap font-sans text-sm text-neutral-900 bg-white">
               {extractedData.preview.body}
             </pre>
           )}

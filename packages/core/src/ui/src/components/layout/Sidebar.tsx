@@ -32,11 +32,11 @@ const Sidebar = ({
         w-3/4 sm:w-64 lg:w-auto min-w-60
         p-4 lg:p-0
         transform transition-transform duration-300 ease-in-out
-        ${isMobileSidebarOpen ? "translate-x-0 bg-white dark:bg-neutral-900" : "-translate-x-[120%] lg:translate-x-0"}
+        ${isMobileSidebarOpen ? "translate-x-0 bg-slate-900" : "-translate-x-[120%] lg:translate-x-0"}
         lg:bg-transparent
       `}
       >
-        <ul className="flex flex-col gap-2 text-gray-700 dark:text-neutral-300">
+        <ul className="flex flex-col gap-2 text-slate-200">
           {getSidebarRoutes(config).map((route) => {
             const isActive = location.pathname.startsWith(route.path);
             const Icon = route.icon;
@@ -46,10 +46,10 @@ const Sidebar = ({
                 <Link
                   to={route.path}
                   className={[
-                    "flex items-center gap-2 rounded-lg px-4 py-2 font-medium",
+                    "flex items-center gap-2 rounded-lg px-4 py-2 font-semibold transition-all duration-200",
                     isActive
-                      ? "bg-green-100 dark:bg-neutral-800 text-gray-900 dark:text-white"
-                      : "text-gray-600 dark:text-neutral-400 hover:bg-gray-50 dark:hover:bg-neutral-800/50",
+                      ? "bg-blue-900/20 text-blue-400 border border-blue-800/30 shadow-sm"
+                      : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-100",
                   ].join(" ")}
                 >
                   <Icon size={16} />

@@ -1,10 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --bg-primary: 0 0 0;
-  --bg-secondary: 15 15 15;
-  --text-primary: 248 250 252;
-  --text-secondary: 148 163 184;
+  /* Permanent Deep Dark Mode - No Light Mode Fallbacks */
+  color-scheme: dark;
+  
+  --bg-primary: 2 6 23;         /* slate-950 */
+  --bg-secondary: 15 23 42;     /* slate-900 */
+  --text-primary: 241 245 249;  /* slate-100 */
+  --text-secondary: 148 163 184; /* slate-400 */
+  --border-color: 30 41 59;     /* slate-800 */
+  --accent-color: 59 130 246;   /* blue-500 */
 }
 
 @theme inline {
@@ -41,8 +46,10 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --color-secondary-bg: light-dark(#f8f8f8, #191a2e);
-  --color-Gray: light-dark(#f8f8f8, #2d2d2d);
+  
+  /* Standardizing on Dark Palette */
+  --color-secondary-bg: #191a2e;
+  --color-Gray: #2d2d2d;
   --color-dark-Gray: #2d2d2d;
   --color-LightGray: #bcbcbc;
   --color-DarkBlue: #7ea4c4;
@@ -57,9 +64,8 @@
   body {
     background-color: rgb(var(--bg-primary));
     color: rgb(var(--text-primary));
-    transition:
-      background-color 0.3s ease,
-      color 0.3s ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   button {
@@ -70,14 +76,16 @@
 @layer utilities {
   .container {
     margin-inline: auto;
-    padding-inline: 10px;
+    padding-inline: 20px;
+    max-width: 1400px;
+  }
+  
+  .card-panel {
+    @apply bg-slate-900 border border-slate-800 rounded-xl shadow-sm;
   }
 }
 
-
-
-
 /* json background */
-.w-json-view-container{
+.w-json-view-container {
   background: transparent !important;
 }

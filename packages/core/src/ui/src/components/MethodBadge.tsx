@@ -1,22 +1,25 @@
 export default function RequestMethodBadge({ method }: { method: string }) {
-  let color = "bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-white";
+  let color = "bg-slate-500/10 text-slate-400 border-slate-500/20";
 
-  switch (method) {
+  switch (method.toUpperCase()) {
     case "GET":
-      color = "bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-white";
+      color = "bg-sky-500/10 text-sky-400 border-sky-500/20";
       break;
     case "POST":
+      color = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+      break;
     case "PUT":
-      color = "bg-blue-100 text-blue-800 dark:bg-blue-600 dark:text-white";
+    case "PATCH":
+      color = "bg-amber-500/10 text-amber-400 border-amber-500/20";
       break;
     case "DELETE":
-      color = "bg-red-100 text-red-800 dark:bg-red-600 dark:text-white";
+      color = "bg-rose-500/10 text-rose-400 border-rose-500/20";
       break;
   }
 
   return (
-    <span className={`rounded px-2 py-1 text-sm font-semibold ${color}`}>
-      {method}
+    <span className={`rounded-md px-2 py-1 text-xs font-bold border tracking-wider ${color}`}>
+      {method.toUpperCase()}
     </span>
   );
 }

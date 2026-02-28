@@ -29,12 +29,11 @@ const BasicRequestDetails = ({ request }: { request: OneRequest }) => {
       {
         label: "Time",
         value: formattedTime,
-        className: "text-gray-900 dark:text-gray-100",
       },
       {
         label: "Hostname",
         value: getHostname(),
-        className: "text-gray-900 dark:text-gray-100 font-mono",
+        className: "font-mono",
       },
       {
         label: "Method",
@@ -47,12 +46,12 @@ const BasicRequestDetails = ({ request }: { request: OneRequest }) => {
       {
         label: "Request ID",
         value: request.request.data.id || "N/A",
-        className: "text-gray-700 dark:text-gray-300 font-mono text-sm",
+        className: "font-mono text-sm",
       },
       {
         label: "Path",
         value: request.request.data.path || "N/A",
-        className: "text-gray-900 dark:text-gray-100 font-mono",
+        className: "font-mono",
       },
       {
         label: "Status",
@@ -65,12 +64,12 @@ const BasicRequestDetails = ({ request }: { request: OneRequest }) => {
       {
         label: "Duration",
         value: request.request.data.duration || "N/A",
-        className: "text-gray-900 dark:text-gray-100 font-medium",
+        className: "font-medium",
       },
       {
         label: "IP Address",
         value: request.request.data.ip || "N/A",
-        className: "text-gray-900 dark:text-gray-100 font-mono",
+        className: "font-mono",
       },
     ],
     [request.request.data, formattedTime],

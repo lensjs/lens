@@ -6,6 +6,8 @@ import ConfigContext from "./utils/context";
 import LoadingScreen from "./components/layout/LoadingScreen";
 import { GlobalLoader } from "./router/routes/Loading";
 
+import { ThemeProvider } from "./utils/theme";
+
 const App = () => {
   const [config, setConfig] = useState<LensConfig>({} as LensConfig);
   const [loading, setLoading] = useState(true);
@@ -30,9 +32,11 @@ const App = () => {
 
   return (
     <ConfigContext.Provider value={{ config: config }}>
-      <Suspense fallback={<GlobalLoader />}>
-        <Router config={config} />
-      </Suspense>
+      <ThemeProvider>
+        <Suspense fallback={<GlobalLoader />}>
+          <Router config={config} />
+        </Suspense>
+      </ThemeProvider>
     </ConfigContext.Provider>
   );
 };

@@ -51,8 +51,8 @@ function Table<T>({ columns: columnsProp, data }: TableProps<T>) {
   const columns = columnsProp.filter((column) => !column.hidden);
 
   return (
-    <div className="relative overflow-x-auto">
-      <table className="w-full text-start">
+    <div className="relative overflow-x-auto card-panel border-none shadow-none bg-transparent">
+      <table className="w-full text-start border-separate border-spacing-y-2 px-1">
         <thead>
           <tr>
             {columns.map((column, i) => (
@@ -60,7 +60,7 @@ function Table<T>({ columns: columnsProp, data }: TableProps<T>) {
                 key={i}
                 scope="col"
                 className={twMerge(
-                  "min-w-32 bg-gray-50  dark:bg-neutral-900 p-5 text-sm font-semibold text-gray-900 dark:text-neutral-200 first:rounded-s-lg last:rounded-e-lg",
+                  "min-w-32 bg-slate-900/50 p-4 text-xs font-bold uppercase tracking-wider text-slate-400 first:rounded-s-lg last:rounded-e-lg",
                   column.position === "end" ? "text-end" : "",
                 )}
               >
@@ -77,24 +77,27 @@ function Table<T>({ columns: columnsProp, data }: TableProps<T>) {
             ))}
           </tr>
         </thead>
-        <tbody>
+        <tbody className="before:block before:h-2">
           {!data.length && (
             <tr>
-              <td colSpan={columns.length} className="p-5 text-center text-neutral-400">
-                    No Entries Recorded Yet!
+              <td
+                colSpan={columns.length}
+                className="p-10 text-center text-slate-500 bg-slate-900 rounded-xl border border-slate-800"
+              >
+                No Entries Recorded Yet!
               </td>
             </tr>
           )}
           {data.map((row, rowIndex) => (
             <tr
               key={rowIndex}
-              className="max-h-none overflow-hidden rounded-lg text-sm font-medium text-gray-800 dark:text-neutral-400 even:[&_td]:bg-gray-25 dark:even:[&_td]:bg-neutral-950 transition-colors"
+              className="group hover:scale-[1.002] transition-all duration-200"
             >
               {columns.map((column, colIndex) => (
                 <td
                   key={colIndex}
                   className={twMerge(
-                    "p-5 first:rounded-s-lg last:rounded-e-lg bg-white dark:bg-transparent",
+                    "p-4 first:rounded-s-xl last:rounded-e-xl bg-slate-900 border-y border-slate-800 first:border-l last:border-r shadow-sm transition-all group-hover:border-slate-700 group-hover:shadow-md",
                     column.position === "end" ? "text-end" : "text-start",
                   )}
                 >
@@ -112,13 +115,15 @@ function Table<T>({ columns: columnsProp, data }: TableProps<T>) {
                   >
                     {column.icon && column.icon(row)}
                     {column.prefix && column.prefix(row)}
-                    {column.render
-                      ? column.render(row)
-                      : column.key
-                        ? String(getNestedValue(row, column.key) ?? "-")
-                        : column.value
-                          ? column.value(row)
-                          : "-"}
+                    <span className="text-slate-300 font-medium">
+                      {column.render
+                        ? column.render(row)
+                        : column.key
+                          ? String(getNestedValue(row, column.key) ?? "-")
+                          : column.value
+                            ? column.value(row)
+                            : "-"}
+                    </span>
                     {column.suffix && column.suffix(row)}
                   </div>
                 </td>
