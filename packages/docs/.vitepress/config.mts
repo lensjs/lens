@@ -133,6 +133,24 @@ export default defineConfig({
               },
             ],
           },
+          {
+            text: "Mail",
+            collapsed: true,
+            items: [
+              {
+                text: "Express",
+                link: "/handlers/mail/express",
+              },
+              {
+                text: "NestJS",
+                link: "/handlers/mail/nestjs",
+              },
+              {
+                text: "Fastify",
+                link: "/handlers/mail/fastify",
+              },
+            ],
+          },
         ],
       },
       {

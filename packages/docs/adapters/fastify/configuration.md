@@ -71,6 +71,9 @@ await lens({
   // Optional: Enable or disable the cache watcher. Defaults to `false`.
   cacheWatcherEnabled: true,
 
+  // Optional: Enable or disable the mail watcher. Defaults to `false`.
+  mailWatcherEnabled: true,
+
   // Optional: The URL path where the Lens dashboard will be accessible. Defaults to "/lens".
   path: "/lens",
 
