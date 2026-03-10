@@ -4,6 +4,7 @@ import {
   Lens,
   lensUtils,
   LensWatcher,
+  MailWatcher,
   QueryWatcher,
   RequestWatcher,
 } from "@lensjs/core";
@@ -50,6 +51,10 @@ export const lens = async (config: ExpressAdapterConfig) => {
     {
       enabled: mergedConfig.exceptionWatcherEnabled,
       watcher: new ExceptionWatcher(),
+    },
+    {
+      enabled: mergedConfig.mailWatcherEnabled,
+      watcher: new MailWatcher(),
     },
   ];
 

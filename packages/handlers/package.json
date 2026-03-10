@@ -25,12 +25,21 @@
     "@lensjs/typescript-config": "workspace:*",
     "kysely": "^0.28.5",
     "prisma": "^6.15.0",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "@types/nodemailer": "^7.0.10"
   },
   "dependencies": {
     "@lensjs/core": "workspace:*",
     "@lensjs/date": "workspace:*",
     "emittery": "latest"
+  },
+  "peerDependencies": {
+    "nodemailer": "^8.0.1"
+  },
+  "peerDependenciesMeta": {
+    "nodemailer": {
+      "optional": true
+    }
   },
   "gitHead": "a229fde5700970ec290ff31f1e3b7d84cc56d325"
 }

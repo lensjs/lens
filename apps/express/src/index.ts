@@ -4,6 +4,8 @@ import { Sequelize, DataTypes, Model } from "sequelize";
 import { createSequelizeHandler, watcherEmitter } from "@lensjs/watchers";
 import { lens } from "@lensjs/express";
 import MemoryCache from "./concrete/cache/memory_cache";
+import nodemailer from "nodemailer";
+import { sendEmail } from "./concrete/mail/nodemailer";
 
 const app = express();
 const port = 3000;
@@ -18,6 +20,17 @@ const sequelize = new Sequelize({
   },
 });
 
+const testEmailAccount = await nodemailer.createTestAccount();
+const mailTransporter = nodemailer.createTransport({
+  host: testEmailAccount.smtp.host,
+  port: testEmailAccount.smtp.port,
+  secure: testEmailAccount.smtp.secure,
+  auth: {
+    user: testEmailAccount.user,
+    pass: testEmailAccount.pass,
+  },
+});
+
 app.use(
   cors({
     origin: "*",
@@ -27,6 +40,7 @@ app.use(
 const { handleExceptions } = await lens({
   app,
   cacheWatcherEnabled: true,
+  mailWatcherEnabled: true,
   queryWatcher: {
     enabled: true,
     handler: createSequelizeHandler({ provider: "sqlite" }),
@@ -131,6 +145,19 @@ class MyRandomClass {
 
 app.get("/throw-error", async (_, res) => {
   new MyRandomClass().throwsErrors();
+});
+
+app.get("/send-email", async (_, res) => {
+  const info = await sendEmail(mailTransporter, {
+    from: '"Mohamed Attar" <mohamedattar@gmail.com>',
+    to: "random@gmail.com",
+    subject: "Template Email",
+    raw: {
+      path: "/home/elattar/workspace/lens/len/sample5.eml",
+    },
+  });
+
+  res.json(info);
 });
 
 handleExceptions();

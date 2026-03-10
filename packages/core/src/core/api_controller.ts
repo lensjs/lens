@@ -37,11 +37,18 @@ export class ApiController {
       false,
     );
 
+    const emails = await getStore().allByRequestId(
+      request.id,
+      WatcherTypeEnum.MAIL,
+      false,
+    );
+
     return this.resourceResponse({
       request,
       queries,
       cacheEntries,
       exceptions,
+      emails,
     });
   }
 
@@ -100,6 +107,22 @@ export class ApiController {
     }
 
     return this.resourceResponse(exception);
+  }
+
+  static async getEmails({ qs }: RouteDefinitionHandler) {
+    return this.paginatedResponse(
+      await getStore().getAllEmails(this.extractPaginationParams(qs)),
+    );
+  }
+
+  static async getEmail({ params }: RouteDefinitionHandler) {
+    const email = await getStore().find(WatcherTypeEnum.MAIL, params.id);
+
+    if (!email) {
+      return this.notFoundResponse();
+    }
+
+    return this.resourceResponse(email);
   }
 
   static async truncate() {

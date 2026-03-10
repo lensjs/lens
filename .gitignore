@@ -43,3 +43,4 @@ nest-demo
 
 # Release documentation
 RELEASE_STEPS.md
+*.eml

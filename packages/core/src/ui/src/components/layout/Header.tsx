@@ -18,18 +18,17 @@ const Header = ({
     <>
       <header className="container my-5 flex items-center justify-between gap-4">
         <Link to={getRoutesPaths(config).REQUESTS}>
-          <p className="text-2xl font-bold ">{config.appName}</p>
+          <p className="text-2xl font-bold text-slate-100">{config.appName}</p>
         </Link>
 
         <div className="flex items-center gap-2">
-         
           <DeleteButton />
           <button
             onClick={onToggleMobileSidebar}
-            className="p-2 rounded-lg  hover:bg-gray-200  dark:hover:bg-neutral-700 transition-colors lg:hidden"
+            className="p-2 rounded-lg hover:bg-slate-800 transition-colors lg:hidden"
             aria-label="Toggle menu"
           >
-            <span className="text-gray-700 dark:text-gray-300">
+            <span className="text-slate-300">
               {isMobileSidebarOpen ? <X size={18} /> : <Menu size={18} />}
             </span>
           </button>

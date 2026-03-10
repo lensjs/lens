@@ -87,15 +87,12 @@ export type RequestEntry = {
   user?: UserEntry | null;
 };
 
-export type Entry =
-  | { type: "query"; data: QueryEntry }
-  | { type: "request"; data: RequestEntry };
-
 export enum WatcherTypeEnum {
   REQUEST = "request",
   QUERY = "query",
   CACHE = "cache",
   EXCEPTION = "exception",
+  MAIL = "mail",
 }
 
 export type LensConfig = {
@@ -168,3 +165,5 @@ export interface QueuedStoreConfig {
   dbMaxSizeGb?: number;
   dbPruneSizeGb?: number;
 }
+
+export * from './mail'

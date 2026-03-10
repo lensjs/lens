@@ -1,16 +1,16 @@
 const getColorClass = (status: number) => {
-  if (status >= 200 && status < 300) return "bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100";
-  if (status >= 300 && status < 400) return "bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100";
-  if (status >= 400 && status < 500) return "bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-100";
-  if (status >= 500) return "bg-red-100 text-red-800 dark:bg-red-700 dark:text-red-100";
+  if (status >= 200 && status < 300) return "bg-green-500/20 text-green-400 border-green-500/30";
+  if (status >= 300 && status < 400) return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+  if (status >= 400 && status < 500) return "bg-orange-500/20 text-orange-400 border-orange-500/30";
+  if (status >= 500) return "bg-red-500/20 text-red-400 border-red-500/30";
 
-  return "bg-gray-100 text-gray-800 dark:bg-neutral-700 dark:text-neutral-200";
+  return "bg-slate-500/20 text-slate-400 border-slate-500/30";
 };
 
 export const StatusCode = ({ status }: { status: number }) => {
   return (
     <span
-      className={`rounded-lg px-2 py-1 text-sm font-semibold ${getColorClass(status)}`}
+      className={`rounded-md px-2.5 py-1 text-sm font-bold border ${getColorClass(status)}`}
     >
       {status}
     </span>

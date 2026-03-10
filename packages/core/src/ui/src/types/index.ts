@@ -1,3 +1,11 @@
+import type {
+  MailEntry,
+  MailRawSource,
+  Mailbox,
+  MimePart,
+  MailHeader,
+} from "../../../types/mail";
+
 export type LensConfig = {
   appName: string;
   path: string;
@@ -6,11 +14,12 @@ export type LensConfig = {
     queries: string;
     cache: string;
     exceptions: string;
+    mail: string;
     truncate: string;
   };
 };
 
-export type LensEntryType = "request" | "query" | "cache";
+export type LensEntryType = "request" | "query" | "cache" | "exception" | "mail";
 export type LanguageTypeOption = "ts" | "dart";
 export type PaginationParams = {
   page: number;
@@ -127,6 +136,7 @@ export type OneRequest = {
   queries: GenericLensEntry<QueryEntry>[];
   cacheEntries: GenericLensEntry<CacheEntry>[];
   exceptions: ExceptionTableRow[];
+  emails: MailTableRow[];
 };
 export type QueryTableRow = GenericLensEntry<QueryEntry>;
 export type OneQuery = GenericLensEntry<QueryEntry>;
@@ -136,4 +146,9 @@ export type ExceptionTableRow = GenericLensEntry<
   Pick<ExceptionEntry, "name" | "message" | "createdAt">
 >;
 export type OneException = GenericLensEntry<ExceptionEntry>;
+export type MailTableRow = GenericLensEntry<
+  Pick<MailEntry, "subject" | "date"> & { recipientsCount?: number }
+>;
+export type OneMail = GenericLensEntry<MailEntry>;
 export type QueryType = "sql" | "mongodb";
+export type { MailEntry, MailRawSource, Mailbox, MimePart, MailHeader };

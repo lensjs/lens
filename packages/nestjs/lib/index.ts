@@ -4,6 +4,7 @@ import {
   Lens,
   lensUtils,
   LensWatcher,
+  MailWatcher,
   QueryWatcher,
   RequestWatcher,
   WatcherTypeEnum,
@@ -24,6 +25,7 @@ const defaultConfig = {
   requestWatcherEnabled: true,
   exceptionWatcherEnabled: true,
   cacheWatcherEnabled: false,
+  mailWatcherEnabled: false,
 };
 
 export async function lens(config: NestLensConfig) {
@@ -49,6 +51,10 @@ export async function lens(config: NestLensConfig) {
     {
       enabled: mergedConfig.exceptionWatcherEnabled,
       watcher: new ExceptionWatcher(),
+    },
+    {
+      enabled: mergedConfig.mailWatcherEnabled,
+      watcher: new MailWatcher(),
     },
   ];
 

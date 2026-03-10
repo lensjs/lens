@@ -25,28 +25,31 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data }) => {
   };
 
   return (
-    <div className="bg-neutral-50 dark:bg-slate-900 rounded-lg p-4 font-mono text-sm overflow-x-auto overflow-y-visible relative">
-      <div className="absolute top-3 right-3 flex gap-2">
+    <div className="bg-slate-950 border border-slate-800 rounded-lg p-4 font-mono text-sm overflow-x-auto overflow-y-visible relative shadow-inner">
+      <div className="absolute top-3 right-3 flex gap-2 z-10">
         <button
           onClick={copyToClipboard}
-          className={`p-1 rounded-md transition-colors ${
+          className={`p-1.5 rounded-md transition-colors border ${
             copied
-              ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
-              : "bg-white text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 dark:bg-slate-800 dark:text-neutral-400 dark:hover:text-neutral-300 dark:hover:bg-slate-700"
+              ? "bg-green-900/30 text-green-400 border-green-800/50"
+              : "bg-slate-800 text-slate-400 hover:text-slate-100 border-slate-700 hover:bg-slate-700"
           }`}
           title={copied ? "Copied!" : "Copy to clipboard"}
         >
           {copied ? <Check size={14} /> : <Copy size={14} />}
         </button>
       </div>
-      <div className="whitespace-pre-wrap pr-20 text-neutral-800 dark:text-neutral-200 min-h-10">
+      <div className="whitespace-pre-wrap pr-20 text-slate-300 min-h-10">
         {typeof data === "string" || Array.isArray(data) ? (
-          <pre>{JSON.stringify(data, null, 2)}</pre>
+          <pre className="text-slate-300">{JSON.stringify(data, null, 2)}</pre>
         ) : (
           <JsonView
             value={data}
             enableClipboard={false}
-            style={nordTheme}
+            style={{
+                ...nordTheme,
+                '--w-rjv-background-color': 'transparent',
+            } as any}
             collapsed={false}
             displayDataTypes={false}
             displayObjectSize={false}

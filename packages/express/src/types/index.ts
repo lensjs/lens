@@ -10,6 +10,7 @@ export type ExpressAdapterConfig = {
   requestWatcherEnabled?: boolean;
   cacheWatcherEnabled?: boolean;
   exceptionWatcherEnabled?: boolean;
+  mailWatcherEnabled?: boolean;
   queryWatcher?: {
     enabled: boolean;
     handler: QueryWatcherHandler;

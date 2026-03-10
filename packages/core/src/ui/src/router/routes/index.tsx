@@ -1,4 +1,4 @@
-import { ArrowRightLeft, Bug, Database, Layers } from "lucide-react";
+import { ArrowRightLeft, Bug, Database, Layers, Mail } from "lucide-react";
 import { lazy } from "react";
 import { Navigate, type RouteObject } from "react-router-dom";
 import Layout from "../../components/layout/Layout";
@@ -28,6 +28,12 @@ const ExceptionsContainer = lazy(
 const ExceptionDetailsContainer = lazy(
   () => import("../../containers/exceptions/ExceptionDetailsContainer"),
 );
+const MailContainer = lazy(
+  () => import("../../containers/mail/MailContainer"),
+);
+const MailDetailsContainer = lazy(
+  () => import("../../containers/mail/MailDetailsContainer"),
+);
 
 export function getRoutesPaths(config: LensConfig) {
   return {
@@ -39,6 +45,8 @@ export function getRoutesPaths(config: LensConfig) {
     CACHE_ENTRY_DETAILS: `${config.path}/cache/:cacheId`,
     EXCEPTIONS: `${config.path}/exceptions`,
     EXCEPTION_DETAILS: `${config.path}/exceptions/:exceptionId`,
+    MAIL: `${config.path}/mail`,
+    MAIL_DETAILS: `${config.path}/mail/:mailId`,
   };
 }
 
@@ -65,6 +73,11 @@ export function getSidebarRoutes(config: LensConfig) {
       path: paths.EXCEPTIONS,
       label: "Exceptions",
       icon: Bug,
+    },
+    {
+      path: paths.MAIL,
+      label: "Mail",
+      icon: Mail,
     },
   ];
 }
@@ -116,6 +129,14 @@ export function getRoutes(config: LensConfig): RouteObject[] {
         {
           path: "exceptions/:id",
           element: <ExceptionDetailsContainer />,
+        },
+        {
+          path: "mail",
+          element: <MailContainer />,
+        },
+        {
+          path: "mail/:id",
+          element: <MailDetailsContainer />,
         },
         {
           path: "*",

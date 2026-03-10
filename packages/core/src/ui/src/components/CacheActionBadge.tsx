@@ -2,16 +2,16 @@ import type { CacheAction } from "../types";
 
 const CacheActionBadge = ({ action }: { action: CacheAction }) => {
   const colors: Record<CacheAction, string> = {
-    hit: "bg-green-100 text-green-800 dark:bg-green-600 dark:text-white",
-    miss: "bg-amber-100 text-amber-800 dark:bg-amber-600 dark:text-white",
-    write: "bg-blue-100 text-blue-800 dark:bg-blue-600 dark:text-white",
-    delete: "bg-red-100 text-red-800 dark:bg-red-600 dark:text-white",
-    clear: "bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-white",
+    hit: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    miss: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    write: "bg-sky-500/10 text-sky-400 border-sky-500/20",
+    delete: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+    clear: "bg-slate-500/10 text-slate-400 border-slate-500/20",
   };
 
   return (
     <span
-      className={`rounded px-2 py-1 text-sm font-semibold ${
+      className={`rounded px-1.5 py-0.5 text-[10px] font-bold border uppercase tracking-wider ${
         colors[action] || colors.clear
       }`}
     >

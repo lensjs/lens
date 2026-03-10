@@ -6,6 +6,7 @@ const defaultRequest: OneRequest = {
   queries: [],
   cacheEntries: [],
   exceptions: [],
+  emails: [],
   request: {
     created_at: "",
     data: {
@@ -42,12 +43,7 @@ export default function useRequests() {
       setLoading(true);
       getRequestById(id)
         .then((res) => {
-          setRequest({
-            request: res.data!,
-            queries: [],
-            cacheEntries: [],
-            exceptions: [],
-          });
+          setRequest(res.data! as any);
         })
         .finally(() => {
           setLoading(false);
