@@ -69,6 +69,7 @@ describe("MailWatcher", () => {
         type: WatcherTypeEnum.MAIL,
         minimal_data: {
           subject: "Test Subject",
+          recipientsCount: 1,
           createdAt: "2025-09-05T10:00:00.000Z",
         },
         data: mailEntry,
@@ -95,6 +96,7 @@ describe("MailWatcher", () => {
         type: WatcherTypeEnum.MAIL,
         minimal_data: {
           subject: "",
+          recipientsCount: 1,
           createdAt: "2025-09-05T10:00:00.000Z",
         },
         data: mailEntry,
@@ -123,6 +125,7 @@ describe("MailWatcher", () => {
       expect(mockStore.save).toHaveBeenCalledWith(expect.objectContaining({
         minimal_data: {
           subject: "No Date Email",
+          recipientsCount: 1,
           createdAt: mockedNow,
         },
       }));

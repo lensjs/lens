@@ -408,9 +408,11 @@ describe("Nodemailer Handler", () => {
       const options = { icalEvent: "BEGIN:VCALENDAR..." };
       const mimePart = await NodemailerUtils.buildMimeParts(options);
       expect(mimePart).toEqual({
-        contentType: "text/calendar",
+        contentType: "text/calendar; method=PUBLISH",
         body: "BEGIN:VCALENDAR...",
+        filename: "invite.ics",
         size: 18,
+        transferEncoding: undefined,
         headers: [],
       });
     });
@@ -483,7 +485,7 @@ describe("Nodemailer Handler", () => {
       expect(mimePart.parts![1].contentType).toBe("text/html");
       expect(mimePart.parts![2].contentType).toBe("text/html"); // watchHtml
       expect(mimePart.parts![3].contentType).toBe("text/x-amp-html");
-      expect(mimePart.parts![4].contentType).toBe("text/calendar");
+      expect(mimePart.parts![4].contentType).toBe("text/calendar; method=PUBLISH");
     });
 
     it("should handle empty options, returning default text/plain", async () => {
