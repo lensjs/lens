@@ -1,5 +1,11 @@
 # @lensjs/core
 
+## 2.6.0
+
+### Minor Changes
+
+- e2263eb: implement mail watcher
+
 ## 2.5.0
 
 ### Minor Changes

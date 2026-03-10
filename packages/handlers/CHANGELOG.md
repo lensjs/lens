@@ -1,5 +1,16 @@
 # @lensjs/watchers
 
+## 1.2.0
+
+### Minor Changes
+
+- e2263eb: implement mail watcher
+
+### Patch Changes
+
+- Updated dependencies [e2263eb]
+  - @lensjs/core@2.6.0
+
 ## 1.1.4
 
 ### Patch Changes

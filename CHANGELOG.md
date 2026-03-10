@@ -1,4 +1,4 @@
-#  (2026-02-16)
+#  (2026-03-10)
 
 
 ### Bug Fixes
@@ -23,6 +23,7 @@
 * **nestjs:** pass registerErrorHandler options when using fastify adapter ([f7d2028](https://github.com/lensjs/lens/commit/f7d20286c012571f1765536c76087211bc670365))
 * parseBody in express adapter ([a68573e](https://github.com/lensjs/lens/commit/a68573eea6f2cff65ff670a19374778c4d3e6744))
 * reorder @types/react-syntax-highlighter dependency in package.json ([a17b2a4](https://github.com/lensjs/lens/commit/a17b2a45831bbaac013499e2abf89af4354e6bff))
+* **tests:** fix nodemailer tests ([e2263eb](https://github.com/lensjs/lens/commit/e2263eb6198c82f24d6c7595816c2fcc27558a10))
 * **ui:** jsonViewer component ([49dc6f0](https://github.com/lensjs/lens/commit/49dc6f0bedacd95a290009ec02c241e0d0f3724a))
 * update server port from 3000 to 3333 ([b42fefd](https://github.com/lensjs/lens/commit/b42fefd702c43e33b6334aa3d4d12370242c2742))
 
