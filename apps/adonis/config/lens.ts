@@ -11,6 +11,7 @@ const lensConfig = defineConfig({
     requests: env.get('LENS_ENABLE_REQUEST_WATCHER', true),
     cache: env.get('LENS_ENABLE_CACHE_WATCHER', false),
     exceptions: env.get('LENS_ENABLE_EXCEPTION_WATCHER', true),
+    mail: env.get('LENS_ENABLE_MAIL_WATCHER', false),
     queries: {
       enabled: env.get('LENS_ENABLE_QUERY_WATCHER', true),
       provider: 'sqlite',

@@ -48,9 +48,9 @@ export default function useMail() {
   );
 
   const fetchMails = useCallback(
-    async (page?: number) => {
+    async (cursor?: number | null) => {
       setLoading(true);
-      getAllMail(page)
+      getAllMail(cursor)
         .then((res) => {
           setMails(res.data!);
           setMeta(res.meta!);

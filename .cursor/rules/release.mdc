@@ -1,0 +1,74 @@
+---
+description: Commit conventions, Changesets, and the release workflow for LensJS
+globs: .changeset/**/*.md,**/CHANGELOG.md,commitlint.config.js
+alwaysApply: false
+---
+
+# Commits & Releases
+
+## Purpose
+
+Keep history machine-readable and releases automated and correct across independently-versioned
+packages.
+
+## Why it exists
+
+A Husky `commit-msg` hook runs `commitlint`, and versioning/changelogs are owned by Changesets.
+Bypassing either corrupts the changelog or ships an unversioned change.
+
+## Conventional Commits (enforced)
+
+Every commit message MUST follow the spec or the commit is rejected
+([commitlint.config.js](mdc:commitlint.config.js) -> `@commitlint/config-conventional`).
+
+```
+<type>(<optional scope>): <description>
+
+feat(express): capture x-forwarded-for as client ip
+fix(core): guard empty cache payload
+docs: update dev setup
+chore: bump dev deps
+```
+
+Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`,
+`chore`, `revert`. Use `!` or a `BREAKING CHANGE:` footer for breaking changes. Prefer the
+package as scope (`core`, `express`, `nestjs`, `fastify`, `adonis`, `watchers`, `date`, `ui`).
+
+Pass multiline messages via a HEREDOC to keep formatting intact.
+
+## Changesets (required for user-facing changes)
+
+Any change that affects a published `@lensjs/*` package's behavior or public API needs a
+changeset:
+
+```bash
+pnpm changeset add
+```
+
+- Select the affected package(s) and the correct bump: `patch` (fix), `minor` (additive
+  feature), `major` (breaking — signature/export/`exports`/contract change).
+- Write a clear summary — it becomes the package `CHANGELOG.md` entry.
+- Commit the generated `.changeset/*.md` alongside your code.
+- The Changesets config ignores non-published targets — `docs`, `ui`, and the `apps/*` examples
+  ([.changeset/config.json](mdc:.changeset/config.json)); changes limited to those need no
+  changeset.
+
+## Release workflow
+
+Follow [RELEASE_STEPS.md](mdc:RELEASE_STEPS.md): clean tree -> code + `changeset add` ->
+`changeset version` (bumps versions, writes CHANGELOGs, creates per-package tags) -> commit ->
+`changeset publish`. `changeset version`/publish own the versions, tags, and changelogs.
+
+## Do NOT
+
+- Hand-edit `version` fields or `CHANGELOG.md` — the tooling owns those.
+- Skip hooks (`--no-verify`, `--no-gpg-sign`).
+- Force-push to `main`, or run destructive git commands, unless explicitly asked.
+- Commit a user-facing `@lensjs/*` change without a changeset.
+- Add a changeset for a docs-only, example-app-only, or internal-tooling change.
+
+## AI must never
+
+- Create a commit whose message would fail commitlint.
+- Bump a version or edit a CHANGELOG by hand instead of using Changesets.
+- Ship a breaking change as anything less than a `major` changeset.

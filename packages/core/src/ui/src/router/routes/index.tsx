@@ -1,4 +1,15 @@
-import { ArrowRightLeft, Bug, Database, Layers, Mail } from "lucide-react";
+import {
+  ArrowRightLeft,
+  Bell,
+  Bug,
+  Database,
+  Globe,
+  Layers,
+  Mail,
+  Radio,
+  Server,
+  Zap,
+} from "lucide-react";
 import { lazy } from "react";
 import { Navigate, type RouteObject } from "react-router-dom";
 import Layout from "../../components/layout/Layout";
@@ -34,6 +45,29 @@ const MailContainer = lazy(
 const MailDetailsContainer = lazy(
   () => import("../../containers/mail/MailDetailsContainer"),
 );
+const HttpContainer = lazy(() => import("../../containers/http/HttpContainer"));
+const HttpDetailsContainer = lazy(
+  () => import("../../containers/http/HttpDetailsContainer"),
+);
+const EventContainer = lazy(
+  () => import("../../containers/event/EventContainer"),
+);
+const EventDetailsContainer = lazy(
+  () => import("../../containers/event/EventDetailsContainer"),
+);
+const RedisContainer = lazy(
+  () => import("../../containers/redis/RedisContainer"),
+);
+const RedisDetailsContainer = lazy(
+  () => import("../../containers/redis/RedisDetailsContainer"),
+);
+const FcmContainer = lazy(() => import("../../containers/fcm/FcmContainer"));
+const FcmDetailsContainer = lazy(
+  () => import("../../containers/fcm/FcmDetailsContainer"),
+);
+const LiveTailContainer = lazy(
+  () => import("../../containers/liveTail/LiveTailContainer"),
+);
 
 export function getRoutesPaths(config: LensConfig) {
   return {
@@ -47,6 +81,15 @@ export function getRoutesPaths(config: LensConfig) {
     EXCEPTION_DETAILS: `${config.path}/exceptions/:exceptionId`,
     MAIL: `${config.path}/mail`,
     MAIL_DETAILS: `${config.path}/mail/:mailId`,
+    HTTP: `${config.path}/http`,
+    HTTP_DETAILS: `${config.path}/http/:httpId`,
+    EVENTS: `${config.path}/events`,
+    EVENT_DETAILS: `${config.path}/events/:eventId`,
+    REDIS: `${config.path}/redis`,
+    REDIS_DETAILS: `${config.path}/redis/:redisId`,
+    FCM: `${config.path}/fcm`,
+    FCM_DETAILS: `${config.path}/fcm/:fcmId`,
+    LIVE_TAIL: `${config.path}/live`,
   };
 }
 
@@ -54,6 +97,11 @@ export function getSidebarRoutes(config: LensConfig) {
   const paths = getRoutesPaths(config);
 
   return [
+    {
+      path: paths.LIVE_TAIL,
+      label: "Live Tail",
+      icon: Radio,
+    },
     {
       path: paths.REQUESTS,
       label: "Requests",
@@ -78,6 +126,26 @@ export function getSidebarRoutes(config: LensConfig) {
       path: paths.MAIL,
       label: "Mail",
       icon: Mail,
+    },
+    {
+      path: paths.HTTP,
+      label: "HTTP",
+      icon: Globe,
+    },
+    {
+      path: paths.EVENTS,
+      label: "Events",
+      icon: Zap,
+    },
+    {
+      path: paths.REDIS,
+      label: "Redis",
+      icon: Server,
+    },
+    {
+      path: paths.FCM,
+      label: "FCM",
+      icon: Bell,
     },
   ];
 }
@@ -137,6 +205,42 @@ export function getRoutes(config: LensConfig): RouteObject[] {
         {
           path: "mail/:id",
           element: <MailDetailsContainer />,
+        },
+        {
+          path: "http",
+          element: <HttpContainer />,
+        },
+        {
+          path: "http/:id",
+          element: <HttpDetailsContainer />,
+        },
+        {
+          path: "events",
+          element: <EventContainer />,
+        },
+        {
+          path: "events/:id",
+          element: <EventDetailsContainer />,
+        },
+        {
+          path: "redis",
+          element: <RedisContainer />,
+        },
+        {
+          path: "redis/:id",
+          element: <RedisDetailsContainer />,
+        },
+        {
+          path: "fcm",
+          element: <FcmContainer />,
+        },
+        {
+          path: "fcm/:id",
+          element: <FcmDetailsContainer />,
+        },
+        {
+          path: "live",
+          element: <LiveTailContainer />,
         },
         {
           path: "*",

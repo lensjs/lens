@@ -13,13 +13,17 @@
     "@lensjs/watchers": "workspace:*",
     "@types/node": "^24.5.2",
     "cors": "^2.8.5",
-    "fastify": "^5.7.4"
+    "fastify": "^5.7.4",
+    "nodemailer": "^8.0.1",
+    "sequelize": "^6.37.7",
+    "sqlite3": "^5.1.7"
   },
   "scripts": {
     "dev": "pnpm dlx tsx src/index.ts"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
+    "@types/nodemailer": "^7.0.10",
     "nodemon": "^3.1.11",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"

@@ -150,7 +150,7 @@ describe("BetterSqliteStore", () => {
       const paginateSpy = vi
         .spyOn(store, "paginate")
         .mockResolvedValue({} as any);
-      const pagination: PaginationParams = { page: 1, perPage: 10 };
+      const pagination: PaginationParams = { perPage: 10 };
       await store.getAllQueries(pagination);
       expect(paginateSpy).toHaveBeenCalledWith(
         WatcherTypeEnum.QUERY,
@@ -164,7 +164,7 @@ describe("BetterSqliteStore", () => {
       const paginateSpy = vi
         .spyOn(store, "paginate")
         .mockResolvedValue({} as any);
-      const pagination: PaginationParams = { page: 1, perPage: 10 };
+      const pagination: PaginationParams = { perPage: 10 };
       await store.getAllRequests(pagination);
       expect(paginateSpy).toHaveBeenCalledWith(
         WatcherTypeEnum.REQUEST,
@@ -179,7 +179,7 @@ describe("BetterSqliteStore", () => {
       const paginateSpy = vi
         .spyOn(store, "paginate")
         .mockResolvedValue({} as any);
-      const pagination: PaginationParams = { page: 1, perPage: 10 };
+      const pagination: PaginationParams = { perPage: 10 };
       await store.getAllCacheEntries(pagination);
       expect(paginateSpy).toHaveBeenCalledWith(
         WatcherTypeEnum.CACHE,
@@ -228,9 +228,10 @@ describe("BetterSqliteStore", () => {
   });
 
   describe("paginate", () => {
-    it("should return paginated data with meta information", async () => {
+    it("should return the newest page with cursor meta", async () => {
       const mockRows = [
         {
+          __cursor: 42,
           id: "entry1",
           data: '{"key":"val1"}',
           minimal_data: '{"key":"val1"}',
@@ -240,28 +241,115 @@ describe("BetterSqliteStore", () => {
         },
       ];
       const allSpy = vi.fn(() => mockRows);
-      const prepareSpy = vi.fn(() => ({ all: allSpy }));
-      (mockConnection.prepare as Mock).mockImplementation((sql: string) => {
-        if (sql.includes("SELECT count(*)")) {
-          return { get: vi.fn(() => ({ count: 10 })) };
-        }
-        return { all: allSpy };
-      });
+      (mockConnection.prepare as Mock).mockReturnValue({ all: allSpy });
 
-      const pagination: PaginationParams = { page: 2, perPage: 5 };
+      const pagination: PaginationParams = { perPage: 5 };
       const result = await store.paginate(WatcherTypeEnum.REQUEST, pagination);
 
       expect(mockConnection.prepare).toHaveBeenCalledWith(
         expect.stringContaining(
-          "FROM lens_entries WHERE type = ? ORDER BY created_at DESC LIMIT ? OFFSET ?",
+          "FROM lens_entries WHERE type = ? ORDER BY rowid DESC LIMIT ?",
         ),
       );
-      expect(allSpy).toHaveBeenCalledWith(WatcherTypeEnum.REQUEST, 5, 5);
+      // perPage + 1 rows are requested to detect `hasMore` without a COUNT(*).
+      expect(allSpy).toHaveBeenCalledWith(WatcherTypeEnum.REQUEST, 6);
       expect(result.data).toHaveLength(1);
       expect(result.meta).toEqual({
-        total: 10,
-        lastPage: 2,
-        currentPage: 2,
+        nextCursor: null,
+        headCursor: 42,
+        hasMore: false,
+        perPage: 5,
+      });
+    });
+
+    it("should page by cursor and report hasMore when a full page is returned", async () => {
+      // perPage = 1 with 2 rows returned -> hasMore true, nextCursor = last visible row.
+      const mockRows = [
+        {
+          __cursor: 50,
+          id: "entry1",
+          data: "{}",
+          minimal_data: "{}",
+          type: WatcherTypeEnum.REQUEST,
+          created_at: "now",
+          lens_entry_id: null,
+        },
+        {
+          __cursor: 49,
+          id: "entry2",
+          data: "{}",
+          minimal_data: "{}",
+          type: WatcherTypeEnum.REQUEST,
+          created_at: "now",
+          lens_entry_id: null,
+        },
+      ];
+      const allSpy = vi.fn(() => mockRows);
+      (mockConnection.prepare as Mock).mockReturnValue({ all: allSpy });
+
+      const result = await store.paginate(WatcherTypeEnum.REQUEST, {
+        cursor: 100,
+        perPage: 1,
+      });
+
+      expect(mockConnection.prepare).toHaveBeenCalledWith(
+        expect.stringContaining(
+          "FROM lens_entries WHERE type = ? AND rowid < ? ORDER BY rowid DESC LIMIT ?",
+        ),
+      );
+      expect(allSpy).toHaveBeenCalledWith(WatcherTypeEnum.REQUEST, 100, 2);
+      expect(result.data).toHaveLength(1);
+      expect(result.meta).toEqual({
+        nextCursor: 50,
+        headCursor: 50,
+        hasMore: true,
+        perPage: 1,
+      });
+    });
+
+    it("pages newer rows with `after` for the live feed", async () => {
+      const mockRows = [
+        {
+          __cursor: 70,
+          id: "n2",
+          data: "{}",
+          minimal_data: "{}",
+          type: WatcherTypeEnum.REQUEST,
+          created_at: "now",
+          lens_entry_id: null,
+        },
+        {
+          __cursor: 69,
+          id: "n1",
+          data: "{}",
+          minimal_data: "{}",
+          type: WatcherTypeEnum.REQUEST,
+          created_at: "now",
+          lens_entry_id: null,
+        },
+      ];
+      const allSpy = vi.fn(() => mockRows);
+      (mockConnection.prepare as Mock).mockReturnValue({ all: allSpy });
+
+      const result = await store.paginate(WatcherTypeEnum.REQUEST, {
+        after: 68,
+        perPage: 5,
+      });
+
+      expect(mockConnection.prepare).toHaveBeenCalledWith(
+        expect.stringContaining(
+          "FROM lens_entries WHERE type = ? AND rowid > ? ORDER BY rowid DESC LIMIT ?",
+        ),
+      );
+      expect(allSpy).toHaveBeenCalledWith(WatcherTypeEnum.REQUEST, 68, 6);
+      expect(result.data).toHaveLength(2);
+      // Delta paging reports the newest row as `headCursor` and never drives
+      // older pagination (`nextCursor` is null).
+      expect(result.meta).toEqual({
+        nextCursor: null,
+        headCursor: 70,
+        hasMore: false,
+        perPage: 5,
       });
     });
 
@@ -285,7 +373,7 @@ describe("BetterSqliteStore", () => {
         return { all: allSpy };
       });
 
-      const pagination: PaginationParams = { page: 1, perPage: 10 };
+      const pagination: PaginationParams = { perPage: 10 };
       const result = await store.paginate(
         WatcherTypeEnum.REQUEST,
         pagination,

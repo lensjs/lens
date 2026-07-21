@@ -74,6 +74,15 @@ describe("utils", () => {
       expect(interpolateQuery(query, bindings)).toBe(expected);
     });
 
+    it("should replace $1/$2 positional placeholders from an array (postgres/sequelize style)", () => {
+      const query =
+        "INSERT INTO users (name, age) VALUES ($1, $2);";
+      const bindings = ["John Doe", 30];
+      const expected =
+        "INSERT INTO users (name, age) VALUES ('John Doe', 30);";
+      expect(interpolateQuery(query, bindings)).toBe(expected);
+    });
+
     it("should replace $name named placeholder", () => {
       const query = "UPDATE users SET name = $name WHERE id = $id;";
       const bindings = { name: "Alice", id: 42 };

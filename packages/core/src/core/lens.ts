@@ -154,6 +154,60 @@ export default class Lens {
           await ApiController.getEmail(data),
       },
       {
+        method: "GET" as const,
+        path: `/${path}/api/event`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getEventEntries(data),
+      },
+      {
+        method: "GET" as const,
+        path: `/${path}/api/event/:id`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getEventEntry(data),
+      },
+      {
+        method: "GET" as const,
+        path: `/${path}/api/http`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getHttpEntries(data),
+      },
+      {
+        method: "GET" as const,
+        path: `/${path}/api/http/:id`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getHttpEntry(data),
+      },
+      {
+        method: "GET" as const,
+        path: `/${path}/api/redis`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getRedisEntries(data),
+      },
+      {
+        method: "GET" as const,
+        path: `/${path}/api/redis/:id`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getRedisEntry(data),
+      },
+      {
+        method: "GET" as const,
+        path: `/${path}/api/fcm`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getFcmEntries(data),
+      },
+      {
+        method: "GET" as const,
+        path: `/${path}/api/fcm/:id`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getFcmEntry(data),
+      },
+      {
+        method: "GET" as const,
+        path: `/${path}/api/stream/poll`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getStream(data),
+      },
+      {
         method: "DELETE" as const,
         path: `/${path}/api/truncate`,
         handler: async () => await ApiController.truncate(),
@@ -170,13 +224,21 @@ export default class Lens {
       return {
         appName: this.config.appName,
         path: `/${this.config.path}`,
+        authRequired: !!this.config.authEnabled,
         api: {
           requests: `/${this.config.path}/api/requests`,
           queries: `/${this.config.path}/api/queries`,
           cache: `/${this.config.path}/api/cache`,
           exceptions: `/${this.config.path}/api/exceptions`,
           mail: `/${this.config.path}/api/mail`,
+          http: `/${this.config.path}/api/http`,
+          event: `/${this.config.path}/api/event`,
+          redis: `/${this.config.path}/api/redis`,
+          fcm: `/${this.config.path}/api/fcm`,
+          stream: `/${this.config.path}/api/stream`,
+          streamPoll: `/${this.config.path}/api/stream/poll`,
           truncate: `/${this.config.path}/api/truncate`,
+          login: `/${this.config.path}/api/auth/login`,
         },
       };
     });

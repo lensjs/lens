@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { twMerge } from "tailwind-merge";
+import { cn } from "../utils/cn";
+import NoData from "./table/NoData";
 
 type Position = "start" | "end";
 
@@ -45,29 +46,38 @@ export type TableColumn<T> =
 interface TableProps<T> {
   columns: TableColumn<T>[];
   data: T[];
+  emptyMessage?: string;
+  onRowClick?: (row: T) => void;
 }
 
-function Table<T>({ columns: columnsProp, data }: TableProps<T>) {
+function Table<T>({
+  columns: columnsProp,
+  data,
+  emptyMessage,
+  onRowClick,
+}: TableProps<T>) {
   const columns = columnsProp.filter((column) => !column.hidden);
 
   return (
-    <div className="relative overflow-x-auto card-panel border-none shadow-none bg-transparent">
-      <table className="w-full text-start border-separate border-spacing-y-2 px-1">
+    <div className="relative overflow-x-auto">
+      <table className="w-full border-separate border-spacing-y-1.5 text-start">
         <thead>
           <tr>
             {columns.map((column, i) => (
               <th
                 key={i}
                 scope="col"
-                className={twMerge(
-                  "min-w-32 bg-slate-900/50 p-4 text-xs font-bold uppercase tracking-wider text-slate-400 first:rounded-s-lg last:rounded-e-lg",
-                  column.position === "end" ? "text-end" : "",
+                className={cn(
+                  "min-w-32 bg-surface-2/40 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted first:rounded-s-lg last:rounded-e-lg",
+                  column.position === "end" && "text-end",
                 )}
               >
                 <div
-                  className={twMerge(
+                  className={cn(
                     "flex items-center gap-2",
-                    column.position === "end" ? "justify-end" : "justify-start",
+                    column.position === "end"
+                      ? "justify-end"
+                      : "justify-start",
                   )}
                 >
                   {column.headPrefix && column.headPrefix()}
@@ -77,33 +87,33 @@ function Table<T>({ columns: columnsProp, data }: TableProps<T>) {
             ))}
           </tr>
         </thead>
-        <tbody className="before:block before:h-2">
+        <tbody>
           {!data.length && (
             <tr>
-              <td
-                colSpan={columns.length}
-                className="p-10 text-center text-slate-500 bg-slate-900 rounded-xl border border-slate-800"
-              >
-                No Entries Recorded Yet!
+              <td colSpan={columns.length} className="px-0 pt-2">
+                <div className="card-panel">
+                  <NoData message={emptyMessage} />
+                </div>
               </td>
             </tr>
           )}
           {data.map((row, rowIndex) => (
             <tr
               key={rowIndex}
-              className="group hover:scale-[1.002] transition-all duration-200"
+              onClick={onRowClick ? () => onRowClick(row) : undefined}
+              className={cn("group", onRowClick && "cursor-pointer")}
             >
               {columns.map((column, colIndex) => (
                 <td
                   key={colIndex}
-                  className={twMerge(
-                    "p-4 first:rounded-s-xl last:rounded-e-xl bg-slate-900 border-y border-slate-800 first:border-l last:border-r shadow-sm transition-all group-hover:border-slate-700 group-hover:shadow-md",
+                  className={cn(
+                    "border-y border-border bg-surface/60 px-4 py-2.5 transition-colors first:rounded-s-xl first:border-l last:rounded-e-xl last:border-r group-hover:border-border-strong group-hover:bg-surface-2/50",
                     column.position === "end" ? "text-end" : "text-start",
                   )}
                 >
                   <div
-                    className={twMerge(
-                      "flex items-center gap-1",
+                    className={cn(
+                      "flex items-center gap-1.5",
                       colIndex < columns.length - 1 &&
                         column.position !== "end" &&
                         "pe-8",
@@ -115,7 +125,7 @@ function Table<T>({ columns: columnsProp, data }: TableProps<T>) {
                   >
                     {column.icon && column.icon(row)}
                     {column.prefix && column.prefix(row)}
-                    <span className="text-slate-300 font-medium">
+                    <span className="font-medium text-fg">
                       {column.render
                         ? column.render(row)
                         : column.key

@@ -8,6 +8,10 @@ import {
   MailWatcher,
   QueryWatcher,
   RequestWatcher,
+  HttpWatcher,
+  EventWatcher,
+  RedisWatcher,
+  FcmWatcher,
 } from "@lensjs/core";
 import type {
   FastifyAdapterConfig,
@@ -29,6 +33,10 @@ const defaultConfig = {
   exceptionWatcherEnabled: true,
   registerErrorHandler: true,
   mailWatcherEnabled: false,
+  httpWatcherEnabled: false,
+  eventWatcherEnabled: false,
+  redisWatcherEnabled: false,
+  fcmWatcherEnabled: false,
 };
 
 export const lens = async (config: FastifyAdapterConfig) => {
@@ -59,6 +67,22 @@ export const lens = async (config: FastifyAdapterConfig) => {
     {
       enabled: mergedConfig.mailWatcherEnabled,
       watcher: new MailWatcher(),
+    },
+    {
+      enabled: mergedConfig.httpWatcherEnabled,
+      watcher: new HttpWatcher(),
+    },
+    {
+      enabled: mergedConfig.eventWatcherEnabled,
+      watcher: new EventWatcher(),
+    },
+    {
+      enabled: mergedConfig.redisWatcherEnabled,
+      watcher: new RedisWatcher(),
+    },
+    {
+      enabled: mergedConfig.fcmWatcherEnabled,
+      watcher: new FcmWatcher(),
     },
   ];
 
@@ -95,6 +119,7 @@ export const lens = async (config: FastifyAdapterConfig) => {
     appName: mergedConfig.appName,
     enabled: mergedConfig.enabled,
     path: normalizedPath,
+    authEnabled: !!mergedConfig.auth?.password,
   });
 
   const exceptionWatcher = watchers.find(
@@ -133,8 +158,12 @@ function handleExceptions({
   enabled: boolean;
   watcher?: ExceptionWatcher;
 }) {
-  app.setErrorHandler((err) => {
+  app.setErrorHandler((err, _request, reply) => {
     logException(err, enabled, watcher);
+
+    // A custom error handler is responsible for the response; without this the
+    // request hangs. `reply.send(err)` restores Fastify's default error output.
+    reply.send(err);
   });
 }
 

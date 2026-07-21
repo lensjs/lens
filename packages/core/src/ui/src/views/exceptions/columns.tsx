@@ -6,7 +6,7 @@ import { humanDifferentDate } from "@lensjs/date";
 import type { TableColumn } from "../../components/Table";
 import { Link } from "react-router-dom";
 
-const getColumns = (): TableColumn<ExceptionTableRow>[] => {
+const useColumns = (): TableColumn<ExceptionTableRow>[] => {
   const paths = getRoutesPaths(useConfig());
 
   return [
@@ -14,13 +14,11 @@ const getColumns = (): TableColumn<ExceptionTableRow>[] => {
       name: "Type",
       render: (row) => (
         <div className="flex flex-col gap-1">
-          <span className="font-medium text-sm text-gray-900 dark:text-gray-100">
-            {row.data.name || (
-              <span className="italic text-gray-400">Unknown</span>
-            )}
+          <span className="font-medium text-sm text-fg">
+            {row.data.name || <span className="italic text-dim">Unknown</span>}
           </span>
           <span
-            className="text-xs text-red-600 dark:text-red-400 truncate max-w-xs"
+            className="text-xs text-danger truncate max-w-xs"
             title={row.data.message}
           >
             {row.data.message}
@@ -42,7 +40,7 @@ const getColumns = (): TableColumn<ExceptionTableRow>[] => {
       render: (row) => (
         <Link
           to={`${paths.EXCEPTIONS}/${row.id}`}
-          className="transition-colors duration-100 hover:text-white"
+          className="text-muted transition-colors hover:text-accent"
         >
           <CircleArrowRightIcon size={20} />
         </Link>
@@ -52,4 +50,4 @@ const getColumns = (): TableColumn<ExceptionTableRow>[] => {
   ];
 };
 
-export default getColumns;
+export default useColumns;

@@ -5,9 +5,9 @@ import type { QueryTableRow } from "../../types";
 
 const QueriesTable = lazy(() => import("../../views/queries/QueryTable"));
 const QueriesContainer = () => {
-  const { loadMoreRequests, fetchQueries } = useQueries();
+  const { loadMoreQueries, fetchQueries } = useQueries();
   const hasMoreObject = useLoadMore<QueryTableRow>({
-    paginatedPage: loadMoreRequests,
+    paginatedPage: loadMoreQueries,
   });
 
   useEffect(() => {

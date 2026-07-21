@@ -1,0 +1,96 @@
+name: Bug Report
+description: Report a defect in LensJS
+title: "[Bug]: "
+labels: ["bug", "needs-reproduction"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please provide a minimal reproduction and your environment so
+        we can triage quickly. Do NOT include real secrets, tokens, or personal data.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of the bug.
+    validations:
+      required: true
+  - type: dropdown
+    id: package
+    attributes:
+      label: Affected package(s)
+      description: Which package(s) are involved?
+      multiple: true
+      options:
+        - "@lensjs/core"
+        - "@lensjs/express"
+        - "@lensjs/fastify"
+        - "@lensjs/nestjs"
+        - "@lensjs/adonis"
+        - "@lensjs/watchers (handlers)"
+        - "@lensjs/date"
+        - "dashboard UI"
+        - "docs"
+        - "not sure"
+    validations:
+      required: true
+  - type: dropdown
+    id: signal
+    attributes:
+      label: Which signal is affected?
+      description: The captured signal, if applicable.
+      options:
+        - request
+        - query
+        - cache
+        - mail
+        - exception
+        - not applicable / not sure
+    validations:
+      required: false
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: A minimal reproduction. A link to a repo or a modified `apps/*` example is ideal.
+      placeholder: |
+        1. Configure Lens with ...
+        2. Send a request to ...
+        3. Open the dashboard at /lens ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include error messages / stack traces (redact any secrets).
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Versions help a lot.
+      value: |
+        - Lens package + version:
+        - Node version:
+        - Framework + version (express/fastify/nestjs/adonis):
+        - ORM/mailer + version (prisma/kysely/sequelize/nodemailer):
+        - OS:
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Confirmations
+      options:
+        - label: I searched existing issues and this is not a duplicate.
+          required: true
+        - label: My report contains no real secrets, tokens, or personal data.
+          required: true

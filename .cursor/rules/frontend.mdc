@@ -1,0 +1,100 @@
+---
+description: Conventions for the bundled React dashboard UI in @lensjs/core (packages/core/src/ui)
+globs: packages/core/src/ui/**/*.ts,packages/core/src/ui/**/*.tsx
+alwaysApply: false
+---
+
+# Dashboard UI
+
+## Purpose
+
+Keep the bundled dashboard consistent, path-agnostic, and reusing its shared primitives so it
+works under any adapter and any mount path.
+
+## Why it exists
+
+The dashboard lives in `packages/core/src/ui` (a Vite + React app, own `package.json`, name
+`ui`), is built and copied into `@lensjs/core`'s `dist/ui` (`build:ui` + `copy-front-build.cjs`),
+and is served by adapters. It must never assume where it is mounted or which API base it talks
+to — those are discovered at runtime.
+
+## Stack
+
+- React 19 + `react-router-dom` v7 (route table via `useRoutes`).
+- Server state via `@tanstack/react-query`.
+- Tailwind CSS v4 via `@tailwindcss/vite` (not PostCSS); icons via `lucide-react`.
+- Timestamps via `@lensjs/date` (`humanDifferentDate`, `formatTimeAgo`), never `Date`/dayjs ad hoc.
+
+## Path-agnostic build (do not break)
+
+`vite.config.ts` sets `base: "./"` and the `prod` script sets `VITE_API_URL=''` so all asset and
+API URLs are RELATIVE. Config is fetched at runtime: `App.tsx` does
+`fetch(prepareApiUrl("/lens-config"))` and puts the result in `ConfigContext` before rendering
+routes ([App.tsx](mdc:packages/core/src/ui/src/App.tsx)). There is no `window.__LENS`/HTML
+injection.
+
+Provider order (outer -> inner): `QueryClientProvider` -> `BrowserRouter` -> `ConfigContext`
+-> `ThemeProvider` -> `Suspense` -> `Router`.
+
+## Structure & layering (under `src/ui/src`)
+
+`components/` (reusable, presentational), `containers/` (smart: data + routing glue),
+`views/` (routed page presentation + `columns`), `router/`, `hooks/`, `utils/`, `types/`,
+`interfaces/`. Keep each file in the folder matching its role.
+
+The per-feature QUARTET (requests, queries, cache, exceptions, mail) repeats exactly:
+`containers/<f>/<F>Container.tsx` + `<F>DetailsContainer.tsx`, `views/<f>/<F>Table.tsx` +
+`columns.tsx` + `<F>Details.tsx`. Containers call the feature hook + `useLoadMore` and
+`React.lazy`-import the view; views are pure props-in markup;
+[RequestsContainer.tsx](mdc:packages/core/src/ui/src/containers/requests/RequestsContainer.tsx)
+is the reference.
+
+## Data fetching & config-driven URLs
+
+- Build every URL with `prepareApiUrl()`
+  ([utils/api.ts](mdc:packages/core/src/ui/src/utils/api.ts)) over a base path from config.
+- Endpoint bases come from the injected config (`config.api.requests|queries|cache|exceptions|
+  mail|truncate`) via `useConfig()`
+  ([utils/context.ts](mdc:packages/core/src/ui/src/utils/context.ts)); route strings come from
+  `getRoutesPaths(config)` ([router/routes/index.tsx](mdc:packages/core/src/ui/src/router/routes/index.tsx)).
+  NEVER hardcode `/lens` or any API path.
+- List pagination: the feature hook exposes a memoized `loadMore*` object
+  `{ initialData, meta, loading, fetchRawPage }` consumed by `useLoadMore`
+  ([hooks/useLoadMore.ts](mdc:packages/core/src/ui/src/hooks/useLoadMore.ts)), which returns
+  `{ data, hasMore, loading, loadMore }`.
+- Detail fetching prefers React Query hooks in
+  [useTanstackApi.ts](mdc:packages/core/src/ui/src/hooks/useTanstackApi.ts). Two data layers
+  currently coexist (`useLensApi` + `useState` vs React Query) — this is debt; do not add a
+  third, and prefer consolidating onto React Query when you touch a feature.
+
+## Component conventions
+
+- Functional components only; one per file; PascalCase `.tsx` filenames; hooks are `use*.ts`;
+  column factories are `columns.tsx` exporting `getColumns()`.
+- Type props with an inline type for tiny components or a named `interface` for richer ones;
+  the data-driven `Table<T>` is generic ([Table.tsx](mdc:packages/core/src/ui/src/components/Table.tsx)).
+- Reuse shared primitives: `Table`, `DetailPanel`, `TabbedDataViewer`, `JsonViewer`, `Modal`,
+  and the badges. Semantic colors live INSIDE the badge components
+  ([CacheActionBadge.tsx](mdc:packages/core/src/ui/src/components/CacheActionBadge.tsx),
+  `MethodBadge`, `StatusCode`) — never inline color logic at call sites.
+
+## Styling
+
+- Tailwind utility classes; dark mode ONLY (`ThemeProvider` forces `dark`, `toggleTheme` is a
+  no-op — do not add a light theme). Reuse tokens/utilities from `index.css` (e.g.
+  `.card-panel`).
+- Compose conditional classes with `tailwind-merge` (`twMerge`), as in `Table.tsx`/`LoadMore.tsx`.
+- Declare any new runtime dependency in the UI `package.json` (e.g. `tailwind-merge` is
+  currently resolved via hoisting from core — declare deps you import).
+
+## Dev & build
+
+- Dev server: `pnpm run dev:front`. After UI changes, rebuild core (`pnpm build`) so `dist/ui`
+  reflects them (adapters serve `dist/ui`, not `src/ui`).
+
+## AI must never
+
+- Hardcode `/lens`, an API path, or an absolute asset URL.
+- Read config from a global/`window` instead of `useConfig()`.
+- Add feature data-fetching/loading/caching state by hand when a hook/React Query covers it.
+- Introduce a light theme or inline badge/status colors at call sites.

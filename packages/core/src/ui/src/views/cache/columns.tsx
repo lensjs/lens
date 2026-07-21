@@ -7,7 +7,7 @@ import type { TableColumn } from "../../components/Table";
 import { Link } from "react-router-dom";
 import CacheActionBadge from "../../components/CacheActionBadge";
 
-const getColumns = (): TableColumn<CacheTableRow>[] => {
+const useColumns = (): TableColumn<CacheTableRow>[] => {
   const paths = getRoutesPaths(useConfig());
 
   return [
@@ -33,7 +33,7 @@ const getColumns = (): TableColumn<CacheTableRow>[] => {
       render: (row) => (
         <Link
           to={`${paths.CACHE_ENTRIES}/${row.id}`}
-          className="transition-colors duration-100 hover:text-white"
+          className="text-muted transition-colors hover:text-accent"
         >
           <CircleArrowRightIcon size={20} />
         </Link>
@@ -43,4 +43,4 @@ const getColumns = (): TableColumn<CacheTableRow>[] => {
   ];
 };
 
-export default getColumns;
+export default useColumns;

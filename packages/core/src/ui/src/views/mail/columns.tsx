@@ -32,7 +32,7 @@ const decodeRFC2047 = (text: string): string => {
   });
 };
 
-const getColumns = (): TableColumn<MailTableRow>[] => {
+const useColumns = (): TableColumn<MailTableRow>[] => {
   const paths = getRoutesPaths(useConfig());
 
   return [
@@ -41,7 +41,7 @@ const getColumns = (): TableColumn<MailTableRow>[] => {
       render: (row) => (
         <Link
           to={`${paths.MAIL}/${row.id}`}
-          className="line-clamp-2 max-w-lg min-w-40 text-base text-blue-600 dark:text-neutral-200 hover:underline font-medium"
+          className="line-clamp-2 max-w-lg min-w-40 text-base font-medium text-accent hover:text-accent-hover hover:underline"
         >
           {row.data.subject ? decodeRFC2047(row.data.subject) : "(No Subject)"}
         </Link>
@@ -67,7 +67,7 @@ const getColumns = (): TableColumn<MailTableRow>[] => {
       render: (row) => (
         <Link
           to={`${paths.MAIL}/${row.id}`}
-          className="transition-colors duration-100 hover:text-white"
+          className="text-muted transition-colors hover:text-accent"
         >
           <CircleArrowRightIcon size={20} />
         </Link>
@@ -77,4 +77,4 @@ const getColumns = (): TableColumn<MailTableRow>[] => {
   ];
 };
 
-export default getColumns;
+export default useColumns;

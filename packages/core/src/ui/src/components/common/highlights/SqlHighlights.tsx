@@ -156,7 +156,7 @@ export function highlightMongo(query: string) {
     if (/^['"`].*['"`]$/.test(token)) {
       // Strings
       return (
-        <span key={i} className="text-green-600 dark:text-green-400">
+        <span key={i} className="text-success">
           {token}
         </span>
       );
@@ -165,7 +165,7 @@ export function highlightMongo(query: string) {
     if (/^\d+\.?\d*$/.test(token)) {
       // Numbers
       return (
-        <span key={i} className="text-orange-600 dark:text-orange-400">
+        <span key={i} className="text-warning">
           {token}
         </span>
       );
@@ -176,7 +176,7 @@ export function highlightMongo(query: string) {
       return (
         <span
           key={i}
-          className="text-blue-600 dark:text-blue-400 font-semibold"
+          className="text-info font-semibold"
         >
           {token}
         </span>
@@ -202,14 +202,14 @@ export function highlightSql(sqlText: string) {
       (token.startsWith('"') && token.endsWith('"'))
     )
       return (
-        <span key={index} className="text-green-600 dark:text-green-400">
+        <span key={index} className="text-success">
           {token}
         </span>
       );
 
     if (/^\d+\.?\d*$/.test(trimmed))
       return (
-        <span key={index} className="text-orange-600 dark:text-orange-400">
+        <span key={index} className="text-warning">
           {token}
         </span>
       );
@@ -219,7 +219,7 @@ export function highlightSql(sqlText: string) {
       (token.startsWith("/*") && token.endsWith("*/"))
     )
       return (
-        <span key={index} className="text-neutral-500 dark:text-neutral-400">
+        <span key={index} className="text-dim">
           {token}
         </span>
       );
@@ -228,7 +228,7 @@ export function highlightSql(sqlText: string) {
       return (
         <span
           key={index}
-          className="text-blue-600 dark:text-blue-400 font-semibold"
+          className="text-info font-semibold"
         >
           {token.toUpperCase()}
         </span>
@@ -236,14 +236,14 @@ export function highlightSql(sqlText: string) {
 
     if (FUNCTIONS.some((f) => f.toLowerCase() === trimmed.toLowerCase()))
       return (
-        <span key={index} className="text-purple-600 dark:text-purple-400">
+        <span key={index} className="text-fg">
           {token.toUpperCase()}
         </span>
       );
 
     if (DATA_TYPES.some((t) => t.toLowerCase() === trimmed.toLowerCase()))
       return (
-        <span key={index} className="text-indigo-600 dark:text-indigo-400">
+        <span key={index} className="text-info">
           {token.toUpperCase()}
         </span>
       );

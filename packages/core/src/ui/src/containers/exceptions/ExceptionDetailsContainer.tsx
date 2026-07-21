@@ -1,8 +1,9 @@
 import { lazy, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useExceptions from "../../hooks/useExceptions";
+import { DetailSkeleton } from "../../components/Skeleton";
 
-const CacheEntryView = lazy(
+const ExceptionView = lazy(
   () => import("../../views/exceptions/ExceptionDetails"),
 );
 
@@ -14,7 +15,9 @@ const ExceptionDetailsContainer = () => {
     id && getItem(id);
   }, [id]);
 
-  return <div>{item && <CacheEntryView data={item} />}</div>;
+  if (!item) return <DetailSkeleton />;
+
+  return <ExceptionView data={item} />;
 };
 
 export default ExceptionDetailsContainer;

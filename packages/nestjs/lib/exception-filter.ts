@@ -1,5 +1,6 @@
 import {
   ExceptionWatcher,
+  getCurrentRequestId,
   lensExceptionUtils,
 } from "@lensjs/core";
 import { Catch, ArgumentsHost, HttpException } from "@nestjs/common";
@@ -19,6 +20,7 @@ export class LensExceptionFilter extends BaseExceptionFilter {
     if (this.enabled && this.watcher && host.getType() === "http") {
       this.watcher.log({
         ...lensExceptionUtils.constructErrorObject(exception),
+        requestId: getCurrentRequestId(),
       });
     }
 

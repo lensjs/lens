@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize-typescript';
-import { watcherEmitter } from '@lensjs/watchers';
+import { attachSequelizeLens } from '@lensjs/watchers';
 import { TestModel } from './models/user.model.js';
 
 export const databaseProviders = [
@@ -15,10 +15,11 @@ export const databaseProviders = [
         database: process.env.DATABASE_NAME,
         benchmark: true,
         logQueryParameters: true,
-        logging: (sql: string, timing?: number) => {
-          watcherEmitter.emit('sequelizeQuery', { sql, timing });
-        },
       });
+
+      // Correlates each query to the request that issued it.
+      attachSequelizeLens(sequelize);
+
       sequelize.addModels([TestModel]);
       await sequelize.sync();
       return sequelize;

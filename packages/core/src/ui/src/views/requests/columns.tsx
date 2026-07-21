@@ -8,7 +8,7 @@ import { humanDifferentDate } from "@lensjs/date";
 import type { TableColumn } from "../../components/Table";
 import { Link } from "react-router-dom";
 
-const getColumns = (): TableColumn<RequestTableRow>[] => {
+const useColumns = (): TableColumn<RequestTableRow>[] => {
   const paths = getRoutesPaths(useConfig());
 
   return [
@@ -21,7 +21,7 @@ const getColumns = (): TableColumn<RequestTableRow>[] => {
       render: (row) => (
         <Link
           to={`${paths.REQUESTS}/${row.id}`}
-          className="line-clamp-2 max-w-80 min-w-40 text-base text-blue-600 dark:text-neutral-200 hover:underline"
+          className="line-clamp-2 max-w-80 min-w-40 text-base font-medium text-accent hover:text-accent-hover hover:underline"
         >
           {row.data.path}
         </Link>
@@ -49,7 +49,7 @@ const getColumns = (): TableColumn<RequestTableRow>[] => {
       render: (row) => (
         <Link
           to={`${paths.REQUESTS}/${row.id}`}
-          className="transition-colors duration-100 hover:text-white"
+          className="text-muted transition-colors hover:text-accent"
         >
           <CircleArrowRightIcon size={20} />
         </Link>
@@ -59,4 +59,4 @@ const getColumns = (): TableColumn<RequestTableRow>[] => {
   ];
 };
 
-export default getColumns;
+export default useColumns;

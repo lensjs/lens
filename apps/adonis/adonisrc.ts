@@ -49,6 +49,7 @@ export default defineConfig({
     () => import('@adonisjs/auth/auth_provider'),
     () => import('@lensjs/adonis/lens_provider'),
     () => import('@adonisjs/cache/cache_provider'),
+    () => import('@adonisjs/mail/mail_provider'),
   ],
 
   /*

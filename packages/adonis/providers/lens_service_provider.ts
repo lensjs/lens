@@ -9,6 +9,11 @@ import {
   RequestWatcher,
   QueryWatcher,
   CacheWatcher,
+  MailWatcher,
+  HttpWatcher,
+  EventWatcher,
+  RedisWatcher,
+  FcmWatcher,
   lensExceptionUtils,
   ExceptionWatcher,
   handleUncaughExceptions,
@@ -35,6 +40,11 @@ export default class LensServiceProvider {
       queries: new QueryWatcher(),
       cache: new CacheWatcher(),
       exceptions: new ExceptionWatcher(),
+      mail: new MailWatcher(),
+      http: new HttpWatcher(),
+      event: new EventWatcher(),
+      redis: new RedisWatcher(),
+      fcm: new FcmWatcher(),
     }
 
     if (!config) {
@@ -81,6 +91,7 @@ export default class LensServiceProvider {
         path: normalizedPath,
         enabled: config.enabled,
         appName: config.appName,
+        authEnabled: !!config.auth?.password,
       })
     })
   }

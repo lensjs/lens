@@ -28,5 +28,16 @@ export default await Env.create(new URL('../', import.meta.url), {
   LENS_ENABLE_QUERY_WATCHER: Env.schema.boolean.optional(),
   LENS_ENABLE_REQUEST_WATCHER: Env.schema.boolean.optional(),
   LENS_ENABLE_CACHE_WATCHER: Env.schema.boolean.optional(),
-  LENS_ENABLE_EXCEPTION_WATCHER: Env.schema.boolean.optional()
+  LENS_ENABLE_EXCEPTION_WATCHER: Env.schema.boolean.optional(),
+  LENS_ENABLE_MAIL_WATCHER: Env.schema.boolean.optional(),
+
+  /*
+  |----------------------------------------------------------
+  | Mail (SMTP) variables
+  |----------------------------------------------------------
+  */
+  SMTP_HOST: Env.schema.string.optional(),
+  SMTP_PORT: Env.schema.number.optional(),
+  SMTP_USERNAME: Env.schema.string.optional(),
+  SMTP_PASSWORD: Env.schema.string.optional(),
 })

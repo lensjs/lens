@@ -38,9 +38,22 @@ export default abstract class Store {
   abstract paginate<T>(
     type: WatcherTypeEnum,
     pagination: PaginationParams,
+    includeFullData?: boolean,
   ): Promise<Paginator<T>>;
 
   abstract count(type: WatcherTypeEnum): Promise<number>;
+
+  /**
+   * Newest entries across ALL watcher types (cursor/delta paginated). Powers the
+   * unified live-tail feed and its polling fallback. Defaults to empty so custom
+   * stores keep working until they opt in.
+   */
+  latest<T>(
+    _pagination: PaginationParams,
+    _includeFullData?: boolean,
+  ): Promise<Paginator<T>> {
+    return this.defaultMinimalPaginate() as unknown as Promise<Paginator<T>>;
+  }
 
   getAllExceptions(
     _paginationParams: PaginationParams,
@@ -68,9 +81,10 @@ export default abstract class Store {
     return Promise.resolve({
       data: [],
       meta: {
-        currentPage: 0,
-        lastPage: 0,
-        total: 0,
+        nextCursor: null,
+        headCursor: null,
+        hasMore: false,
+        perPage: 0,
       },
     });
   }

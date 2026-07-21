@@ -14,6 +14,7 @@ vi.mock('@lensjs/core', () => ({
     interpolateQuery: vi.fn((sql, params) => `interpolated(${sql}, ${params.join(', ')})`),
     formatSqlQuery: vi.fn((sql, provider) => `formatted(${sql}, ${provider})`),
   },
+  getCurrentRequestId: vi.fn(() => 'test-request-id'),
 }));
 
 vi.mock('@lensjs/date', () => ({
@@ -52,7 +53,7 @@ describe('createKyselyHandler', () => {
       duration: '10.5 ms',
       type: 'sqlite',
       createdAt: '2025-09-05T12:00:00.000Z',
-    });
+    }, 'test-request-id');
     expect(consoleErrorSpy).not.toHaveBeenCalled();
   });
 

@@ -20,12 +20,12 @@ export default function useQueries() {
           setLoading(false);
         });
     },
-    [getQueries]
+    [getQueryById]
   );
   const fetchQueries = useCallback(
-    async (page?: number) => {
+    async (cursor?: number | null) => {
       setLoading(true);
-      await getQueries(page ?? 1)
+      await getQueries(cursor)
         .then((res) => {
           setQueries(res.data!);
           setMeta(res.meta!);
@@ -37,7 +37,7 @@ export default function useQueries() {
     [getQueries]
   );
 
-  const loadMoreRequests = useMemo(
+  const loadMoreQueries = useMemo(
     () => ({
       initialData: queries,
       meta,
@@ -48,7 +48,7 @@ export default function useQueries() {
   );
 
   return {
-    loadMoreRequests,
+    loadMoreQueries,
     fetchQueries,
     fetchQuery,
     queries,

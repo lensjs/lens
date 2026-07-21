@@ -1,0 +1,64 @@
+---
+description: Performance and bundle-size rules — instrumentation must never slow the host app
+globs: packages/core/src/**/*.ts,packages/handlers/src/**/*.ts,packages/express/src/**/*.ts,packages/fastify/src/**/*.ts,packages/nestjs/lib/**/*.ts,packages/adonis/src/**/*.ts
+alwaysApply: false
+---
+
+# Performance & Bundle Size
+
+## Purpose
+
+Ensure Lens observes an app without measurably slowing it, and that packages stay small and
+tree-shakable.
+
+## Why it exists
+
+Lens runs INSIDE the request path of production apps. If capture blocks the event loop, adds
+sync I/O, or bloats the bundle, it becomes the problem it is meant to diagnose.
+
+## Instrumentation must be non-blocking
+
+- Capture on the response lifecycle, off the critical path: `res.on("finish")` (express),
+  `onResponse` (fastify), `http:request_completed` (adonis) — never delay the response.
+- Fire-and-forget async watcher wiring with `void` (`void this.watchQueries(...)`); never
+  `await` capture in a way that stalls the host handler.
+- Wrap capture in try/catch; on failure `console.error` and continue. Instrumentation errors
+  must never surface to the host app.
+- Check `shouldIgnorePath()` FIRST and bail before doing any work for ignored paths.
+
+## Writes are queued and batched
+
+- The default store buffers `save()` into a `Denque` and flushes batches on an interval
+  ([queued_store.ts](mdc:packages/core/src/mixins/queued_store.ts)); respect `batchSize`,
+  `processIntervalMs`, `warnThreshold`, `preallocate`. Do not replace this with a synchronous
+  per-entry write.
+- Keep the `minimal_data` / full `data` split: list endpoints must read only `minimal_data`
+  columns (`getSelectedColumns(false)` in
+  [better_sqlite.ts](mdc:packages/core/src/stores/better_sqlite.ts)); never load full payloads
+  for a table view.
+- Respect DB-size guards (`dbMaxSizeGb`/`dbPruneSizeGb` pruning, WAL mode). Large-payload/binary
+  response bodies are purged to `"Purged By Lens"` before storage.
+- Reuse expensive singletons (e.g. the single `StackUtils` instance in
+  [exception.ts](mdc:packages/core/src/utils/exception.ts)); do not allocate them per event.
+
+## Bundle size
+
+- Build ESM + CJS with `skipNodeModulesBundle` and `splitting: false`
+  ([tsup.config.ts](mdc:tsup.config.ts)); do not bundle node_modules into output.
+- Keep drivers/ORMs/frameworks as peer/dev deps, not `dependencies` (see `packages.mdc`); do
+  not add heavy runtime deps to core.
+- No import side effects at module top level (keeps output tree-shakable).
+
+## UI performance
+
+- Code-split routes with `React.lazy` + `Suspense`
+  ([router/routes/index.tsx](mdc:packages/core/src/ui/src/router/routes/index.tsx)).
+- Paginate with `useLoadMore`; never fetch the entire dataset. Let React Query cache
+  (`staleTime`/`gcTime` set in `main.tsx`) rather than refetching manually.
+
+## AI must never
+
+- Add synchronous or awaited I/O to the host app's request path.
+- Let a capture failure throw into the host app.
+- Load full entry `data` for list/table endpoints.
+- Add a heavy dependency to a package's `dependencies`.

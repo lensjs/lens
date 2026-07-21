@@ -7,6 +7,10 @@ import {
   MailWatcher,
   QueryWatcher,
   RequestWatcher,
+  HttpWatcher,
+  EventWatcher,
+  RedisWatcher,
+  FcmWatcher,
   WatcherTypeEnum,
 } from "@lensjs/core";
 import { NestLensConfig, RequiredNestLensConfig } from "./types";
@@ -26,6 +30,10 @@ const defaultConfig = {
   exceptionWatcherEnabled: true,
   cacheWatcherEnabled: false,
   mailWatcherEnabled: false,
+  httpWatcherEnabled: false,
+  eventWatcherEnabled: false,
+  redisWatcherEnabled: false,
+  fcmWatcherEnabled: false,
 };
 
 export async function lens(config: NestLensConfig) {
@@ -55,6 +63,22 @@ export async function lens(config: NestLensConfig) {
     {
       enabled: mergedConfig.mailWatcherEnabled,
       watcher: new MailWatcher(),
+    },
+    {
+      enabled: mergedConfig.httpWatcherEnabled,
+      watcher: new HttpWatcher(),
+    },
+    {
+      enabled: mergedConfig.eventWatcherEnabled,
+      watcher: new EventWatcher(),
+    },
+    {
+      enabled: mergedConfig.redisWatcherEnabled,
+      watcher: new RedisWatcher(),
+    },
+    {
+      enabled: mergedConfig.fcmWatcherEnabled,
+      watcher: new FcmWatcher(),
     },
   ];
 
@@ -88,9 +112,10 @@ export async function lens(config: NestLensConfig) {
       }).setConfig({
         ...mergedConfig,
         app: mergedConfig.app.getHttpAdapter().getInstance(),
+        // Fastify's own error handler is skipped; exceptions are captured by the
+        // Nest global `LensExceptionFilter` below instead (single source).
         registerErrorHandler: false,
       });
-      mergedConfig.exceptionWatcherEnabled = false;
       break;
     default:
       throw new Error("Lens Only Supports Express And Fastify Adapters");
@@ -115,5 +140,6 @@ export async function lens(config: NestLensConfig) {
     appName: mergedConfig.appName,
     enabled: mergedConfig.enabled,
     path: normalizedPath,
+    authEnabled: !!mergedConfig.auth?.password,
   });
 }

@@ -1,0 +1,70 @@
+---
+description: Documentation conventions for the VitePress site and in-code docs
+globs: packages/docs/**/*.md,packages/docs/**/*.mts,packages/docs/**/*.ts
+alwaysApply: false
+---
+
+# Documentation
+
+## Purpose
+
+Keep the docs site (and in-code docs) consistent, discoverable, and in sync with the public API.
+
+## Why it exists
+
+`packages/docs` is the public VitePress site consumers rely on. Every new adapter/handler or
+public behavior change must be documented and wired into navigation, or users cannot find it.
+
+## Stack & structure
+
+- VitePress with a near-stock theme; config in `packages/docs/.vitepress/config.mts`
+  (`themeConfig.sidebar`, `nav`, `socialLinks`, `sitemap`).
+- Folders MIRROR the sidebar groups: `getting-started/`, `adapters/<framework>/`, `handlers/`
+  (the "Watchers" sidebar section), `ui-interaction.md`. Adding a page WITHOUT adding its
+  sidebar entry in `config.mts` is incomplete.
+- Terminology: the docs section is "Watchers" but the folder/aggregator pages say "handlers"
+  (the `@lensjs/watchers` package) — the terms are interchangeable; keep matching existing pages.
+
+## Frontmatter
+
+Use frontmatter only when needed: `layout: home` (`index.md`), `outline: deep` (long pages).
+Most content pages have no frontmatter — do not add boilerplate.
+
+## Tone & structure
+
+- Second person, friendly, task-oriented.
+- Numbered H2 step sections (`## 1. Install Packages`, `## 2. Minimal Setup`,
+  `## 3. Next Steps`). Recurring sections: Prerequisites, Usage Example, Try it out,
+  Next Steps, Custom Handlers, Configuration.
+- Bold product/framework names and key toggles; cross-link with relative `.md` links.
+
+## Code blocks
+
+- Always tag the language: ` ```ts `, ` ```bash `, ` ```mermaid `.
+- Use VitePress code features where helpful (`// [!code ++]`, `// [!code --]`, `// ...` to elide
+  boilerplate); keep the primary path copy-pasteable.
+- CONSUMER docs install with `npm` (`npm install @lensjs/watchers`); CONTRIBUTOR docs use
+  `pnpm`. Do not mix.
+
+## Recipe: documenting a new adapter or handler
+
+- New adapter: add `adapters/<framework>/installation.md` (+ `configuration.md`); register a
+  collapsed group under "Adapters" in `config.mts`. Follow the express pages' shape (install ->
+  minimal setup -> "Try it out" -> configuration with all options inline-commented).
+- New handler: add `handlers/<signal>/<framework>.md`; register it under the matching signal
+  sub-group in the "Watchers" sidebar. Restate the `QueryWatcherHandler` contract in a
+  "Custom Handlers" section.
+
+## In-code documentation
+
+- Add JSDoc to exported utility functions, mirroring
+  [utils/exception.ts](mdc:packages/core/src/utils/exception.ts) and
+  [utils/index.ts](mdc:packages/core/src/utils/index.ts).
+- Do not write comments that restate code; document intent/constraints only (see `typescript.mdc`).
+
+## AI must never
+
+- Add a docs page without wiring it into the `config.mts` sidebar.
+- Document an API shape that does not match the actual code (verify against source before
+  writing examples).
+- Use `pnpm` in consumer-facing install snippets, or invent options a package does not accept.

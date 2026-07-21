@@ -1,16 +1,19 @@
 const getColorClass = (status: number) => {
-  if (status >= 200 && status < 300) return "bg-green-500/20 text-green-400 border-green-500/30";
-  if (status >= 300 && status < 400) return "bg-blue-500/20 text-blue-400 border-blue-500/30";
-  if (status >= 400 && status < 500) return "bg-orange-500/20 text-orange-400 border-orange-500/30";
-  if (status >= 500) return "bg-red-500/20 text-red-400 border-red-500/30";
+  if (status >= 200 && status < 300)
+    return "bg-success/10 text-success ring-success/20";
+  if (status >= 300 && status < 400)
+    return "bg-info/10 text-info ring-info/20";
+  if (status >= 400 && status < 500)
+    return "bg-warning/10 text-warning ring-warning/20";
+  if (status >= 500) return "bg-danger/10 text-danger ring-danger/20";
 
-  return "bg-slate-500/20 text-slate-400 border-slate-500/30";
+  return "bg-surface-2 text-muted ring-border";
 };
 
 export const StatusCode = ({ status }: { status: number }) => {
   return (
     <span
-      className={`rounded-md px-2.5 py-1 text-sm font-bold border ${getColorClass(status)}`}
+      className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-bold tabular ring-1 ring-inset ${getColorClass(status)}`}
     >
       {status}
     </span>

@@ -7,6 +7,10 @@ import {
   MailWatcher,
   QueryWatcher,
   RequestWatcher,
+  HttpWatcher,
+  EventWatcher,
+  RedisWatcher,
+  FcmWatcher,
 } from "@lensjs/core";
 import { ExpressAdapterConfig, RequiredExpressAdapterConfig } from "./types";
 import { ExpressAdapter } from "./adapter";
@@ -25,6 +29,10 @@ const defaultConfig = {
   requestWatcherEnabled: true,
   cacheWatcherEnabled: false,
   exceptionWatcherEnabled: true,
+  httpWatcherEnabled: false,
+  eventWatcherEnabled: false,
+  redisWatcherEnabled: false,
+  fcmWatcherEnabled: false,
 };
 
 export const lens = async (config: ExpressAdapterConfig) => {
@@ -56,6 +64,22 @@ export const lens = async (config: ExpressAdapterConfig) => {
       enabled: mergedConfig.mailWatcherEnabled,
       watcher: new MailWatcher(),
     },
+    {
+      enabled: mergedConfig.httpWatcherEnabled,
+      watcher: new HttpWatcher(),
+    },
+    {
+      enabled: mergedConfig.eventWatcherEnabled,
+      watcher: new EventWatcher(),
+    },
+    {
+      enabled: mergedConfig.redisWatcherEnabled,
+      watcher: new RedisWatcher(),
+    },
+    {
+      enabled: mergedConfig.fcmWatcherEnabled,
+      watcher: new FcmWatcher(),
+    },
   ];
 
   defaultWatchers.forEach((watcher) => {
@@ -78,6 +102,7 @@ export const lens = async (config: ExpressAdapterConfig) => {
     appName: mergedConfig.appName,
     enabled: mergedConfig.enabled,
     path: normalizedPath,
+    authEnabled: !!mergedConfig.auth?.password,
   });
 
   return {

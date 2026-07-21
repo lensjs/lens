@@ -93,17 +93,99 @@ export enum WatcherTypeEnum {
   CACHE = "cache",
   EXCEPTION = "exception",
   MAIL = "mail",
+  HTTP = "http",
+  EVENT = "event",
+  REDIS = "redis",
+  FCM = "fcm",
 }
+
+export type EventEntry = {
+  requestId?: string;
+  createdAt: string;
+  name: string;
+  payload?: any;
+};
+
+export type HttpEntry = {
+  requestId?: string;
+  createdAt: string;
+  method: string;
+  url: string;
+  status?: number;
+  duration: string;
+  requestHeaders?: Record<string, string>;
+  responseHeaders?: Record<string, string>;
+  requestBody?: any;
+  responseBody?: any;
+  error?: string;
+};
+
+export type RedisEntry = {
+  requestId?: string;
+  createdAt: string;
+  command: string;
+  args?: string[];
+  duration: string;
+  status: "success" | "failed";
+  error?: string;
+};
+
+export type FcmRecipient = {
+  /** The recipient token (truncated) / topic / condition. */
+  target: string;
+  success: boolean;
+  messageId?: string;
+  error?: string;
+};
+
+export type FcmEntry = {
+  requestId?: string;
+  createdAt: string;
+  method: string;
+  target?: string;
+  title?: string;
+  body?: string;
+  data?: Record<string, string>;
+  duration: string;
+  status: "success" | "failed";
+  successCount?: number;
+  failureCount?: number;
+  messageId?: string;
+  error?: string;
+  /** Per-recipient delivery results for batch sends (multicast / sendEach). */
+  recipients?: FcmRecipient[];
+};
 
 export type LensConfig = {
   path: string;
   appName: string;
   enabled: boolean;
+  /** Whether the dashboard is password-locked (surfaced to the UI). */
+  authEnabled?: boolean;
   storeQueueConfig?: QueuedStoreConfig;
   hiddenParams?: {
     headers?: string[];
     bodyParams?: string[];
   };
+};
+
+/**
+ * Password-lock configuration for the dashboard. Setting `password` enables the
+ * lock; all other fields are optional and have safe defaults.
+ */
+export type LensAuthConfig = {
+  /** The password required to unlock the dashboard. Enables the lock when set. */
+  password: string;
+  /** Optional signing secret; by default the signing key is derived from the password. */
+  secret?: string;
+  /** Token lifetime in seconds (default: 12 hours). */
+  tokenTtl?: number;
+  /** Max failed attempts per window before lockout (default: 5). */
+  maxAttempts?: number;
+  /** Rate-limit window in milliseconds (default: 60000). */
+  windowMs?: number;
+  /** Base lockout in milliseconds; doubles each lockout up to 1h (default: 60000). */
+  lockoutMs?: number;
 };
 
 export type LensEntry = {
@@ -126,15 +208,22 @@ export type RouteDefinition = {
 };
 
 export type PaginationParams = {
-  page: number;
+  /** Opaque cursor (row id) to fetch entries older than; omit for the newest page. */
+  cursor?: number | null;
+  /** Opaque cursor (row id) to fetch entries newer than (live delta polling). */
+  after?: number | null;
   perPage: number;
 };
 
 export type Paginator<T> = {
   meta: {
-    total: number;
-    lastPage: number;
-    currentPage: number;
+    /** Cursor to pass back as `cursor` to fetch the next (older) page; null when exhausted. */
+    nextCursor: number | null;
+    /** Newest row id in this response; seed/advance the live-feed `after` cursor. */
+    headCursor: number | null;
+    /** Older paging: more older rows exist. Delta paging: more new rows than `perPage` (a gap). */
+    hasMore: boolean;
+    perPage: number;
   };
   data: T;
 };

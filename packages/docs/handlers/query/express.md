@@ -16,7 +16,7 @@ This package supports popular ORMs out of the box, allowing you to easily plug t
 
 ### 1. Prisma
 
-Capture queries from **Prisma** by using `createPrismaHandler`.
+Capture queries from **Prisma** by wrapping your client with `withLensPrisma` and registering `createPrismaHandler`.
 
 **Prerequisites:**
 Follow the official Prisma documentation to install Prisma in your project and then [Install Prisma Client](https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/relational-databases/install-prisma-client-typescript-planetscale).
@@ -26,27 +26,33 @@ Follow the official Prisma documentation to install Prisma in your project and t
 ```ts
 import express from "express";
 import { lens } from "@lensjs/express";
-import { createPrismaHandler } from "@lensjs/watchers";
+import { withLensPrisma, createPrismaHandler } from "@lensjs/watchers";
 import { PrismaClient } from "@prisma/client";
 
 const app = express();
-const prisma = new PrismaClient({ log: ["query"] }); // Enable query logging for Prisma
+
+// Wrap the client so every query is captured inside the request context.
+// Use this `prisma` instance everywhere you access the database.
+export const prisma = withLensPrisma(new PrismaClient(), { provider: "mysql" });
 
 await lens({
   app,
   queryWatcher: {
     enabled: true, // Enable the query watcher
     handler: createPrismaHandler({
-      prisma,
       provider: "mysql", // Specify your database provider
     }),
   },
 });
 ```
 
+> **Why `withLensPrisma`?** Prisma's query engine emits its `$on("query")` events across a native boundary that loses Node's async context, so those raw-SQL events cannot be reliably attached to the request that triggered them. `withLensPrisma` captures the request id **at query-issue time** (in-context) via a [Prisma Client extension](https://www.prisma.io/docs/orm/prisma-client/client-extensions), guaranteeing correct correlation even under concurrency. It logs the Prisma operation (e.g. `user.findMany({...})`) with a precise duration.
+>
+> The legacy `createPrismaHandler({ prisma, provider })` form still works (raw SQL via `$on`), but it **cannot correlate** queries to requests. Prefer the wrapper.
+
 ### 2. Kysely
 
-Capture queries from **Kysely** by using `createKyselyHandler`.
+Capture queries from **Kysely** by using `createKyselyHandler` with `createLensKyselyPlugin`.
 
 **Dependencies:**
 
@@ -61,7 +67,11 @@ import express from "express";
 import { lens } from "@lensjs/express";
 import { Kysely, MysqlDialect } from "kysely";
 import mysql from "mysql2";
-import { createKyselyHandler, watcherEmitter } from "@lensjs/watchers";
+import {
+  createKyselyHandler,
+  createLensKyselyPlugin,
+  watcherEmitter,
+} from "@lensjs/watchers";
 
 const app = express();
 
@@ -89,11 +99,15 @@ const db = new Kysely<Database>({
       database: "DB_NAME",
     }),
   }),
+  // Captures the request id in-context at compile time.
+  plugins: [createLensKyselyPlugin()],
   log(event) {
     watcherEmitter.emit("kyselyQuery", event); // Emit Kysely query events to Lens
   },
 });
 ```
+
+> **Why `createLensKyselyPlugin`?** Kysely's `log` callback fires from the driver's detached completion context, so it can't see the request that issued the query. The plugin captures the request id in-context when the query is compiled and links it to the log event via Kysely's `queryId`. Without it, queries are recorded but not correlated to their request.
 
 ### 3. Sequelize
 
@@ -111,7 +125,7 @@ npm install sequelize
 import express from "express";
 import { lens } from "@lensjs/express";
 import { Sequelize } from "sequelize";
-import { createSequelizeHandler, watcherEmitter } from "@lensjs/watchers";
+import { createSequelizeHandler, attachSequelizeLens } from "@lensjs/watchers";
 
 const app = express();
 
@@ -128,15 +142,17 @@ const sequelize = new Sequelize("DB_NAME", "DB_USER", "DB_PASSWORD", {
   dialect: "mysql",
   benchmark: true,
   logQueryParameters: true,
-  logging: (sql: string, timing?: number) => {
-    watcherEmitter.emit("sequelizeQuery", { sql, timing }); // Emit Sequelize query events to Lens
-  },
 });
+
+// Correlates each query to the request that issued it.
+attachSequelizeLens(sequelize);
 ```
+
+> **Why `attachSequelizeLens`?** Sequelize's `logging` callback fires from the driver's detached completion context (the async context is lost for real/pooled databases), so it can't be attached to the originating request. `attachSequelizeLens` captures the request id in-context inside the `beforeQuery` hook and carries it to `afterQuery`, guaranteeing correlation. The legacy `logging: (sql, timing) => watcherEmitter.emit("sequelizeQuery", { sql, timing })` wiring still works but cannot correlate.
 
 ### 4. MikroORM
 
-Capture queries from **MikroORM** by using `createMikroOrmHandler` and `MikroOrmLensLogger`.
+Capture queries from **MikroORM** by using `createMikroOrmHandler` with `attachMikroOrmLens` (recommended for SQL drivers — it correlates queries to requests).
 
 **Dependencies:**
 
@@ -146,24 +162,24 @@ npm install @mikro-orm/core
 
 **Usage Example (Express + MikroORM):**
 
-MikroORM integration requires two steps: (1) configure MikroORM with the Lens logger, and (2) register the query handler with lens.
-
 ```ts
 import express from "express";
 import { lens } from "@lensjs/express";
 import { MikroORM } from "@mikro-orm/core";
-import { createMikroOrmHandler, MikroOrmLensLogger } from "@lensjs/watchers";
+import { createMikroOrmHandler, attachMikroOrmLens } from "@lensjs/watchers";
 
 const app = express();
 
-// Step 1: Configure MikroORM with the Lens logger
+// Step 1: Initialize MikroORM
 const orm = await MikroORM.init({
-  debug: true, // Required: enables query logging
-  loggerFactory: (options) => new MikroOrmLensLogger(options),
-  // ... your other MikroORM options
+  // ... your MikroORM options
 });
 
-// Step 2: Register the query watcher with lens
+// Step 2: Attach Lens — captures the request id in-context from the underlying
+// knex driver so queries correlate to the request that issued them.
+attachMikroOrmLens(orm);
+
+// Step 3: Register the query watcher with lens
 await lens({
   app,
   queryWatcher: {
@@ -173,7 +189,9 @@ await lens({
 });
 ```
 
-> **Note:** MikroORM must be initialized with `debug: true` (or `debug: ["query"]`) for the Lens logger to receive query events. Transaction queries (`BEGIN`, `COMMIT`, `ROLLBACK`, `SAVEPOINT`) are automatically filtered out.
+> **Why `attachMikroOrmLens`?** MikroORM's logger fires from the driver's detached completion context, so it can't be attached to the originating request. `attachMikroOrmLens` hooks the underlying knex `query` event (SQL drivers) to capture the request id in-context and links it to the result via knex's per-query id. Transaction queries (`BEGIN`, `COMMIT`, `ROLLBACK`, `SAVEPOINT`) are filtered out automatically.
+>
+> **Alternative (no correlation):** `MikroOrmLensLogger` remains available as a `loggerFactory` for console-style capture without request correlation — initialize MikroORM with `debug: true` and use `loggerFactory: (options) => new MikroOrmLensLogger(options)`. Use either `attachMikroOrmLens` **or** the logger, not both.
 
 ## Custom Handlers
 
@@ -185,6 +203,7 @@ A custom handler must adhere to the `QueryWatcherHandler` interface and perform 
 
 *   Return a `QueryWatcherHandler` function.
 *   Call the `onQuery` callback function whenever a query is captured, providing the necessary query details.
+*   Query log/event callbacks from most drivers fire from a **detached context** (a native boundary, connection pool, worker, or external emitter) where the async context is already lost. Capture the request id at an **in-context** hook (ORM plugin/hook that runs at query-issue time) with `getCurrentRequestId()` from `@lensjs/core` and pass it as the second argument: `onQuery(entry, requestId)`. The built-in integrations do this for you via `withLensPrisma`, `attachSequelizeLens`, `createLensKyselyPlugin`, and `attachMikroOrmLens`.
 *   Optionally utilize `lensUtils` for common tasks:
     *   `interpolateQuery(sql, params)`: Injects parameters into a SQL query string.
     *   `formatSqlQuery(query)`: Formats a SQL query for better readability.

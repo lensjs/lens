@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 import type {
-  ApiResponse,
   CacheTableRow,
   ExceptionTableRow,
   GenericLensEntry,
@@ -8,73 +7,35 @@ import type {
   OneException,
   OneMail,
   OneQuery,
-  PaginatorMeta,
   QueryTableRow,
   RequestEntry,
   RequestTableRow,
   MailTableRow,
+  HttpTableRow,
+  OneHttp,
+  EventTableRow,
+  OneEvent,
+  RedisTableRow,
+  OneRedis,
+  FcmTableRow,
+  OneFcm,
 } from "../types";
 import { prepareApiUrl } from "../utils/api";
 import { useConfig } from "../utils/context";
+import { fetchJson, withQueryParams, DEFAULT_META } from "../utils/apiClient";
 
-export const DEFAULT_META: PaginatorMeta = {
-  currentPage: 1,
-  lastPage: 1,
-  total: 0,
-};
+export { DEFAULT_META };
 
 const useLensApi = () => {
   const config = useConfig();
 
-  const fetchJson = useCallback(
-    async function fetchJson<TData>(
-      url: string,
-      options?: RequestInit,
-    ): Promise<ApiResponse<TData>> {
-      const res = await fetch(url, {
-        headers: { "Content-Type": "application/json" },
-        ...options,
-      });
-
-      if (!res.ok) {
-        throw new Error(`Failed to fetch: ${url}`);
-      }
-
-      return res.json();
-    },
-    [],
-  );
-
-  const withQueryParams = useCallback(
-    (endpoint: string, params?: Record<string, unknown>) => {
-      const searchParams = new URLSearchParams(
-        Object.entries(params || {}).reduce(
-          (acc, [key, value]) => {
-            if (value !== undefined && value !== null) {
-              acc[key] = String(value);
-            }
-            return acc;
-          },
-          {} as Record<string, string>,
-        ),
-      );
-
-      return `${endpoint}${searchParams.toString() ? `?${searchParams}` : ""}`;
-    },
-    [],
-  );
-
   const getAllRequests = useCallback(
-    async (page?: number) => {
+    async (cursor?: number | null, after?: number | null) => {
       return fetchJson<RequestTableRow[]>(
-        prepareApiUrl(
-          withQueryParams(config.api.requests, {
-            page,
-          }),
-        ),
+        prepareApiUrl(withQueryParams(config.api.requests, { cursor, after })),
       );
     },
-    [config.api.requests, fetchJson, withQueryParams],
+    [config.api.requests],
   );
 
   const getRequestById = useCallback(
@@ -83,60 +44,48 @@ const useLensApi = () => {
         prepareApiUrl(`${config.api.requests}/${id}`),
       );
     },
-    [config.api.requests, fetchJson],
+    [config.api.requests],
   );
 
   const getQueries = useCallback(
-    async (page: number) => {
+    async (cursor?: number | null, after?: number | null) => {
       return fetchJson<QueryTableRow[]>(
-        prepareApiUrl(
-          withQueryParams(config.api.queries, {
-            page,
-          }),
-        ),
+        prepareApiUrl(withQueryParams(config.api.queries, { cursor, after })),
       );
     },
-    [config.api.queries, fetchJson, withQueryParams],
+    [config.api.queries],
   );
 
   const getQueryById = useCallback(
     async (id: string) => {
       return fetchJson<OneQuery>(prepareApiUrl(`${config.api.queries}/${id}`));
     },
-    [config.api.queries, fetchJson],
+    [config.api.queries],
   );
 
   const getCacheEntries = useCallback(
-    async (page?: number) => {
+    async (cursor?: number | null, after?: number | null) => {
       return fetchJson<CacheTableRow[]>(
-        prepareApiUrl(
-          withQueryParams(config.api.cache, {
-            page,
-          }),
-        ),
+        prepareApiUrl(withQueryParams(config.api.cache, { cursor, after })),
       );
     },
-    [config.api.cache, fetchJson, withQueryParams],
+    [config.api.cache],
   );
 
   const getCacheEntryById = useCallback(
     async (id: string) => {
       return fetchJson<OneCache>(prepareApiUrl(`${config.api.cache}/${id}`));
     },
-    [config.api.cache, fetchJson],
+    [config.api.cache],
   );
 
   const getExceptions = useCallback(
-    async (page?: number) => {
+    async (cursor?: number | null, after?: number | null) => {
       return fetchJson<ExceptionTableRow[]>(
-        prepareApiUrl(
-          withQueryParams(config.api.exceptions, {
-            page,
-          }),
-        ),
+        prepareApiUrl(withQueryParams(config.api.exceptions, { cursor, after })),
       );
     },
-    [config.api.exceptions, fetchJson, withQueryParams],
+    [config.api.exceptions],
   );
 
   const getExceptionById = useCallback(
@@ -145,27 +94,87 @@ const useLensApi = () => {
         prepareApiUrl(`${config.api.exceptions}/${id}`),
       );
     },
-    [config.api.exceptions, fetchJson],
+    [config.api.exceptions],
   );
 
   const getAllMail = useCallback(
-    async (page?: number) => {
+    async (cursor?: number | null, after?: number | null) => {
       return fetchJson<MailTableRow[]>(
-        prepareApiUrl(
-          withQueryParams(config.api.mail, {
-            page,
-          }),
-        ),
+        prepareApiUrl(withQueryParams(config.api.mail, { cursor, after })),
       );
     },
-    [config.api.mail, fetchJson, withQueryParams],
+    [config.api.mail],
   );
 
   const getMailById = useCallback(
     async (id: string) => {
       return fetchJson<OneMail>(prepareApiUrl(`${config.api.mail}/${id}`));
     },
-    [config.api.mail, fetchJson],
+    [config.api.mail],
+  );
+
+  const getHttpEntries = useCallback(
+    async (cursor?: number | null, after?: number | null) => {
+      return fetchJson<HttpTableRow[]>(
+        prepareApiUrl(withQueryParams(config.api.http, { cursor, after })),
+      );
+    },
+    [config.api.http],
+  );
+
+  const getHttpById = useCallback(
+    async (id: string) => {
+      return fetchJson<OneHttp>(prepareApiUrl(`${config.api.http}/${id}`));
+    },
+    [config.api.http],
+  );
+
+  const getEventEntries = useCallback(
+    async (cursor?: number | null, after?: number | null) => {
+      return fetchJson<EventTableRow[]>(
+        prepareApiUrl(withQueryParams(config.api.event, { cursor, after })),
+      );
+    },
+    [config.api.event],
+  );
+
+  const getEventById = useCallback(
+    async (id: string) => {
+      return fetchJson<OneEvent>(prepareApiUrl(`${config.api.event}/${id}`));
+    },
+    [config.api.event],
+  );
+
+  const getRedisEntries = useCallback(
+    async (cursor?: number | null, after?: number | null) => {
+      return fetchJson<RedisTableRow[]>(
+        prepareApiUrl(withQueryParams(config.api.redis, { cursor, after })),
+      );
+    },
+    [config.api.redis],
+  );
+
+  const getRedisById = useCallback(
+    async (id: string) => {
+      return fetchJson<OneRedis>(prepareApiUrl(`${config.api.redis}/${id}`));
+    },
+    [config.api.redis],
+  );
+
+  const getFcmEntries = useCallback(
+    async (cursor?: number | null, after?: number | null) => {
+      return fetchJson<FcmTableRow[]>(
+        prepareApiUrl(withQueryParams(config.api.fcm, { cursor, after })),
+      );
+    },
+    [config.api.fcm],
+  );
+
+  const getFcmById = useCallback(
+    async (id: string) => {
+      return fetchJson<OneFcm>(prepareApiUrl(`${config.api.fcm}/${id}`));
+    },
+    [config.api.fcm],
   );
 
   return {
@@ -179,6 +188,14 @@ const useLensApi = () => {
     getExceptionById,
     getAllMail,
     getMailById,
+    getHttpEntries,
+    getHttpById,
+    getEventEntries,
+    getEventById,
+    getRedisEntries,
+    getRedisById,
+    getFcmEntries,
+    getFcmById,
   };
 };
 

@@ -40,10 +40,10 @@ const CopyButton = ({ value }: { value: string }) => {
   return (
     <button
       onClick={handleCopy}
-      className="p-1 hover:bg-slate-800 rounded transition-colors text-slate-500 hover:text-slate-300"
+      className="p-1 hover:bg-surface-2 rounded transition-colors text-dim hover:text-fg"
       title="Copy to clipboard"
     >
-      {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
+      {copied ? <Check size={14} className="text-success" /> : <Copy size={14} />}
     </button>
   );
 };
@@ -451,7 +451,7 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
         value: (
           <button
             onClick={handleDownloadEml}
-            className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 bg-accent hover:bg-accent-hover text-accent-fg rounded-md text-sm font-medium transition-colors"
           >
             <Download size={16} />
             Download .eml
@@ -478,12 +478,12 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
                       <button
                         key={idx}
                         onClick={() => handleDownloadAttachment(att)}
-                        className="flex items-center gap-2 px-3 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full text-xs font-medium transition-colors max-w-xs overflow-hidden"
+                        className="flex items-center gap-2 px-3 py-1 bg-surface-2 hover:bg-elevated border border-border rounded-full text-xs font-medium transition-colors max-w-xs overflow-hidden"
                         title={`${att.filename} (${att.contentType})`}
                       >
-                          <FileIcon size={14} className="text-slate-400" />
-                          <span className="truncate text-slate-200">{att.filename}</span>
-                          <Download size={12} className="text-slate-500" />
+                          <FileIcon size={14} className="text-muted" />
+                          <span className="truncate text-fg">{att.filename}</span>
+                          <Download size={12} className="text-dim" />
                       </button>
                   ))}
               </div>
@@ -496,7 +496,7 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
       id: "preview",
       label: "Preview",
       content: extractedData.preview?.body ? (
-        <div className="border border-slate-800 rounded-lg overflow-hidden bg-slate-900">
+        <div className="border border-border rounded-lg overflow-hidden bg-surface">
           {extractedData.preview.type.includes("text/html") ? (
             <iframe
               title="Mail Preview"
@@ -505,13 +505,13 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
               sandbox="allow-popups allow-popups-to-escape-sandbox"
             />
           ) : (
-            <pre className="p-4 whitespace-pre-wrap font-sans text-sm text-slate-300 bg-slate-950">
+            <pre className="p-4 whitespace-pre-wrap font-sans text-sm text-fg bg-canvas">
               {extractedData.preview.body}
             </pre>
           )}
         </div>
       ) : (
-        <div className="text-center py-10 text-slate-500">No preview available</div>
+        <div className="text-center py-10 text-dim">No preview available</div>
       ),
     },
     {
@@ -519,20 +519,20 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
         label: "Calendar",
         shouldShow: !!extractedData.calendar,
         content: extractedData.calendar && (
-            <div className="bg-slate-950 border border-slate-800 rounded-xl p-6 flex flex-col gap-6">
+            <div className="bg-canvas border border-border rounded-xl p-6 flex flex-col gap-6">
                 <div className="flex items-start justify-between">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-blue-500/10 rounded-lg text-blue-400">
+                        <div className="p-3 bg-accent/10 rounded-lg text-accent">
                             <Calendar size={24} />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-slate-100">{extractedData.calendar.summary || "Calendar Event"}</h3>
-                            <p className="text-sm text-slate-400">Method: <span className="text-blue-400 font-mono font-bold uppercase">{extractedData.calendar.method}</span></p>
+                            <h3 className="text-lg font-bold text-fg">{extractedData.calendar.summary || "Calendar Event"}</h3>
+                            <p className="text-sm text-muted">Method: <span className="text-accent font-mono font-bold uppercase">{extractedData.calendar.method}</span></p>
                         </div>
                     </div>
                     <button
                         onClick={() => handleDownloadAttachment({ body: extractedData.calendar!.raw, filename: extractedData.calendar!.filename, contentType: "text/calendar" })}
-                        className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm font-medium border border-slate-700 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-surface-2 hover:bg-elevated text-fg rounded-lg text-sm font-medium border border-border transition-colors"
                     >
                         <Download size={16} />
                         Download .ics
@@ -540,28 +540,28 @@ const MailDetails = ({ mail }: { mail: OneMail }) => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-800/50">
-                        <span className="text-xs font-bold text-slate-500 uppercase block mb-1">Start Time</span>
-                        <span className="text-slate-200">{extractedData.calendar.start || "Not specified"}</span>
+                    <div className="bg-surface/50 p-4 rounded-lg border border-border/50">
+                        <span className="text-xs font-bold text-dim uppercase block mb-1">Start Time</span>
+                        <span className="text-fg">{extractedData.calendar.start || "Not specified"}</span>
                     </div>
-                    <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-800/50">
-                        <span className="text-xs font-bold text-slate-500 uppercase block mb-1">End Time</span>
-                        <span className="text-slate-200">{extractedData.calendar.end || "Not specified"}</span>
+                    <div className="bg-surface/50 p-4 rounded-lg border border-border/50">
+                        <span className="text-xs font-bold text-dim uppercase block mb-1">End Time</span>
+                        <span className="text-fg">{extractedData.calendar.end || "Not specified"}</span>
                     </div>
                     {extractedData.calendar.location && (
-                        <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-800/50 md:col-span-2">
-                            <span className="text-xs font-bold text-slate-500 uppercase block mb-1 flex items-center gap-2">
+                        <div className="bg-surface/50 p-4 rounded-lg border border-border/50 md:col-span-2">
+                            <span className="text-xs font-bold text-dim uppercase block mb-1 flex items-center gap-2">
                                 Location
                                 <CopyButton value={extractedData.calendar.location} />
                             </span>
-                            <span className="text-slate-200 break-all">{extractedData.calendar.location}</span>
+                            <span className="text-fg break-all">{extractedData.calendar.location}</span>
                         </div>
                     )}
                 </div>
 
                 <div className="mt-2">
-                    <span className="text-xs font-bold text-slate-500 uppercase block mb-2">Raw Data</span>
-                    <pre className="bg-slate-900 p-4 rounded-lg text-xs text-slate-400 overflow-x-auto border border-slate-800">
+                    <span className="text-xs font-bold text-dim uppercase block mb-2">Raw Data</span>
+                    <pre className="bg-surface p-4 rounded-lg text-xs text-muted overflow-x-auto border border-border">
                         {extractedData.calendar.raw}
                     </pre>
                 </div>

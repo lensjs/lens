@@ -110,25 +110,25 @@ export const highlightCode = (code: string) => {
 export const getClassName = (type: string) => {
   switch (type) {
     case "comment":
-      return "text-green-600 dark:text-green-400 italic";
+      return "text-dim italic";
     case "string":
     case "template":
-      return "text-orange-600 dark:text-orange-400";
+      return "text-success";
     case "keyword":
-      return "text-blue-600 dark:text-blue-400 font-semibold";
+      return "text-info font-semibold";
     case "function":
-      return "text-yellow-600 dark:text-yellow-400 font-medium";
+      return "text-fg font-medium";
     case "className":
-      return "text-teal-600 dark:text-teal-400 font-semibold";
+      return "text-fg font-semibold";
     case "property":
-      return "text-indigo-600 dark:text-indigo-400";
+      return "text-fg";
     case "number":
-      return "text-purple-600 dark:text-purple-400";
+      return "text-warning";
     case "operator":
-      return "text-pink-600 dark:text-pink-400";
+      return "text-muted";
     case "bracket":
-      return "text-gray-600 dark:text-gray-400 font-semibold";
+      return "text-muted font-semibold";
     default:
-      return "text-gray-800 dark:text-gray-200";
+      return "text-muted";
   }
 };

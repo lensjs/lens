@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://lensjs.vercel.app
+    about: Read the LensJS docs — installation, adapters, watchers, and configuration.
+  - name: Questions & Discussions
+    url: https://github.com/lensjs/lens/discussions
+    about: For usage questions and open-ended discussion, please use Discussions instead of an issue.

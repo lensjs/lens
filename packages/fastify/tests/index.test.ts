@@ -170,6 +170,7 @@ describe('lens', () => {
       appName: 'Lens',
       enabled: true,
       path: '/lens',
+      authEnabled: false,
     });
 
     expect(mockAdapterInstance.setConfig).toHaveBeenCalledWith(
@@ -208,6 +209,7 @@ describe('lens', () => {
       appName: 'MyCustomLens',
       enabled: false,
       path: '/custom-lens',
+      authEnabled: false,
     });
 
     expect(mockAdapterInstance.setConfig).toHaveBeenCalledWith(
@@ -251,9 +253,11 @@ describe('lens', () => {
     const error = new Error('Test Error') as FastifyError;
     error.statusCode = 500;
 
+    const reply = { send: vi.fn() };
+
     // Simulate Fastify calling the error handler
     if ((mockFastifyInstance as any).errorHandler) {
-      await (mockFastifyInstance as any).errorHandler(error, {}, {});
+      await (mockFastifyInstance as any).errorHandler(error, {}, reply);
     }
 
     expect(lensExceptionUtils.constructErrorObject).toHaveBeenCalledWith(error);
@@ -264,6 +268,9 @@ describe('lens', () => {
         requestId: 'mock-request-id',
       })
     );
+    // The handler must send Fastify's default error response, otherwise the
+    // request hangs.
+    expect(reply.send).toHaveBeenCalledWith(error);
   });
 
   it('should export a logException function that logs to the exception watcher', async () => {

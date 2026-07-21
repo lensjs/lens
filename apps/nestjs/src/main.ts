@@ -16,6 +16,8 @@ async function bootstrap() {
   await lens({
     adapter: 'fastify',
     app,
+    cacheWatcherEnabled: true,
+    mailWatcherEnabled: true,
     queryWatcher: {
       enabled: true,
       handler: createSequelizeHandler({ provider: 'mysql' }),

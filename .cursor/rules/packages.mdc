@@ -1,0 +1,102 @@
+---
+description: Monorepo layout, package.json conventions, dependency tiering, exports, barrels, and backward compatibility
+globs: **/package.json,**/tsup.config.ts,**/tsconfig.json
+alwaysApply: false
+---
+
+# Monorepo & Packages
+
+## Purpose
+
+Keep the pnpm + Turborepo workspace consistent: every publishable package looks the same,
+depends on the right tier, exports a stable surface, and stays tree-shakable.
+
+## Why it exists
+
+These are published open-source packages. The `package.json` `exports` map and the barrel
+files are the public contract. Inconsistent manifests, hardcoded internal versions, or leaked
+internals break consumers and the release tooling.
+
+## Monorepo layout
+
+- `packages/core` -> `@lensjs/core`: engine + React dashboard (`src/ui`).
+- `packages/express|fastify|nestjs|adonis` -> `@lensjs/<framework>`: adapters.
+- `packages/handlers` -> `@lensjs/watchers`: ORM/mailer integrations.
+- `packages/docs` -> `docs`: VitePress site (private, not published).
+- `shared/date` -> `@lensjs/date`; `shared/typescript-config` -> `@lensjs/typescript-config`.
+- `apps/*`: runnable example apps per framework (private, not published).
+
+Note: folder name may differ from package name (`packages/handlers` publishes `@lensjs/watchers`).
+
+## Commands (from repo root)
+
+- Install: `pnpm install` — NEVER `npm install` / `yarn`.
+- Build (respects the dep graph): `pnpm build`. Dev: `pnpm dev`. UI dev: `pnpm run dev:front`.
+- Test: `pnpm test`. Turbo runs `test` after `^build` + `check-types`
+  ([turbo.json](mdc:turbo.json)).
+
+## Cross-package dependencies
+
+- Reference internal packages with `"workspace:*"` (e.g. `"@lensjs/core": "workspace:*"`).
+- Never hardcode a published version for an internal package.
+- Never import another package by relative path across package boundaries. Import the public
+  `@lensjs/*` entry. The `../../core/dist/...` import in
+  [define_config.ts](mdc:packages/adonis/src/define_config.ts) is known debt — do not copy it.
+
+## Dependency tiering (critical for bundle size)
+
+Model the tiers on [handlers package.json](mdc:packages/handlers/package.json):
+
+- `dependencies`: only lightweight runtime needs + workspace primitives (`@lensjs/core`,
+  `@lensjs/date`). Core adds `denque`, `libsql`, `luxon`, `sql-formatter`, `stack-utils`.
+- `devDependencies`: ORMs/tools used only for TYPES at build time (`prisma`, `kysely`) and
+  `@lensjs/typescript-config`, `vitest`.
+- `peerDependencies` (+ `peerDependenciesMeta.optional`): the user-supplied driver/framework
+  (e.g. `nodemailer` optional peer in handlers; `fastify`/`@fastify/static` peers in the
+  fastify adapter). The consumer picks the version.
+
+Adapters may keep their framework as a normal `dependency` (express) OR a peer (fastify) —
+match the sibling package you are extending. `@lensjs/express` is the template manifest.
+
+## Publishable package.json conventions (match `@lensjs/express`)
+
+- Scope under `@lensjs/*`; `"type": "module"`.
+- Dual output via `exports`:
+
+```json
+"exports": { ".": { "require": "./dist/index.cjs", "import": "./dist/index.js" } }
+```
+
+- Set `"main"`, `"types"`, `"files": ["dist"]`, `"publishConfig": { "access": "public" }`.
+- Include `repository.directory`, `homepage`, `bugs`, and relevant `keywords` for
+  discoverability. (Fastify's manifest is currently missing these — fix, don't imitate.)
+- Build with `tsup` (ESM + CJS + `.d.ts`, `target: node18`, `skipNodeModulesBundle`,
+  `splitting: false`) — see [tsup.config.ts](mdc:tsup.config.ts). Adonis is the intentional
+  exception (builds with `tsc` + stubs per AdonisJS package conventions).
+- Do NOT commit `dist/` (gitignored, produced by build).
+
+## Barrels, public surface & tree-shaking
+
+- Each package exposes ONE `.` entry; do not add ad-hoc subpath exports.
+- Re-export the public surface from an `index.ts` barrel. Keep it minimal.
+- Use SELECTIVE re-exports to hide internals while still allowing tests to import them
+  directly: e.g. [handlers query barrel](mdc:packages/handlers/src/query/index.ts) exports
+  `export * from "./prisma"` (helpers are module-private) but only
+  `export { createSequelizeHandler }` from `sequelize.ts` (whose helpers are public for tests).
+- Tree-shaking relies on ESM output + the `import` condition + named exports; never introduce
+  import side effects at module top level.
+
+## Backward compatibility & public API stability
+
+- Adding an optional field / new named export = `minor`.
+- Changing a signature, removing/renaming an export, or changing an `exports` path = `major`
+  (requires a `major` changeset — see `release.mdc`).
+- When in doubt, add a new symbol rather than changing an existing one.
+
+## AI must never
+
+- Run `npm`/`yarn` in this repo, or hand-edit `version`/`CHANGELOG.md`.
+- Add a heavy dependency to a `dependencies` block when it can be a dev/peer dependency.
+- Add a new subpath to `exports` or change an existing export path without a `major` changeset.
+- Leak an internal symbol into a package barrel just to reach it from another package — use the
+  public API or move the code.

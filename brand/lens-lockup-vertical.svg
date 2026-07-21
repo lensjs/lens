@@ -1,0 +1,20 @@
+<!-- Vertical lockup: mark centered above the wordmark. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="104" viewBox="0 0 96 104">
+  <path
+    transform="translate(30 8) scale(1.5)"
+    fill="#10B981"
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M7.5 2.5 H16.5 A5 5 0 0 1 21.5 7.5 V16.5 A5 5 0 0 1 16.5 21.5 H7.5 A5 5 0 0 1 2.5 16.5 V7.5 A5 5 0 0 1 7.5 2.5 Z M12 7.4 L16.6 12 L12 16.6 L7.4 12 Z"
+  />
+  <text
+    x="48"
+    y="94"
+    text-anchor="middle"
+    font-family="Geist, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    font-size="20"
+    font-weight="600"
+    letter-spacing="-0.5"
+    fill="#FAFAFA"
+  >Lens<tspan fill="#71717A">.js</tspan></text>
+</svg>

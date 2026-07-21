@@ -1,9 +1,32 @@
 import { EventEmitter } from "events";
-import { CacheEntry, MailEntry } from "../types";
+import {
+  CacheEntry,
+  EventEntry,
+  FcmEntry,
+  HttpEntry,
+  LensEntry,
+  MailEntry,
+  RedisEntry,
+} from "../types";
 
 type LensEvents = {
   cache: CacheEntry;
   mail: MailEntry;
+  http: HttpEntry;
+  event: EventEntry;
+  redis: RedisEntry;
+  fcm: FcmEntry;
+};
+
+/** A single persisted entry pushed to the live-tail stream (SSE). */
+export type LensStreamMessage = {
+  /** Monotonic row cursor (doubles as the SSE `Last-Event-ID`). */
+  cursor: number;
+  entry: LensEntry;
+};
+
+type LensStreamEvents = {
+  entry: LensStreamMessage;
 };
 
 class TypedEventEmitter<T extends Record<string, any>> {
@@ -34,3 +57,9 @@ export const createEmittery = <T extends Record<string, any>>() => {
 };
 
 export const lensEmitter = createEmittery<LensEvents>();
+
+/**
+ * A single in-process stream of every persisted entry, used to power the
+ * live-tail SSE endpoint. Emitted by the store right after a successful write.
+ */
+export const lensStream = createEmittery<LensStreamEvents>();

@@ -10,6 +10,12 @@ import {
   lensEmitter,
   type HttpMethod,
   MailWatcher,
+  HttpWatcher,
+  EventWatcher,
+  RedisWatcher,
+  FcmWatcher,
+  createLensAuth,
+  type LensAuth,
 } from "@lensjs/core";
 import type { RequiredFastifyAdapterConfig } from "./types.ts";
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
@@ -21,6 +27,7 @@ import fastifyStatic from "@fastify/static";
 export class FastifyAdapter extends LensAdapter {
   protected app!: FastifyInstance;
   protected config!: RequiredFastifyAdapterConfig;
+  private auth?: LensAuth;
 
   constructor({ app }: { app: FastifyInstance }) {
     super();
@@ -30,6 +37,18 @@ export class FastifyAdapter extends LensAdapter {
   public setConfig(config: RequiredFastifyAdapterConfig) {
     this.config = config;
     return this;
+  }
+
+  private getAuth(): LensAuth {
+    if (!this.auth) {
+      this.auth = createLensAuth(this.config?.auth);
+    }
+    return this.auth;
+  }
+
+  private lensApiPath(suffix: string): string {
+    const base = this.config.path.replace(/^\/+|\/+$/g, "");
+    return this.normalizePath(`/${base}/${suffix.replace(/^\/+/, "")}`);
   }
 
   setup(): void {
@@ -55,16 +74,52 @@ export class FastifyAdapter extends LensAdapter {
             void this.watchMail(watcher as MailWatcher);
           }
           break;
+        case WatcherTypeEnum.HTTP:
+          if (this.config.httpWatcherEnabled) {
+            void this.watchHttp(watcher as HttpWatcher);
+          }
+          break;
+        case WatcherTypeEnum.EVENT:
+          if (this.config.eventWatcherEnabled) {
+            void this.watchEvent(watcher as EventWatcher);
+          }
+          break;
+        case WatcherTypeEnum.REDIS:
+          if (this.config.redisWatcherEnabled) {
+            void this.watchRedis(watcher as RedisWatcher);
+          }
+          break;
+        case WatcherTypeEnum.FCM:
+          if (this.config.fcmWatcherEnabled) {
+            void this.watchFcm(watcher as FcmWatcher);
+          }
+          break;
       }
     }
   }
 
   registerRoutes(routes: RouteDefinition[]): void {
+    const auth = this.getAuth();
+
+    if (auth.enabled) {
+      this.registerLoginRoute(auth);
+    }
+
     routes.forEach((route) => {
       this.app.route({
         method: route.method.toUpperCase() as any,
         url: this.normalizePath(route.path),
         handler: async (request: FastifyRequest, reply: FastifyReply) => {
+          if (
+            auth.enabled &&
+            route.path !== "/lens-config" &&
+            !auth.authorize(request.headers["authorization"])
+          ) {
+            return reply
+              .code(401)
+              .send({ status: 401, message: "Unauthorized", data: null });
+          }
+
           const result = await route.handler({
             params: request.params as Record<string, string>,
             qs: request.query as Record<string, any>,
@@ -73,6 +128,38 @@ export class FastifyAdapter extends LensAdapter {
         },
       });
     });
+  }
+
+  private registerLoginRoute(auth: LensAuth): void {
+    this.app.post(
+      this.lensApiPath("api/auth/login"),
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        const ip = this.config.getRequestIp?.(request) ?? this.getIp(request);
+        const body = (request.body ?? {}) as { password?: unknown };
+        const result = auth.attemptLogin(ip, body.password);
+
+        if (result.ok) {
+          return reply.code(200).send({
+            status: 200,
+            message: "Authenticated",
+            data: { token: result.token, expiresIn: result.expiresIn },
+          });
+        }
+
+        if (result.retryAfter != null) {
+          reply.header("Retry-After", String(result.retryAfter));
+          return reply.code(429).send({
+            status: 429,
+            message: "Too many attempts. Please try again later.",
+            data: null,
+          });
+        }
+
+        return reply
+          .code(401)
+          .send({ status: 401, message: "Invalid credentials", data: null });
+      },
+    );
   }
 
   serveUI(
@@ -119,13 +206,45 @@ export class FastifyAdapter extends LensAdapter {
     });
   }
 
+  private async watchHttp(watcher: HttpWatcher) {
+    if (!this.config.httpWatcherEnabled) return;
+
+    lensEmitter.on("http", async (data) => {
+      await watcher?.log(data);
+    });
+  }
+
+  private async watchEvent(watcher: EventWatcher) {
+    if (!this.config.eventWatcherEnabled) return;
+
+    lensEmitter.on("event", async (data) => {
+      await watcher?.log(data);
+    });
+  }
+
+  private async watchRedis(watcher: RedisWatcher) {
+    if (!this.config.redisWatcherEnabled) return;
+
+    lensEmitter.on("redis", async (data) => {
+      await watcher?.log(data);
+    });
+  }
+
+  private async watchFcm(watcher: FcmWatcher) {
+    if (!this.config.fcmWatcherEnabled) return;
+
+    lensEmitter.on("fcm", async (data) => {
+      await watcher?.log(data);
+    });
+  }
+
   private async watchQueries(watcher: QueryWatcher) {
     if (!this.config.queryWatcher?.enabled) return;
 
     const handler = this.config.queryWatcher.handler;
 
     await handler({
-      onQuery: async (query) => {
+      onQuery: async (query, requestId) => {
         const queryPayload = {
           query: query.query,
           duration: query.duration || "0 ms",
@@ -135,7 +254,7 @@ export class FastifyAdapter extends LensAdapter {
 
         await watcher?.log({
           data: queryPayload,
-          requestId: lensContext.getStore()?.requestId ?? "",
+          requestId: requestId ?? lensContext.getStore()?.requestId ?? "",
         });
       },
     });

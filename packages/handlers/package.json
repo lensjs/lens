@@ -23,10 +23,11 @@
   },
   "devDependencies": {
     "@lensjs/typescript-config": "workspace:*",
+    "@mikro-orm/core": "^6.6.16",
+    "@types/nodemailer": "^7.0.10",
     "kysely": "^0.28.5",
     "prisma": "^6.15.0",
-    "vitest": "^3.2.4",
-    "@types/nodemailer": "^7.0.10"
+    "vitest": "^3.2.4"
   },
   "dependencies": {
     "@lensjs/core": "workspace:*",
@@ -35,10 +36,14 @@
   },
   "peerDependencies": {
     "@mikro-orm/core": "^6.0.0",
+    "ioredis": "^5.0.0",
     "nodemailer": "^8.0.1"
   },
   "peerDependenciesMeta": {
     "@mikro-orm/core": {
+      "optional": true
+    },
+    "ioredis": {
       "optional": true
     },
     "nodemailer": {

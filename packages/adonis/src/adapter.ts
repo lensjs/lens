@@ -9,15 +9,23 @@ import {
   RouteHttpMethod,
   QueryEntry,
   CacheWatcher,
+  MailWatcher,
+  HttpWatcher,
+  EventWatcher,
+  RedisWatcher,
+  FcmWatcher,
+  lensEmitter,
+  createLensAuth,
+  type LensAuth,
 } from '@lensjs/core'
 import * as path from 'path'
 import type { ApplicationService, EmitterService, HttpRouterService } from '@adonisjs/core/types'
 import { assertCacheBindingRegistered, shouldIgnoreLogging } from './utils/index.js'
+import { buildMailEntry, type AdonisMailSentEvent } from './mail.js'
 import string from '@adonisjs/core/helpers/string'
 import { HttpContext } from '@adonisjs/core/http'
 import { LensConfig } from './define_config.js'
 import { nowISO } from '@lensjs/date'
-import emitter from '@adonisjs/core/services/emitter'
 
 export default class AdonisAdapter extends LensAdapter {
   protected app: ApplicationService
@@ -26,6 +34,7 @@ export default class AdonisAdapter extends LensAdapter {
   protected isRequestWatcherEnabled = false
   protected queryWatcher?: QueryWatcher
   protected config!: LensConfig
+  private auth?: LensAuth
 
   constructor({ app }: { app: ApplicationService }) {
     super()
@@ -50,6 +59,21 @@ export default class AdonisAdapter extends LensAdapter {
           case WatcherTypeEnum.CACHE:
             this.watchCache(watcher as unknown as CacheWatcher)
             break
+          case WatcherTypeEnum.MAIL:
+            this.watchMail(watcher as unknown as MailWatcher)
+            break
+          case WatcherTypeEnum.HTTP:
+            this.watchHttp(watcher as unknown as HttpWatcher)
+            break
+          case WatcherTypeEnum.EVENT:
+            this.watchEvent(watcher as unknown as EventWatcher)
+            break
+          case WatcherTypeEnum.REDIS:
+            this.watchRedis(watcher as unknown as RedisWatcher)
+            break
+          case WatcherTypeEnum.FCM:
+            this.watchFcm(watcher as unknown as FcmWatcher)
+            break
         }
       }
     })
@@ -60,17 +84,73 @@ export default class AdonisAdapter extends LensAdapter {
     return this
   }
 
+  private getAuth(): LensAuth {
+    if (!this.auth) {
+      this.auth = createLensAuth(this.config?.auth)
+    }
+    return this.auth
+  }
+
+  private lensApiPath(suffix: string): string {
+    const base = this.config.path.replace(/^\/+|\/+$/g, '')
+    return `/${base}/${suffix.replace(/^\/+/, '')}`
+  }
+
   registerRoutes(routes: RouteDefinition[]): void {
+    const auth = this.getAuth()
+
     this.app.booted(async () => {
+      if (auth.enabled) {
+        this.registerLoginRoute(auth)
+      }
+
       routes.forEach((route) => {
         this.router[route.method.toLowerCase() as RouteHttpMethod](
           route.path,
           async (ctx: HttpContext) => {
+            if (
+              auth.enabled &&
+              route.path !== '/lens-config' &&
+              !auth.authorize(ctx.request.header('authorization'))
+            ) {
+              return ctx.response
+                .status(401)
+                .json({ status: 401, message: 'Unauthorized', data: null })
+            }
+
             const data = await route.handler({ params: ctx.params, qs: ctx.request.qs() })
             return ctx.response.json(data)
           }
         )
       })
+    })
+  }
+
+  private registerLoginRoute(auth: LensAuth): void {
+    this.router.post(this.lensApiPath('api/auth/login'), async (ctx: HttpContext) => {
+      const ip = ctx.request.ip()
+      const result = auth.attemptLogin(ip, ctx.request.input('password'))
+
+      if (result.ok) {
+        return ctx.response.status(200).json({
+          status: 200,
+          message: 'Authenticated',
+          data: { token: result.token, expiresIn: result.expiresIn },
+        })
+      }
+
+      if (result.retryAfter != null) {
+        ctx.response.header('Retry-After', String(result.retryAfter))
+        return ctx.response.status(429).json({
+          status: 429,
+          message: 'Too many attempts. Please try again later.',
+          data: null,
+        })
+      }
+
+      return ctx.response
+        .status(401)
+        .json({ status: 401, message: 'Invalid credentials', data: null })
     })
   }
 
@@ -113,7 +193,7 @@ export default class AdonisAdapter extends LensAdapter {
       if (shouldIgnoreLogging(self.app)) return
 
       // @ts-ignore
-      emitter.on('db:query', async function (query: any) {
+      self.emitter.on('db:query', async function (query: any) {
         const requestId = HttpContext.get()?.request.lensEntry?.requestId
         const duration: string = query.duration ? string.prettyHrTime(query.duration) : '0 ms'
 
@@ -205,6 +285,54 @@ export default class AdonisAdapter extends LensAdapter {
         createdAt: nowISO(),
         requestId: HttpContext.get()?.request.lensEntry?.requestId,
       })
+    })
+  }
+
+  protected watchHttp(watcher: HttpWatcher): void {
+    if (!this.config.watchers.http) return
+
+    lensEmitter.on('http', async (data) => {
+      await watcher.log(data)
+    })
+  }
+
+  protected watchEvent(watcher: EventWatcher): void {
+    if (!this.config.watchers.event) return
+
+    lensEmitter.on('event', async (data) => {
+      await watcher.log(data)
+    })
+  }
+
+  protected watchRedis(watcher: RedisWatcher): void {
+    if (!this.config.watchers.redis) return
+
+    lensEmitter.on('redis', async (data) => {
+      await watcher.log(data)
+    })
+  }
+
+  protected watchFcm(watcher: FcmWatcher): void {
+    if (!this.config.watchers.fcm) return
+
+    lensEmitter.on('fcm', async (data) => {
+      await watcher.log(data)
+    })
+  }
+
+  protected watchMail(mailWatcher: MailWatcher): void {
+    if (!this.config.watchers.mail || shouldIgnoreLogging(this.app)) return
+
+    // @ts-expect-error - 'mail:sent' is emitted by @adonisjs/mail when installed
+    this.emitter.on('mail:sent', async (event: AdonisMailSentEvent) => {
+      try {
+        const requestId = HttpContext.get()?.request.lensEntry?.requestId ?? ''
+
+        await mailWatcher.log(buildMailEntry(event, requestId))
+      } catch (error) {
+        // Instrumentation must never break the host app.
+        console.error('Lens: failed to log mail entry', error)
+      }
     })
   }
 

@@ -47,14 +47,26 @@ export function interpolateQuery(query: string, bindings: any): string {
     return value.toString();
   };
 
-  // Case 1: Array-based bindings for '?' placeholders
+  // Case 1: Array-based bindings.
   if (Array.isArray(bindings)) {
-    let i = 0;
-    return query.replace(/\?/g, () => {
-      if (i >= bindings.length) {
-        throw new Error("Not enough bindings for placeholders");
-      }
-      return formatValue(bindings[i++]);
+    // Positional '?' placeholders (mysql/sqlite style).
+    if (query.includes("?")) {
+      let i = 0;
+      return query.replace(/\?/g, () => {
+        if (i >= bindings.length) {
+          throw new Error("Not enough bindings for placeholders");
+        }
+        return formatValue(bindings[i++]);
+      });
+    }
+
+    // Positional '$1', '$2', ... placeholders (postgres style) backed by an
+    // array — e.g. Sequelize/knex emit `$1` with an ordered bind array.
+    return query.replace(/\$(\d+)/g, (match, index) => {
+      const pos = Number(index) - 1;
+      return pos >= 0 && pos < bindings.length
+        ? formatValue(bindings[pos])
+        : match;
     });
   }
 

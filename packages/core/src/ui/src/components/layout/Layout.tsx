@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
+import Footer from "./Footer";
+import CommandPalette from "../CommandPalette";
 
 const Layout = () => {
   const location = useLocation();
@@ -11,37 +13,27 @@ const Layout = () => {
     setIsMobileSidebarOpen(false);
   }, [location.pathname]);
 
-  const handleToggleMobileSidebar = () => {
-    setIsMobileSidebarOpen(!isMobileSidebarOpen);
-  };
-
-  const handleCloseMobileSidebar = () => {
-    setIsMobileSidebarOpen(false);
-  };
-
   return (
-    <>
-      {" "}
+    <div className="flex min-h-screen flex-col">
       <Header
         isMobileSidebarOpen={isMobileSidebarOpen}
-        onToggleMobileSidebar={handleToggleMobileSidebar}
+        onToggleMobileSidebar={() => setIsMobileSidebarOpen((open) => !open)}
       />
-      <hr className="container my-6 border-slate-800" />
-      <div className="container flex flex-col h-full lg:flex-row gap-8 relative">
+
+      <div className="container relative flex flex-1 flex-col gap-6 py-6 lg:flex-row lg:gap-8">
         <Sidebar
           isMobileSidebarOpen={isMobileSidebarOpen}
-          onCloseMobileSidebar={handleCloseMobileSidebar}
+          onCloseMobileSidebar={() => setIsMobileSidebarOpen(false)}
         />
 
-        {/* Main content */}
-        <div className="w-full min-h-[88vh]  flex-1 flex flex-col  min-w-0 pb-5 overflow-hidden">
-          <div className="flex-1">
-            <Outlet />
-          </div>
-          {/* <Footer /> */}
-        </div>
-      </div>{" "}
-    </>
+        <main className="min-w-0 flex-1 pb-6">
+          <Outlet />
+        </main>
+      </div>
+
+      <Footer />
+      <CommandPalette />
+    </div>
   );
 };
 

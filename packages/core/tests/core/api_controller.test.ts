@@ -52,7 +52,7 @@ describe("ApiController", () => {
       ];
       const mockPaginator: Paginator<Omit<LensEntry, "data">[]> = {
         data: mockRequests,
-        meta: { total: 1, lastPage: 1, currentPage: 1 },
+        meta: { nextCursor: null, headCursor: null, hasMore: false, perPage: 100 },
       };
       mockStore.getAllRequests.mockResolvedValue(mockPaginator);
 
@@ -61,14 +61,13 @@ describe("ApiController", () => {
       });
 
       expect(mockStore.getAllRequests).toHaveBeenCalledWith({
-        page: 1,
         perPage: 10,
       });
       expect(result).toEqual({
         status: 200,
         message: "Data fetched successfully",
         data: mockRequests,
-        meta: { total: 1, lastPage: 1, currentPage: 1 },
+        meta: { nextCursor: null, headCursor: null, hasMore: false, perPage: 100 },
       });
     });
 
@@ -76,14 +75,13 @@ describe("ApiController", () => {
       const mockRequests: Omit<LensEntry, "data">[] = [];
       const mockPaginator: Paginator<Omit<LensEntry, "data">[]> = {
         data: mockRequests,
-        meta: { total: 0, lastPage: 0, currentPage: 1 },
+        meta: { nextCursor: null, headCursor: null, hasMore: false, perPage: 100 },
       };
       mockStore.getAllRequests.mockResolvedValue(mockPaginator);
 
       await ApiController.getRequests({ qs: {} });
 
       expect(mockStore.getAllRequests).toHaveBeenCalledWith({
-        page: 1,
         perPage: 100,
       });
     });
@@ -158,6 +156,10 @@ describe("ApiController", () => {
           cacheEntries: mockCacheEntries,
           exceptions: [],
           emails: [],
+          httpEntries: [],
+          eventEntries: [],
+          redisEntries: [],
+          fcmEntries: [],
         },
       });
     });
@@ -195,7 +197,7 @@ describe("ApiController", () => {
       ];
       const mockPaginator: Paginator<LensEntry[]> = {
         data: mockQueries,
-        meta: { total: 1, lastPage: 1, currentPage: 1 },
+        meta: { nextCursor: null, headCursor: null, hasMore: false, perPage: 100 },
       };
       mockStore.getAllQueries.mockResolvedValue(mockPaginator);
 
@@ -204,14 +206,13 @@ describe("ApiController", () => {
       });
 
       expect(mockStore.getAllQueries).toHaveBeenCalledWith({
-        page: 1,
         perPage: 10,
       });
       expect(result).toEqual({
         status: 200,
         message: "Data fetched successfully",
         data: mockQueries,
-        meta: { total: 1, lastPage: 1, currentPage: 1 },
+        meta: { nextCursor: null, headCursor: null, hasMore: false, perPage: 100 },
       });
     });
   });
@@ -276,7 +277,7 @@ describe("ApiController", () => {
       ];
       const mockPaginator: Paginator<Omit<LensEntry, "data">[]> = {
         data: mockCacheEntries,
-        meta: { total: 1, lastPage: 1, currentPage: 1 },
+        meta: { nextCursor: null, headCursor: null, hasMore: false, perPage: 100 },
       };
       mockStore.getAllCacheEntries.mockResolvedValue(mockPaginator);
 
@@ -285,14 +286,13 @@ describe("ApiController", () => {
       });
 
       expect(mockStore.getAllCacheEntries).toHaveBeenCalledWith({
-        page: 1,
         perPage: 10,
       });
       expect(result).toEqual({
         status: 200,
         message: "Data fetched successfully",
         data: mockCacheEntries,
-        meta: { total: 1, lastPage: 1, currentPage: 1 },
+        meta: { nextCursor: null, headCursor: null, hasMore: false, perPage: 100 },
       });
     });
   });
@@ -372,54 +372,60 @@ describe("ApiController", () => {
   });
 
   describe("extractPaginationParams", () => {
-    it("should return default pagination if no qs", () => {
+    it("should return default perPage with no cursor if no qs", () => {
       const result = (ApiController as any).extractPaginationParams();
-      expect(result).toEqual({ page: 1, perPage: 100 });
+      expect(result).toEqual({ cursor: undefined, perPage: 100 });
     });
 
-    it("should return default pagination if qs is empty", () => {
+    it("should return default perPage with no cursor if qs is empty", () => {
       const result = (ApiController as any).extractPaginationParams({});
-      expect(result).toEqual({ page: 1, perPage: 100 });
+      expect(result).toEqual({ cursor: undefined, perPage: 100 });
     });
 
-    it("should parse valid pagination params", () => {
+    it("should parse a valid cursor and perPage", () => {
       const result = (ApiController as any).extractPaginationParams({
-        page: "5",
+        cursor: "42",
         perPage: "20",
       });
-      expect(result).toEqual({ page: 5, perPage: 20 });
+      expect(result).toEqual({ cursor: 42, after: undefined, perPage: 20 });
+    });
+
+    it("should parse a valid `after` cursor for delta polling", () => {
+      const result = (ApiController as any).extractPaginationParams({
+        after: "42",
+        perPage: "20",
+      });
+      expect(result).toEqual({ cursor: undefined, after: 42, perPage: 20 });
     });
 
     it("should cap perPage at 100", () => {
       const result = (ApiController as any).extractPaginationParams({
-        page: "1",
         perPage: "200",
       });
-      expect(result).toEqual({ page: 1, perPage: 100 });
+      expect(result).toEqual({ cursor: undefined, perPage: 100 });
     });
 
     it("should set perPage to 100 if less than 5", () => {
       const result = (ApiController as any).extractPaginationParams({
-        page: "1",
         perPage: "3",
       });
-      expect(result).toEqual({ page: 1, perPage: 100 });
+      expect(result).toEqual({ cursor: undefined, perPage: 100 });
     });
 
-    it("should set page to 1 if less than 1", () => {
+    it("should ignore invalid (non-numeric) cursor values", () => {
       const result = (ApiController as any).extractPaginationParams({
-        page: "0",
+        cursor: "abc",
         perPage: "10",
       });
-      expect(result).toEqual({ page: 1, perPage: 10 });
+      expect(result).toEqual({ cursor: undefined, perPage: 10 });
     });
 
-    it("should handle non-numeric page/perPage values", () => {
+    it("should ignore non-positive cursor values", () => {
       const result = (ApiController as any).extractPaginationParams({
-        page: "abc",
-        perPage: "xyz",
+        cursor: "0",
+        perPage: "10",
       });
-      expect(result).toEqual({ page: 1, perPage: 100 });
+      expect(result).toEqual({ cursor: undefined, perPage: 10 });
     });
   });
 });

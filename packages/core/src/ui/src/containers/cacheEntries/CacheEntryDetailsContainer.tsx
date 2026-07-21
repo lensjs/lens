@@ -1,6 +1,7 @@
 import { lazy, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useCacheEntries from "../../hooks/useCacheEntries";
+import { DetailSkeleton } from "../../components/Skeleton";
 
 const CacheEntryView = lazy(
   () => import("../../views/cache/CacheEntryDetails"),
@@ -14,7 +15,9 @@ const CacheEntryDetailsContainer = () => {
     id && getItem(id);
   }, [id]);
 
-  return <div>{item && <CacheEntryView data={item} />}</div>;
+  if (!item) return <DetailSkeleton />;
+
+  return <CacheEntryView data={item} />;
 };
 
 export default CacheEntryDetailsContainer;

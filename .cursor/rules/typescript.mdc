@@ -1,0 +1,98 @@
+---
+description: TypeScript language conventions, naming, imports, generics, errors, async, and comments for LensJS
+globs: **/*.ts,**/*.tsx
+alwaysApply: false
+---
+
+# TypeScript Standards
+
+## Purpose
+
+Keep TypeScript uniform, strict, and dual-target (ESM + CJS) across every package.
+
+## Why it exists
+
+The whole monorepo shares one strict compiler baseline
+([base.json](mdc:shared/typescript-config/base.json)) and ships via `tsup` to Node 18+.
+Consistent typing and naming is what lets `@lensjs/core` primitives be reused everywhere
+without friction, and what keeps public `.d.ts` output correct for consumers.
+
+## Compiler baseline (do not weaken)
+
+`strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `noFallthroughCasesInSwitch`,
+`skipLibCheck`. Emit is owned by `tsup`, so the shared config sets `noEmit: true`.
+Each package extends a semantically-named preset (`core.json`, `express.json`,
+`fastify.json`, `handlers.json`) that today just re-extends `base.json` — extend the named
+one anyway so it stays a stable per-package extension point.
+
+## Mandatory rules
+
+- Use `import type { ... }` for type-only imports (`verbatimModuleSyntax` is on in several
+  packages and the UI).
+- Prefix Node built-ins: `import path from "node:path"`, `import { randomUUID } from "node:crypto"`.
+- Give exported functions and public class methods explicit return types.
+- Respect `noUncheckedIndexedAccess`: guard array/record access; do not blindly `!`-assert.
+- Handle every promise: `await` it, or explicitly `void` a fire-and-forget call (adapters use
+  `void this.watchQueries(...)`). Never leave a floating promise.
+- Use `override` when overriding a base method (`noImplicitOverride`) — see
+  [better_sqlite.ts](mdc:packages/core/src/stores/better_sqlite.ts).
+- Avoid `any`. If unavoidable at an internal boundary, isolate it and comment why. NEVER widen
+  a public type to `any`.
+
+## Naming & file placement
+
+- File names: `snake_case.ts` (`cache_watcher.ts`, `api_controller.ts`, `async_context.ts`,
+  `event_emitter.ts`). Single-word files stay lowercase (`prisma.ts`, `compose.ts`).
+- Classes / types / interfaces / enums: `PascalCase`. Variables / functions: `camelCase`.
+- Enums use the `...Enum` suffix (`WatcherTypeEnum`) with string values.
+- Abstract base classes live in `abstracts/`; class mixins in `mixins/`; pure helpers in
+  `utils/`; DI/context in `context/`.
+- React UI files are the exception: PascalCase `.tsx` for components (see `frontend.mdc`).
+
+## Generics & composition
+
+- Prefer generics over `any` for reusable shapes: `Paginator<T>`, `ApiResponse<T>`,
+  `TypedEventEmitter<T>`, the overloaded `compose<>()`
+  ([compose.ts](mdc:packages/core/src/utils/compose.ts)).
+- Derive constrained unions from core types instead of restating them, e.g.
+  `Extract<SqlQueryType, "mysql" | "postgresql" | ...>` in
+  [handlers types/query.ts](mdc:packages/handlers/src/types/query.ts).
+- Prefer composition (mixins via `compose()`) and small abstract contracts over deep
+  inheritance trees.
+
+## Error handling & async
+
+- Instrumentation must never throw into the host app: wrap capture in try/catch and
+  `console.error` on failure (see adapter `finalizeRequestLog`), never rethrow.
+- Normalize errors through [lensExceptionUtils](mdc:packages/core/src/utils/exception.ts)
+  (`constructErrorObject`) rather than hand-building exception payloads.
+
+## Logging & comments
+
+- Logging is `console.*` only, and only for genuinely exceptional/operational events
+  (queue overflow warning, DB connect, save failure). No logging framework, no debug spam.
+- Do not write comments that narrate code. Comment only non-obvious intent/constraints.
+- Add JSDoc to exported utility functions (mirror the JSDoc in
+  [exception.ts](mdc:packages/core/src/utils/exception.ts) and
+  [utils/index.ts](mdc:packages/core/src/utils/index.ts)).
+
+## Style (Prettier defaults, no committed lint for backend)
+
+Double quotes, semicolons, 2-space indent, trailing commas in multiline literals.
+
+```typescript
+// GOOD
+import type { RouteDefinition } from "../types";
+import path from "node:path";
+
+export function normalizePath(p: string): string {
+  return p.startsWith("/") ? p : `/${p}`;
+}
+```
+
+## AI must never
+
+- Disable or loosen a strict compiler flag to make code compile.
+- Introduce a floating promise or swallow one silently without `void`/`await`.
+- Add `any` to a public/exported type.
+- Rename files to `camelCase`/`kebab-case` — backend files are `snake_case.ts`.

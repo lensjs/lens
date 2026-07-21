@@ -1,7 +1,7 @@
 import { configProvider } from '@adonisjs/core'
 import { HttpContext } from '@adonisjs/core/http'
 import { QueryType, UserEntry } from '../../core/dist/types/index.js'
-import type {LensConfig as BaseLensConfig} from '@lensjs/core'
+import type {LensConfig as BaseLensConfig, LensAuthConfig} from '@lensjs/core'
 
 type AdonisQueryType = Extract<
   QueryType,
@@ -19,9 +19,16 @@ export type LensConfig = {
     cache: boolean
     requests: boolean
     exceptions: boolean
+    mail?: boolean
+    http?: boolean
+    event?: boolean
+    redis?: boolean
+    fcm?: boolean
   },
   isAuthenticated?: (ctx: HttpContext) => Promise<boolean>,
   getUser?: (ctx: HttpContext) => Promise<UserEntry>,
+  /** Password-lock the dashboard. Setting `auth.password` enables it. */
+  auth?: LensAuthConfig,
 } & BaseLensConfig
 
 export function defineConfig(config: LensConfig) {

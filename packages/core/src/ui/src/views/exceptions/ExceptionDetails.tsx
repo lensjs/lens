@@ -17,33 +17,33 @@ const ExceptionDetails = ({ data }: { data: OneException }) => {
           value: (
             <Link
               to={`${getRoutesPaths(useConfig()).REQUESTS}/${data.lens_entry_id}`}
-              className="text-blue-600 hover:underline font-semibold"
+              className="text-accent hover:text-accent-hover hover:underline font-semibold"
             >
               View Request
             </Link>
           ),
-          className: "text-gray-900 dark:text-gray-100",
+          className: "text-fg",
         }
       : null,
     data.data.name
       ? {
           label: "Name",
           value: data.data.name,
-          className: "text-gray-900 dark:text-gray-100",
+          className: "text-fg",
         }
       : null,
     data.data.fileInfo?.file
       ? {
           label: "File",
           value: data.data.fileInfo?.file,
-          className: "text-gray-900 dark:text-gray-100",
+          className: "text-fg",
         }
       : null,
     data.data.fileInfo?.function
       ? {
           label: "Function",
           value: data.data.fileInfo?.function,
-          className: "text-gray-900 dark:text-gray-100",
+          className: "text-fg",
         }
       : null,
   ].filter((i) => !!i);

@@ -1,12 +1,21 @@
 import { describe, it, expect, vi, beforeEach, Mock} from 'vitest';
-import { createPrismaHandler } from '../src/query/prisma';
-import { lensUtils } from '@lensjs/core';
+import { createPrismaHandler, withLensPrisma } from '../src/query/prisma';
+import { lensUtils, getCurrentRequestId } from '@lensjs/core';
+import { watcherEmitter } from '../src/utils/emitter';
 
 // Mock dependencies
 vi.mock('@lensjs/core', () => ({
   lensUtils: {
     interpolateQuery: vi.fn((sql, params) => `interpolated(${sql}, ${JSON.stringify(params)})`),
     formatSqlQuery: vi.fn((sql, provider) => `formatted(${sql}, ${provider})`),
+  },
+  getCurrentRequestId: vi.fn(() => undefined),
+}));
+
+vi.mock('../src/utils/emitter', () => ({
+  watcherEmitter: {
+    on: vi.fn(),
+    emit: vi.fn(),
   },
 }));
 
@@ -127,5 +136,92 @@ describe('createPrismaHandler', () => {
       query: 'BEGIN',
       type: 'mongodb',
     }));
+  });
+
+  describe('withLensPrisma (in-context correlation)', () => {
+    it('wraps the client and emits prismaQuery with the in-context requestId + duration', async () => {
+      (getCurrentRequestId as Mock).mockReturnValue('req-42');
+
+      let capturedExtension: any;
+      const fakeClient = {
+        $extends: vi.fn((extension: any) => {
+          capturedExtension = extension;
+          return { extended: true };
+        }),
+      };
+
+      const wrapped = withLensPrisma(fakeClient as any, { provider: 'postgresql' });
+
+      expect(fakeClient.$extends).toHaveBeenCalledTimes(1);
+      expect(wrapped).toEqual({ extended: true });
+
+      // Simulate Prisma invoking the wrapped operation in-context.
+      const queryFn = vi.fn(async () => ['result']);
+      const result = await capturedExtension.query.$allOperations({
+        model: 'User',
+        operation: 'findMany',
+        args: { where: { id: 1 } },
+        query: queryFn,
+      });
+
+      expect(result).toEqual(['result']);
+      expect(queryFn).toHaveBeenCalledWith({ where: { id: 1 } });
+      expect(watcherEmitter.emit).toHaveBeenCalledTimes(1);
+
+      const [event, payload] = (watcherEmitter.emit as Mock).mock.calls[0];
+      expect(event).toBe('prismaQuery');
+      expect(payload).toMatchObject({
+        query: 'User.findMany({"where":{"id":1}})',
+        provider: 'postgresql',
+        requestId: 'req-42',
+      });
+      expect(typeof payload.duration).toBe('number');
+    });
+
+    it('forwards prismaQuery events to onQuery with the captured requestId', async () => {
+      const handler = createPrismaHandler({ provider: 'postgresql' });
+      await handler({ onQuery: onQueryMock });
+
+      const registration = (watcherEmitter.on as Mock).mock.calls.find(
+        (call) => call[0] === 'prismaQuery',
+      );
+      expect(registration).toBeDefined();
+
+      const listener = registration![1];
+      await listener({
+        query: 'User.findMany({})',
+        duration: 3.14159,
+        provider: 'postgresql',
+        requestId: 'req-7',
+      });
+
+      expect(onQueryMock).toHaveBeenCalledWith(
+        {
+          query: 'User.findMany({})',
+          duration: '3.1 ms',
+          createdAt: expect.any(String),
+          type: 'postgresql',
+        },
+        'req-7',
+      );
+    });
+
+    it('ignores prismaQuery events from a different provider', async () => {
+      const handler = createPrismaHandler({ provider: 'postgresql' });
+      await handler({ onQuery: onQueryMock });
+
+      const listener = (watcherEmitter.on as Mock).mock.calls.find(
+        (call) => call[0] === 'prismaQuery',
+      )![1];
+
+      await listener({
+        query: 'User.findMany({})',
+        duration: 1,
+        provider: 'mysql',
+        requestId: 'req-9',
+      });
+
+      expect(onQueryMock).not.toHaveBeenCalled();
+    });
   });
 });

@@ -18,8 +18,8 @@ export const StackFrame: React.FC<StackFrameProps> = ({
 
   return (
     <div
-      className={`group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors ${
-        isFirst ? "bg-orange-50 dark:bg-orange-950/20" : ""
+      className={`group hover:bg-surface-2/50 transition-colors ${
+        isFirst ? "bg-warning/10" : ""
       }`}
     >
       <div className="flex items-start gap-3 p-3">
@@ -39,7 +39,7 @@ export const StackFrame: React.FC<StackFrameProps> = ({
 
           {/* Raw line for unparsed or complex traces */}
           {!parsed.function && !parsed.file && (
-            <div className="font-mono text-sm text-gray-700 dark:text-gray-300 break-all">
+            <div className="font-mono text-sm text-fg break-all">
               {parsed.raw}
             </div>
           )}
@@ -47,7 +47,7 @@ export const StackFrame: React.FC<StackFrameProps> = ({
 
         {isFirst && (
           <div className="flex-shrink-0">
-            <div className="bg-orange-500 text-white px-2 py-1 rounded text-xs font-medium">
+            <div className="bg-warning text-fg px-2 py-1 rounded text-xs font-medium">
               Origin
             </div>
           </div>

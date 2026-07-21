@@ -14,7 +14,7 @@ To integrate Sequelize with the Query Watcher, follow these steps:
 
     ```ts
     import { Sequelize } from 'sequelize-typescript';
-    import { watcherEmitter } from '@lensjs/watchers';
+    import { attachSequelizeLens } from '@lensjs/watchers';
     import { TestModel } from './models/user.model.js';
 
     export const databaseProviders = [
@@ -28,13 +28,15 @@ To integrate Sequelize with the Query Watcher, follow these steps:
             username: process.env.DATABASE_USERNAME,
             password: process.env.DATABASE_PASSWORD,
             database: process.env.DATABASE_NAME,
-            benchmark: true, // Essential for logging query timings
-            logQueryParameters: true, // Essential for logging query parameters
-            logging: (sql: string, timing?: number) => {
-              // Emit the 'sequelizeQuery' event with SQL and timing data
-              watcherEmitter.emit('sequelizeQuery', { sql, timing });
-            },
+            benchmark: true, // Essential for accurate query timings
+            logQueryParameters: true, // Essential for capturing query parameters
           });
+
+          // Correlates each query to the request that issued it. Sequelize's
+          // `logging` callback fires from the driver's detached context, so the
+          // request id is captured in-context via `beforeQuery`/`afterQuery`.
+          attachSequelizeLens(sequelize);
+
           sequelize.addModels([TestModel]);
           await sequelize.sync();
           return sequelize;
@@ -73,45 +75,52 @@ To integrate Prisma with the Query Watcher, follow these steps:
 
 1.  **Installation:** Begin by following the [official NestJS Prisma integration guide](https://docs.nestjs.com/recipes/prisma#getting-started) to set up Prisma in your application.
 
-2.  **Configure PrismaService Logging:** When creating your `PrismaService`, it's crucial to pass the `log` option with `'query'` to the `super` method. This enables Prisma to emit query events that the Query Watcher can capture.
+2.  **Wrap your Prisma client with `withLensPrisma`:** Prisma's `$on("query")` events are emitted across the engine's native boundary, which loses Node's async context — so raw-SQL events cannot be reliably attached to the originating request. `withLensPrisma` wraps the client with a [Prisma Client extension](https://www.prisma.io/docs/orm/prisma-client/client-extensions) that captures the request id **in-context** (at query-issue time), guaranteeing correct correlation even under concurrency. Because an extended client has a different type than `PrismaClient`, expose it through a factory provider and use it everywhere you query.
 
     ```ts
-    import { Injectable, OnModuleInit } from '@nestjs/common';
+    // src/prisma.ts
     import { PrismaClient } from '@prisma/client';
+    import { withLensPrisma } from '@lensjs/watchers';
 
-    @Injectable()
-    export class PrismaService extends PrismaClient implements OnModuleInit {
-      constructor() {
-        // This is essential for Prisma to emit query events
-        super({
-          log: ['query'],
-        });
-      }
+    export const PRISMA = Symbol('PRISMA');
 
-      async onModuleInit() {
-        await this.$connect();
-      }
-    }
+    export const createLensPrismaClient = () =>
+      withLensPrisma(new PrismaClient(), { provider: 'sqlite' }); // your provider
+
+    export type LensPrismaClient = ReturnType<typeof createLensPrismaClient>;
     ```
 
-3.  **Integrate with `main.ts`:** In your `main.ts` file, retrieve the `PrismaService` instance from the application context. Then, use `createPrismaHandler` from `@lensjs/watchers` and pass both the `prisma` instance and your database `provider` (e.g., `'sqlite'`, `'postgresql'`) to the `queryWatcher` configuration within the `lens` function.
+    ```ts
+    // src/prisma.module.ts
+    import { Global, Module } from '@nestjs/common';
+    import { PRISMA, createLensPrismaClient } from './prisma.js';
+
+    @Global()
+    @Module({
+      providers: [{ provide: PRISMA, useFactory: createLensPrismaClient }],
+      exports: [PRISMA],
+    })
+    export class PrismaModule {}
+    ```
+
+    Inject it where you access the database: `constructor(@Inject(PRISMA) private readonly prisma: LensPrismaClient) {}`.
+
+3.  **Integrate with `main.ts`:** Register `createPrismaHandler` from `@lensjs/watchers` with your database `provider` (e.g., `'sqlite'`, `'postgresql'`). You no longer pass the client — correlation is handled by the wrapper's extension.
 
     ```ts
     import { NestFactory } from '@nestjs/core';
     import { AppModule } from './app.module.js';
     import { lens } from '@lensjs/nestjs';
-    import { PrismaService } from './prisma.service.js';
     import { createPrismaHandler } from '@lensjs/watchers';
 
     async function bootstrap() {
       const app = await NestFactory.create(AppModule);
-      const prisma = app.get(PrismaService);
 
       await lens({
         app,
         queryWatcher: {
           enabled: true,
-          handler: createPrismaHandler({ prisma, provider: 'sqlite' }), // Replace 'sqlite' with your database provider
+          handler: createPrismaHandler({ provider: 'sqlite' }), // Replace 'sqlite' with your database provider
         },
       });
 
@@ -119,6 +128,8 @@ To integrate Prisma with the Query Watcher, follow these steps:
     }
     bootstrap();
     ``````
+
+    > **Legacy note:** `createPrismaHandler({ prisma, provider })` (passing a raw client) still works and shows raw SQL via `$on`, but it **cannot correlate** queries to requests. Prefer `withLensPrisma`.
 
 ## 3. Kysely
 
@@ -129,7 +140,7 @@ To integrate Kysely with the Query Watcher, follow these steps:
 2.  **Configure Kysely Logging:** In your Kysely module configuration, set up the `log` option to emit `kyselyQuery` events using `watcherEmitter.emit`.
 
     ```ts
-    import { watcherEmitter } from '@lensjs/watchers';
+    import { createLensKyselyPlugin, watcherEmitter } from '@lensjs/watchers';
     import { Module } from '@nestjs/common';
     import { KyselyModule as BaseKyselyModule } from 'nestjs-kysely';
 
@@ -137,6 +148,7 @@ To integrate Kysely with the Query Watcher, follow these steps:
       imports: [
         BaseKyselyModule.forRoot({
         // ... other configurations
+          plugins: [createLensKyselyPlugin()], // captures the request id in-context
           log: (event) => {
             // Emit the 'kyselyQuery' event with the query event data
             watcherEmitter.emit('kyselyQuery', event);
@@ -146,6 +158,8 @@ To integrate Kysely with the Query Watcher, follow these steps:
     })
     export class KyselyModule {}
     ```
+
+    > **Why `createLensKyselyPlugin`?** Kysely's `log` callback fires from the driver's detached completion context; the plugin captures the request id in-context at compile time and links it to the log event via Kysely's `queryId`. Without it, queries are recorded but not correlated.
 
 3.  **Integrate with `main.ts`:** In your `main.ts` file, import `createKyselyHandler` from `@lensjs/watchers` and pass it to the `queryWatcher` configuration within the `lens` function. You can also configure optional settings like `logQueryErrorsToConsole`.
 
@@ -190,30 +204,31 @@ To integrate MikroORM with the Query Watcher, follow these steps:
 
 1.  **Installation:** Install MikroORM and its NestJS integration following the [official MikroORM documentation](https://mikro-orm.io/docs/guide/first-entity).
 
-2.  **Configure MikroORM Logging:** In your MikroORM configuration (e.g., `mikro-orm.config.ts`), set `debug: true` and provide the `MikroOrmLensLogger` as the `loggerFactory`.
+2.  **Configure MikroORM:** No special logger is required for correlation — `attachMikroOrmLens` (next step) captures the request id in-context from the underlying knex driver.
 
     ```ts
     // mikro-orm.config.ts
     import { defineConfig } from "@mikro-orm/postgresql";
-    import { MikroOrmLensLogger } from "@lensjs/watchers";
 
     export default defineConfig({
-      debug: true, // Required: enables query logging
-      loggerFactory: (options) => new MikroOrmLensLogger(options),
-      // ... your other MikroORM options (entities, dbName, etc.)
+      // ... your MikroORM options (entities, dbName, etc.)
     });
     ```
 
-3.  **Integrate with `main.ts`:** In your `main.ts` file, import `createMikroOrmHandler` from `@lensjs/watchers` and pass it to the `queryWatcher` configuration within the `lens` function.
+3.  **Integrate with `main.ts`:** Attach Lens to the MikroORM instance (so queries correlate to their request) and register `createMikroOrmHandler`.
 
     ```ts
     import { NestFactory } from "@nestjs/core";
+    import { MikroORM } from "@mikro-orm/core";
     import { AppModule } from "./app.module.js";
     import { lens } from "@lensjs/nestjs";
-    import { createMikroOrmHandler } from "@lensjs/watchers";
+    import { createMikroOrmHandler, attachMikroOrmLens } from "@lensjs/watchers";
 
     async function bootstrap() {
       const app = await NestFactory.create(AppModule);
+
+      // Captures the request id in-context from the underlying knex driver.
+      attachMikroOrmLens(app.get(MikroORM));
 
       await lens({
         app,
@@ -228,6 +243,8 @@ To integrate MikroORM with the Query Watcher, follow these steps:
     bootstrap();
     ```
 
+    > **Alternative (no correlation):** `MikroOrmLensLogger` remains available as a `loggerFactory` (with `debug: true`) for console-style capture without request correlation. Use `attachMikroOrmLens` **or** the logger, not both.
+
 > **Note:** Transaction queries (`BEGIN`, `COMMIT`, `ROLLBACK`, `SAVEPOINT`) are automatically filtered out by the handler.
 
 ## 5. Custom Handlers
@@ -240,6 +257,7 @@ A custom handler must adhere to the `QueryWatcherHandler` interface and perform 
 
 *   Return a `QueryWatcherHandler` function.
 *   Call the `onQuery` callback function whenever a query is captured, providing the necessary query details.
+*   Query log/event callbacks from most drivers fire from a **detached context** (a native boundary, connection pool, worker, or external emitter) where the async context is already lost. Capture the request id at an **in-context** hook (ORM plugin/hook that runs at query-issue time) with `getCurrentRequestId()` from `@lensjs/core` and pass it as the second argument: `onQuery(entry, requestId)`. The built-in integrations do this for you via `withLensPrisma`, `attachSequelizeLens`, `createLensKyselyPlugin`, and `attachMikroOrmLens`.
 *   Optionally utilize `lensUtils` for common tasks:
     *   `interpolateQuery(sql, params)`: Injects parameters into a SQL query string.
     *   `formatSqlQuery(query)`: Formats a SQL query for better readability.

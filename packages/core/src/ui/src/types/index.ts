@@ -9,17 +9,85 @@ import type {
 export type LensConfig = {
   appName: string;
   path: string;
+  authRequired?: boolean;
   api: {
     requests: string;
     queries: string;
     cache: string;
     exceptions: string;
     mail: string;
+    http: string;
+    event: string;
+    redis: string;
+    fcm: string;
+    stream: string;
+    streamPoll: string;
     truncate: string;
+    login: string;
   };
 };
 
-export type LensEntryType = "request" | "query" | "cache" | "exception" | "mail";
+export type LensEntryType =
+  | "request"
+  | "query"
+  | "cache"
+  | "exception"
+  | "mail"
+  | "http"
+  | "event"
+  | "redis"
+  | "fcm";
+
+export type EventEntry = {
+  name: string;
+  payload?: unknown;
+  createdAt: string;
+};
+
+export type RedisEntry = {
+  command: string;
+  args?: string[];
+  duration: string;
+  status: "success" | "failed";
+  error?: string;
+  createdAt: string;
+};
+
+export type FcmRecipient = {
+  target: string;
+  success: boolean;
+  messageId?: string;
+  error?: string;
+};
+
+export type FcmEntry = {
+  method: string;
+  target?: string;
+  title?: string;
+  body?: string;
+  data?: Record<string, string>;
+  duration: string;
+  status: "success" | "failed";
+  successCount?: number;
+  failureCount?: number;
+  messageId?: string;
+  error?: string;
+  recipients?: FcmRecipient[];
+  createdAt: string;
+};
+
+export type HttpEntry = {
+  method: string;
+  url: string;
+  status?: number;
+  duration: string;
+  createdAt: string;
+  requestHeaders?: Record<string, string>;
+  responseHeaders?: Record<string, string>;
+  requestBody?: unknown;
+  responseBody?: unknown;
+  error?: string;
+};
 export type LanguageTypeOption = "ts" | "dart";
 export type PaginationParams = {
   page: number;
@@ -27,9 +95,10 @@ export type PaginationParams = {
 };
 
 export type PaginatorMeta = {
-  total: number;
-  lastPage: number;
-  currentPage: number;
+  nextCursor: number | null;
+  headCursor: number | null;
+  hasMore: boolean;
+  perPage: number;
 };
 
 export type Paginator<T> = {
@@ -99,6 +168,9 @@ export type GenericLensEntry<T> = {
   data: T;
 };
 
+/** A single entry as delivered by the live-tail stream (any watcher type). */
+export type LiveEntry = GenericLensEntry<Record<string, any>>;
+
 export type ExceptionEntry = {
   name: string;
   message: string;
@@ -128,6 +200,8 @@ export type HasMoreType<T> = {
   hasMore: boolean;
   loading: boolean;
   loadMore: () => Promise<void>;
+  /** True once the live feed dropped entries between polls (high write volume). */
+  hasGap: boolean;
 };
 
 export type RequestTableRow = GenericLensEntry<RequestTableEntry>;
@@ -137,11 +211,23 @@ export type OneRequest = {
   cacheEntries: GenericLensEntry<CacheEntry>[];
   exceptions: ExceptionTableRow[];
   emails: MailTableRow[];
+  httpEntries: HttpTableRow[];
+  eventEntries: EventTableRow[];
+  redisEntries: RedisTableRow[];
+  fcmEntries: FcmTableRow[];
 };
 export type QueryTableRow = GenericLensEntry<QueryEntry>;
 export type OneQuery = GenericLensEntry<QueryEntry>;
 export type CacheTableRow = GenericLensEntry<CacheEntry>;
 export type OneCache = GenericLensEntry<CacheEntry>;
+export type HttpTableRow = GenericLensEntry<HttpEntry>;
+export type OneHttp = GenericLensEntry<HttpEntry>;
+export type EventTableRow = GenericLensEntry<EventEntry>;
+export type OneEvent = GenericLensEntry<EventEntry>;
+export type RedisTableRow = GenericLensEntry<RedisEntry>;
+export type OneRedis = GenericLensEntry<RedisEntry>;
+export type FcmTableRow = GenericLensEntry<FcmEntry>;
+export type OneFcm = GenericLensEntry<FcmEntry>;
 export type ExceptionTableRow = GenericLensEntry<
   Pick<ExceptionEntry, "name" | "message" | "createdAt">
 >;

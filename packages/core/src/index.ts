@@ -9,5 +9,16 @@ export { default as LensWatcher } from "./core/watcher";
 export { getStore as getLensStore } from "./context/context";
 export * as lensUtils from "./utils/index";
 export * as lensExceptionUtils from "./utils/exception";
-export { createEmittery, lensEmitter } from "./utils/event_emitter";
-export { lensContext, handleUncaughExceptions } from "./utils/async_context";
+export {
+  createEmittery,
+  lensEmitter,
+  lensStream,
+} from "./utils/event_emitter";
+export type { LensStreamMessage } from "./utils/event_emitter";
+export { createLensAuth } from "./auth/lens_auth";
+export type { LensAuth } from "./auth/lens_auth";
+export {
+  lensContext,
+  handleUncaughExceptions,
+  getCurrentRequestId,
+} from "./utils/async_context";

@@ -8,7 +8,7 @@ interface FileInfoProps {
 }
 
 export const FileInfo: React.FC<FileInfoProps> = ({ file, line, column }) => (
-  <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 mb-1">
+  <div className="flex items-center gap-2 text-xs text-muted mb-1">
     <FileText className="w-3 h-3" />
     <span className="font-mono truncate max-w-xs" title={file}>
       {file}

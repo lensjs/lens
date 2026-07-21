@@ -1,0 +1,72 @@
+---
+description: How the AI triages and responds to GitHub issues for LensJS. Apply when triaging or answering an issue.
+alwaysApply: false
+---
+
+# Issue Triage
+
+## Purpose
+
+Classify issues consistently, request exactly the missing information, and route each to the
+right package/layer.
+
+## Why it exists
+
+LensJS is a multi-package monorepo; a good triage identifies the affected package early
+(`@lensjs/core` vs an adapter vs `@lensjs/watchers`) and separates real bugs from usage
+questions, so maintainers spend time on the right things.
+
+## Classify each issue
+
+Assign one primary type (and add labels as needed):
+
+- `bug` — something behaves contrary to documented/expected behavior.
+- `feature` — a new capability or enhancement request.
+- `documentation` — docs are missing/wrong/unclear.
+- `question` — usage/how-to; not a defect.
+- `discussion` — open-ended design/direction.
+- `duplicate` — already tracked (link the original).
+- `invalid` — not actionable / not a LensJS issue.
+- `needs-reproduction` — plausible bug without a runnable repro.
+- `needs-more-info` — missing environment/details to proceed.
+- `good-first-issue` — small, well-scoped, low-context.
+- `help-wanted` — actionable but needs a contributor.
+
+Also tag the affected area when known: `core`, `express`, `fastify`, `nestjs`, `adonis`,
+`watchers` (handlers), `ui`, `docs`.
+
+## For bugs, verify
+
+- Reproducible: is there a minimal repro (or one of the `apps/*` examples reproduces it)?
+- Expected vs actual behavior, stated clearly.
+- Environment: Lens package versions, Node version, framework + version, ORM/mailer + version,
+  OS.
+- Affected package(s) and watcher/signal (request/query/cache/mail/exception).
+- Possible root cause and blast radius (core vs single adapter). If capture is involved, check
+  request correlation, `shouldIgnorePath`, and redaction/purge paths.
+
+If a repro or environment is missing, label `needs-reproduction`/`needs-more-info` and ask for
+precisely the missing items — nothing more.
+
+## For feature requests, evaluate
+
+- Architectural fit: does it belong in core, an adapter, or a handler? Does it respect the
+  boundaries in `architecture.mdc`?
+- API consistency: does it match existing naming/config/shapes, or invent a new pattern?
+- Maintenance cost: added surface, dependencies, cross-framework parity burden.
+- Backward compatibility: can it ship as a `minor` (additive) or does it force a `major`?
+- Extensibility: can it be a watcher/store/adapter/handler extension instead of a core change?
+
+## Response format
+
+- **Classification** — type + area labels.
+- **Assessment** — restate the problem/request; confirm or challenge with evidence.
+- **Missing info** — a short, specific checklist (only if needed).
+- **Next step** — proposed action (accept + point to the layer/rule, request repro, close as
+  duplicate/invalid with a reason, or mark good-first-issue with pointers).
+
+## AI must never
+
+- Promise a fix, timeline, or acceptance on behalf of maintainers.
+- Ask for information the reporter already provided.
+- Recommend an implementation that violates a boundary in `architecture.mdc`.

@@ -7,6 +7,7 @@ import {
 } from "../types/index";
 import Database from "libsql";
 import { nowISO } from "@lensjs/date";
+import { lensStream } from "../utils/event_emitter";
 
 const TABLE_NAME = "lens_entries";
 const BYTES_IN_GB = 1024 * 1024 * 1024;
@@ -34,18 +35,40 @@ export default class BetterSqliteStore extends Store {
     timestamp?: string;
     requestId?: string;
   }) {
-    this.connection
+    const id = entry.id ?? randomUUID();
+    const createdAt = entry.timestamp ?? nowISO();
+    const lensEntryId = entry.requestId || null;
+    const minimal = entry.minimal_data ?? {};
+
+    const info = this.connection
       .prepare(
         `INSERT INTO ${TABLE_NAME} (id, data, type, created_at, lens_entry_id, minimal_data) values($id, $data, $type, $created_at, $lens_entry_id, $minimalData)`,
       )
       .run({
-        id: entry.id ?? randomUUID(),
+        id,
         data: this.stringifyData(entry.data),
         type: entry.type,
-        created_at: entry.timestamp ?? nowISO(),
-        lens_entry_id: entry.requestId || null,
-        minimalData: this.stringifyData(entry.minimal_data ?? {}),
+        created_at: createdAt,
+        lens_entry_id: lensEntryId,
+        minimalData: this.stringifyData(minimal),
       });
+
+    // Push to the live-tail stream. Prefer the compact minimal_data; fall back
+    // to the full data for watchers that don't provide one (e.g. queries).
+    try {
+      lensStream.emit("entry", {
+        cursor: Number(info.lastInsertRowid),
+        entry: {
+          id,
+          type: entry.type,
+          created_at: createdAt,
+          lens_entry_id: lensEntryId,
+          data: Object.keys(minimal).length ? minimal : entry.data,
+        },
+      });
+    } catch {
+      // streaming must never break persistence
+    }
 
     this.maybePruneDatabase();
   }
@@ -96,31 +119,119 @@ export default class BetterSqliteStore extends Store {
 
   public async paginate<T>(
     type: WatcherTypeEnum,
-    { page, perPage }: PaginationParams,
+    { cursor, after, perPage }: PaginationParams,
     includeFullData: boolean = true,
   ): Promise<{
     meta: {
-      total: number;
-      lastPage: number;
-      currentPage: number;
+      nextCursor: number | null;
+      headCursor: number | null;
+      hasMore: boolean;
+      perPage: number;
     };
     data: T;
   }> {
-    const offset = (page - 1) * perPage;
-    const query = `${this.getSelectedColumns(
-      includeFullData,
-    )} FROM ${TABLE_NAME} WHERE type = ? ORDER BY created_at DESC LIMIT ? OFFSET ?`;
-    const count = await this.count(type);
-    const rows = this.connection.prepare(query).all(type, perPage, offset);
-    const mappedRows = this.mapRows(rows, includeFullData);
+    // Cursor pagination on the implicit rowid (monotonic with insertion order,
+    // indexed by default). Ordering by rowid DESC yields newest-first without a
+    // COUNT(*) — we fetch one extra row to cheaply detect whether more exist.
+    // `after` fetches rows NEWER than a cursor (live delta polling); `cursor`
+    // fetches rows OLDER than a cursor (infinite scroll); neither = newest page.
+    const columns = this.getSelectedColumns(includeFullData).replace(
+      /^SELECT /,
+      "SELECT rowid AS __cursor, ",
+    );
+    const limit = perPage + 1;
+
+    let rows: any[];
+    if (after != null) {
+      rows = this.connection
+        .prepare(
+          `${columns} FROM ${TABLE_NAME} WHERE type = ? AND rowid > ? ORDER BY rowid DESC LIMIT ?`,
+        )
+        .all(type, after, limit);
+    } else if (cursor != null) {
+      rows = this.connection
+        .prepare(
+          `${columns} FROM ${TABLE_NAME} WHERE type = ? AND rowid < ? ORDER BY rowid DESC LIMIT ?`,
+        )
+        .all(type, cursor, limit);
+    } else {
+      rows = this.connection
+        .prepare(
+          `${columns} FROM ${TABLE_NAME} WHERE type = ? ORDER BY rowid DESC LIMIT ?`,
+        )
+        .all(type, limit);
+    }
+
+    const hasMore = rows.length > perPage;
+    const pageRows = hasMore ? rows.slice(0, perPage) : rows;
+    const cursorAt = (row: any) => Number((row as { __cursor: number }).__cursor);
+
+    // Rows are DESC: [0] is the newest (head), [last] is the oldest of the page.
+    const headCursor = pageRows.length
+      ? cursorAt(pageRows[0])
+      : (after ?? null);
+    const nextCursor =
+      after != null
+        ? null // delta paging does not drive older pagination
+        : hasMore
+          ? cursorAt(pageRows[pageRows.length - 1])
+          : null;
 
     return {
-      meta: {
-        total: count,
-        lastPage: Math.ceil(count / perPage),
-        currentPage: page,
-      },
-      data: mappedRows as T,
+      meta: { nextCursor, headCursor, hasMore, perPage },
+      data: this.mapRows(pageRows, includeFullData) as T,
+    };
+  }
+
+  override async latest<T>(
+    { cursor, after, perPage }: PaginationParams,
+    includeFullData: boolean = false,
+  ): Promise<{
+    meta: {
+      nextCursor: number | null;
+      headCursor: number | null;
+      hasMore: boolean;
+      perPage: number;
+    };
+    data: T;
+  }> {
+    // Same cursor/delta semantics as `paginate`, but across ALL watcher types —
+    // the source for the unified live-tail feed and its polling fallback.
+    const columns = this.getSelectedColumns(includeFullData).replace(
+      /^SELECT /,
+      "SELECT rowid AS __cursor, ",
+    );
+    const limit = perPage + 1;
+
+    let rows: any[];
+    if (after != null) {
+      rows = this.connection
+        .prepare(`${columns} FROM ${TABLE_NAME} WHERE rowid > ? ORDER BY rowid DESC LIMIT ?`)
+        .all(after, limit);
+    } else if (cursor != null) {
+      rows = this.connection
+        .prepare(`${columns} FROM ${TABLE_NAME} WHERE rowid < ? ORDER BY rowid DESC LIMIT ?`)
+        .all(cursor, limit);
+    } else {
+      rows = this.connection
+        .prepare(`${columns} FROM ${TABLE_NAME} ORDER BY rowid DESC LIMIT ?`)
+        .all(limit);
+    }
+
+    const hasMore = rows.length > perPage;
+    const pageRows = hasMore ? rows.slice(0, perPage) : rows;
+    const cursorAt = (row: any) => Number((row as { __cursor: number }).__cursor);
+    const headCursor = pageRows.length ? cursorAt(pageRows[0]) : (after ?? null);
+    const nextCursor =
+      after != null
+        ? null
+        : hasMore
+          ? cursorAt(pageRows[pageRows.length - 1])
+          : null;
+
+    return {
+      meta: { nextCursor, headCursor, hasMore, perPage },
+      data: this.mapRows(pageRows, includeFullData) as T,
     };
   }
 

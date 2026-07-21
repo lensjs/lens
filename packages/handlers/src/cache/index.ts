@@ -1,4 +1,4 @@
-import { CacheEntry, lensContext, lensEmitter } from "@lensjs/core";
+import { CacheEntry, getCurrentRequestId, lensEmitter } from "@lensjs/core";
 import { nowISO } from "@lensjs/date";
 
 export const emitCacheEvent = (data: Omit<CacheEntry, "requestId" | 'createdAt'>) => {
@@ -6,6 +6,6 @@ export const emitCacheEvent = (data: Omit<CacheEntry, "requestId" | 'createdAt'>
     action: data.action,
     createdAt: nowISO(),
     data: "data" in data ? (data.data as any) : {},
-    requestId: lensContext.getStore()?.requestId,
+    requestId: getCurrentRequestId(),
   });
 };

@@ -2,7 +2,6 @@ import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import type {
   ApiResponse,
   OneRequest,
-  PaginatorMeta,
   QueryEntry,
   QueryTableRow,
   RequestTableRow,
@@ -11,47 +10,9 @@ import type {
 } from "../types";
 import { prepareApiUrl } from "../utils/api";
 import { useConfig } from "../utils/context";
+import { fetchJson, withQueryParams } from "../utils/apiClient";
 
-export const DEFAULT_META: PaginatorMeta = {
-  currentPage: 1,
-  lastPage: 1,
-  total: 0,
-};
-
-async function fetchJson<TData>(
-  url: string,
-  options?: RequestInit,
-): Promise<ApiResponse<TData>> {
-  const res = await fetch(url, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
-
-  if (!res.ok) {
-    throw new Error(`Failed to fetch: ${url}`);
-  }
-
-  return res.json();
-}
-
-const withQueryParams = (
-  endpoint: string,
-  params?: Record<string, unknown>,
-) => {
-  const searchParams = new URLSearchParams(
-    Object.entries(params || {}).reduce(
-      (acc, [key, value]) => {
-        if (value !== undefined && value !== null) {
-          acc[key] = String(value);
-        }
-        return acc;
-      },
-      {} as Record<string, string>,
-    ),
-  );
-
-  return `${endpoint}${searchParams.toString() ? `?${searchParams}` : ""}`;
-};
+export { DEFAULT_META } from "../utils/apiClient";
 
 export function useAllRequests(
   page?: number,

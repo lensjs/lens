@@ -1,0 +1,86 @@
+---
+description: Vitest testing conventions for LensJS
+globs: packages/**/tests/**/*.ts
+alwaysApply: false
+---
+
+# Testing (Vitest)
+
+## Purpose
+
+Make behavior verifiable and regressions cheap to catch, using one testing style across the
+monorepo.
+
+## Why it exists
+
+CI runs `pnpm test` on every push/PR to `main` ([ci.yml](mdc:.github/workflows/ci.yml)), and
+Turbo runs `test` after `^build` + `check-types` ([turbo.json](mdc:turbo.json)). Tests are the
+contract for watcher/store/adapter/handler behavior.
+
+## Layout & naming
+
+- Tests live in each package's `tests/` folder. Core mirrors `src/` (e.g.
+  `src/watchers/cache_watcher.ts` -> `tests/watchers/cache_watcher.test.ts`). Handlers use a
+  flat `tests/` with one file per tool (`prisma.test.ts`, `nodemailer.test.ts`).
+- Name files `*.test.ts`. Run with `pnpm test` (per package: `vitest run`).
+
+## Conventions
+
+- Import explicitly from `vitest`: `describe`, `it`, `expect`, `vi`, `beforeEach`, `Mock` — do
+  not rely on globals in core/handlers.
+- Nest `describe` for the unit and each method; write behavior-focused `it("should ...")` names.
+- Reset state in `beforeEach(() => vi.clearAllMocks())`; restore timers/spies in `afterEach`.
+- Never hit a real database, filesystem, network, or clock.
+
+## Mocking the store & context
+
+Mock the store by extending the abstract `Store` with `vi.fn()` members, and mock the context
+module so `getStore()` returns it — see
+[request_watcher.test.ts](mdc:packages/core/tests/watchers/request_watcher.test.ts):
+
+```typescript
+class MockStore extends Store {
+  initialize = vi.fn();
+  save = vi.fn();
+  // ...all abstract members as vi.fn()
+}
+vi.mock("../../src/context/context", () => ({ getStore: vi.fn() }));
+```
+
+Assert on the EXACT persisted payload (including normalized/redacted fields):
+
+```typescript
+expect(mockStore.save).toHaveBeenCalledWith({
+  id: "request-1",
+  type: WatcherTypeEnum.REQUEST,
+  minimal_data: { /* ... */ },
+  data: { /* headers lowercased, secrets "*******" */ },
+});
+```
+
+## Testing handlers (event/hook based)
+
+Mock the workspace boundaries (`vi.mock("@lensjs/core", ...)`, `vi.mock("@lensjs/date", ...)`
+for deterministic time, `vi.mock("../src/utils/emitter", ...)`), run the factory, then CAPTURE
+the registered listener and invoke it to simulate an event:
+
+```typescript
+const listener = prismaMock.$on.mock.calls[0][1];
+await listener(event);
+expect(onQueryMock).toHaveBeenCalledWith({ query, duration, createdAt, type });
+```
+
+Test pure helpers (e.g. `normalizeSql`, `sequelizeEventHandler`, `buildMimeParts`) in isolated
+`describe` blocks; use `it.each([...])` for table-driven cases; use `vi.useFakeTimers()` +
+`vi.setSystemTime(...)` when a handler stamps its own time.
+
+## Requirement
+
+Add or update tests for ANY bug fix or new behavior in `@lensjs/core`, adapters, and handlers.
+A behavior change without a test change should not merge.
+
+## AI must never
+
+- Introduce a test that depends on a real DB/network/clock, or on wall-clock time.
+- Assert with loose matchers when the exact payload is knowable.
+- Ship a behavior change in a watcher/store/adapter/handler without a corresponding test.

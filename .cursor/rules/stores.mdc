@@ -1,0 +1,87 @@
+---
+description: How the persistence layer works and how to build a custom Store
+globs: packages/core/src/stores/**/*.ts,packages/core/src/abstracts/store.ts,packages/core/src/mixins/**/*.ts
+alwaysApply: false
+---
+
+# Stores
+
+## Purpose
+
+Define the persistence contract so watchers can save and the `ApiController` can read without
+knowing which backend is in use.
+
+## Why it exists
+
+The dashboard/API talk to ONE `Store` interface. Swapping SQLite for another backend must be a
+drop-in. The default store is also queued for throughput, so the read/write contract and the
+queuing behavior must stay stable.
+
+## The Store contract
+
+Extend the abstract [store.ts](mdc:packages/core/src/abstracts/store.ts). Abstract members you
+MUST implement: `initialize()`, `save(entry)`, `getAllRequests()`, `getAllQueries()`,
+`getAllCacheEntries()`, `allByRequestId()`, `find()`, `truncate()`, `paginate<T>()`, `count()`.
+
+Provided (override only if the backend supports them): `getAllExceptions()` and
+`getAllEmails()` default to `defaultMinimalPaginate()` (empty page). Helpers `stringifyData()`
+and `defaultMinimalPaginate()` are provided — reuse them.
+
+- `save(entry)` accepts `{ id?, data, minimal_data?, type, timestamp?, requestId? }` and must
+  tolerate a missing `id`/`timestamp` (generate a UUID / use `nowISO()`), mirroring
+  [better_sqlite.ts](mdc:packages/core/src/stores/better_sqlite.ts).
+- List reads use `minimal_data`; detail reads (`find`, `getAllQueries`) use full `data`. The
+  `includeFullData` flag + `getSelectedColumns()` implement this split — preserve it.
+- `paginate<T>()` returns `Paginator<T>` (`{ meta: { total, lastPage, currentPage }, data }`).
+
+## Default store: composition, not inheritance
+
+The shipped store is composed with the `compose()` helper
+([compose.ts](mdc:packages/core/src/utils/compose.ts)):
+
+```typescript
+// stores/queued_sqlite.ts
+export default class QueuedSqliteStore extends compose(BetterSqliteStore, QueuedStore) {}
+```
+
+- [better_sqlite.ts](mdc:packages/core/src/stores/better_sqlite.ts): `libsql`-backed table
+  `lens_entries`, WAL mode, indexes on `(id, type)` and `lens_entry_id`, pagination, and
+  size-based pruning gated by `dbMaxSizeGb`/`dbPruneSizeGb`.
+- [queued_store.ts](mdc:packages/core/src/mixins/queued_store.ts): a class mixin that buffers
+  `save()` into a `Denque` queue and flushes batches on an interval; registers `SIGINT`/
+  `SIGTERM` to drain then exit. Tunables come from `QueuedStoreConfig`
+  ([types/index.ts](mdc:packages/core/src/types/index.ts)): `batchSize`, `processIntervalMs`,
+  `warnThreshold`, `preallocate`, `dbMaxSizeGb`, `dbPruneSizeGb`.
+
+Write new cross-cutting store behavior (batching, retry, metrics) as a mixin and `compose()` it
+— do not fork `BetterSqliteStore`.
+
+## Wiring
+
+- `Lens.getStore()` returns the configured store or lazily builds the default
+  `QueuedSqliteStore` ([lens.ts](mdc:packages/core/src/core/lens.ts)).
+- A custom store is injected via `Lens.setStore(new MyStore(...))` before `Lens.start()`.
+- Export it from [stores/index.ts](mdc:packages/core/src/stores/index.ts).
+
+## When to create a store
+
+Only for a new persistence backend (Postgres, Redis, remote API, etc.). Implement the full
+abstract surface, keep the `minimal_data`/`data` split and `Paginator` shape, call
+`initialize()` before use, and clean up resources on shutdown. Do not create a store for a
+tweak that belongs in `QueuedStoreConfig` or a mixin.
+
+## Security & safety
+
+- Never persist secrets/PII. Redaction happens in the watcher BEFORE `save()`
+  (`RequestWatcher.hideSensitive`) — a store must not undo it or log raw payloads.
+- Never `console.log` entry contents; only operational errors (as
+  [queued_store.ts](mdc:packages/core/src/mixins/queued_store.ts) does).
+- Keep writes non-blocking to the host app (queue + batch); a slow store must not stall
+  request handling.
+
+## AI must never
+
+- Make a watcher or adapter talk to a concrete store — everything goes through `getStore()`.
+- Change the `save()` entry shape or the `Paginator`/`ApiResponse` shapes without a `major`
+  changeset (the dashboard depends on them).
+- Duplicate `BetterSqliteStore` to add behavior that should be a `compose()` mixin.

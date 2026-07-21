@@ -14,6 +14,10 @@ export default defineConfig({
         items: [
           { text: "What is Lens?", link: "/getting-started/what-is-lens" },
           { text: "Quick Start", link: "/getting-started/quick-start" },
+          {
+            text: "Securing the Dashboard",
+            link: "/getting-started/securing-the-dashboard",
+          },
         ],
       },
       {
@@ -142,14 +146,34 @@ export default defineConfig({
                 link: "/handlers/mail/express",
               },
               {
-                text: "NestJS",
-                link: "/handlers/mail/nestjs",
-              },
-              {
                 text: "Fastify",
                 link: "/handlers/mail/fastify",
               },
+              {
+                text: "AdonisJS",
+                link: "/handlers/mail/adonis",
+              },
+              {
+                text: "NestJS",
+                link: "/handlers/mail/nestjs",
+              },
             ],
+          },
+          {
+            text: "HTTP Client",
+            link: "/handlers/http",
+          },
+          {
+            text: "Events",
+            link: "/handlers/event",
+          },
+          {
+            text: "Redis",
+            link: "/handlers/redis",
+          },
+          {
+            text: "FCM",
+            link: "/handlers/fcm",
           },
         ],
       },

@@ -1,6 +1,6 @@
 import { Express } from "express";
 import { QueryWatcherHandler } from "@lensjs/watchers";
-import { LensConfig, UserEntry } from "@lensjs/core";
+import { LensConfig, LensAuthConfig, UserEntry } from "@lensjs/core";
 import { Request } from "express";
 
 export type ExpressAdapterConfig = {
@@ -11,6 +11,10 @@ export type ExpressAdapterConfig = {
   cacheWatcherEnabled?: boolean;
   exceptionWatcherEnabled?: boolean;
   mailWatcherEnabled?: boolean;
+  httpWatcherEnabled?: boolean;
+  eventWatcherEnabled?: boolean;
+  redisWatcherEnabled?: boolean;
+  fcmWatcherEnabled?: boolean;
   queryWatcher?: {
     enabled: boolean;
     handler: QueryWatcherHandler;
@@ -18,6 +22,8 @@ export type ExpressAdapterConfig = {
   isAuthenticated?: (request: Request) => Promise<boolean>;
   getUser?: (request: Request) => Promise<UserEntry>;
   getRequestIp?: (request: Request) => string;
+  /** Password-lock the dashboard. Setting `auth.password` enables it. */
+  auth?: LensAuthConfig;
 } & Partial<LensConfig>;
 
 export type RequiredExpressAdapterConfig = Required<ExpressAdapterConfig> & {
@@ -25,4 +31,5 @@ export type RequiredExpressAdapterConfig = Required<ExpressAdapterConfig> & {
   isAuthenticated?: ExpressAdapterConfig["isAuthenticated"];
   getUser?: ExpressAdapterConfig["getUser"];
   getRequestIp?: (request: Request) => string;
+  auth?: ExpressAdapterConfig["auth"];
 };

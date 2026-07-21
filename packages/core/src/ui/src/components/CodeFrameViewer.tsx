@@ -28,7 +28,7 @@ const SyntaxHighlighter: React.FC<{ code: string }> = ({ code }) => {
   } catch (error) {
     console.error("Error rendering syntax highlighter:", error);
     return (
-      <code className="font-mono text-sm leading-5 whitespace-pre text-gray-800 dark:text-gray-200">
+      <code className="font-mono text-sm leading-5 whitespace-pre text-fg">
         {code}
       </code>
     );
@@ -41,19 +41,19 @@ const CodeFrameHeader: React.FC<{
   line: number;
   column: number;
 }> = ({ file, line, column }) => (
-  <div className="px-4 py-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border-b border-gray-200 dark:border-gray-600">
+  <div className="px-4 py-2 bg-gradient-to-r from-surface-2 to-elevated border-b border-border">
     <div className="flex items-center gap-3 text-sm">
       <div className="flex items-center gap-2">
-        <AlertCircle className="w-4 h-4 text-red-500 dark:text-red-400" />
-        <span className="font-semibold text-red-600 dark:text-red-400">
+        <AlertCircle className="w-4 h-4 text-danger" />
+        <span className="font-semibold text-danger">
           Error Location
         </span>
       </div>
-      <div className="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
-      <div className="font-mono text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-xs truncate max-w-xs" title={file}>
+      <div className="h-4 w-px bg-border-strong"></div>
+      <div className="font-mono text-fg bg-elevated px-2 py-1 rounded text-xs truncate max-w-xs" title={file}>
         {file || "Unknown file"}
       </div>
-      <span className="text-gray-500 dark:text-gray-400 text-xs">
+      <span className="text-muted text-xs">
         Line {line || "?"}:{column || "?"}
       </span>
     </div>
@@ -72,7 +72,7 @@ const ErrorIndicator: React.FC<{
         left: `${Math.max(0, (column - 1) * 0.6)}em`,
       }}
     >
-      <span className="text-red-500 -mt-2 dark:text-red-400 font-semibold  font-mono">
+      <span className="text-danger -mt-2 font-semibold font-mono">
         {"^"}
       </span>
     </div>
@@ -89,16 +89,16 @@ const CodeLine: React.FC<{
   <div
     className={`flex group ${
       isErrorLine
-        ? "bg-red-50 dark:bg-red-950/30"
-        : "hover:bg-gray-50 dark:hover:bg-gray-800/30"
+        ? "bg-danger/10"
+        : "hover:bg-surface-2/30"
     }`}
   >
     {/* Line number */}
     <div
       className={`flex-shrink-0 w-16 py-1 px-3 text-right select-none text-sm font-mono tabular-nums border-r ${
         isErrorLine
-          ? "text-red-500 dark:text-red-400 font-bold bg-red-100 dark:bg-red-900/40 border-red-300 dark:border-red-700"
-          : "text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 group-hover:bg-gray-100 dark:group-hover:bg-gray-700"
+          ? "text-danger font-bold bg-danger/20 border-danger/40"
+          : "text-muted bg-surface-2 border-border group-hover:bg-elevated"
       }`}
     >
       {lineNumber}
@@ -120,10 +120,10 @@ const CodeLine: React.FC<{
 const CodeFrameFooter: React.FC<{
   totalLines: number;
 }> = ({ totalLines }) => (
-  <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 text-xs">
-    <div className="flex items-center justify-between text-gray-600 dark:text-gray-400">
+  <div className="px-4 py-2 bg-surface-2 border-t border-border text-xs">
+    <div className="flex items-center justify-between text-muted">
       <span className="flex items-center gap-2">
-        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+        <div className="w-2 h-2 bg-danger rounded-full animate-pulse"></div>
         Error line highlighted :<span>{totalLines} lines of context</span>
       </span>
     </div>
@@ -136,7 +136,7 @@ const CodeFrameFooter: React.FC<{
 const EmptyState: React.FC<{
   message: string;
 }> = ({ message }) => (
-  <div className="p-4 text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg">
+  <div className="p-4 text-center text-muted bg-surface-2 rounded-lg">
     <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
     <p>{message}</p>
   </div>
@@ -160,7 +160,7 @@ const CodeFrameViewer: React.FC<CodeFrameViewerProps> = ({ codeFrame }) => {
     const errorLineIndex = (pre || []).length;
 
     return (
-      <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-900 shadow-lg">
+      <div className="border border-border rounded-lg overflow-hidden bg-surface shadow-lg">
         <CodeFrameHeader
           file={file || ""}
           line={line || 0}

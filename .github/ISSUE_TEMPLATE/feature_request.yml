@@ -1,0 +1,61 @@
+name: Feature Request
+description: Propose a new capability or enhancement for LensJS
+title: "[Feature]: "
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! Features are evaluated for architectural fit, API consistency,
+        maintenance cost, backward compatibility, and extensibility (see
+        `.cursor/rules/issues.mdc`).
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What are you trying to do, and what is missing or painful today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the API/behavior you'd like. Sketch config or code if you can.
+    validations:
+      required: true
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Where should this live?
+      description: Which layer do you think this belongs to?
+      options:
+        - "core (framework/driver-agnostic)"
+        - "a framework adapter (express/fastify/nestjs/adonis)"
+        - "a handler (@lensjs/watchers: prisma/kysely/sequelize/nodemailer)"
+        - "dashboard UI"
+        - "not sure"
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches, workarounds, or prior art.
+    validations:
+      required: false
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Backward compatibility
+      description: Can this be additive (minor), or would it change/remove existing public API (major)?
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Confirmations
+      options:
+        - label: I searched existing issues/discussions and this is not a duplicate.
+          required: true
+        - label: This fits LensJS's scope (observability for Node.js apps) and respects its package boundaries.
+          required: false

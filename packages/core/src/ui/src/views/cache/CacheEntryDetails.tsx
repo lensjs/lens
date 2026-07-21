@@ -15,24 +15,24 @@ export default function CacheEntryView({ data }: { data: OneCache }) {
           value: (
             <Link
               to={`${getRoutesPaths(useConfig()).REQUESTS}/${data.lens_entry_id}`}
-              className="text-blue-600 hover:underline font-semibold"
+              className="text-accent hover:text-accent-hover hover:underline font-semibold"
             >
               View Request
             </Link>
           ),
-          className: "text-gray-900 dark:text-gray-100",
+          className: "text-fg",
         }
       : null,
     {
       label: "Operation",
       value: <CacheActionBadge action={data.data.action} />,
-      className: "text-gray-900 dark:text-gray-100",
+      className: "text-fg",
     },
     data.data.data.key
       ? {
           label: "Key",
           value: data.data.data.key ?? "__",
-          className: "text-gray-900 dark:text-gray-100",
+          className: "text-fg",
         }
       : null,
   ].filter((i) => !!i);

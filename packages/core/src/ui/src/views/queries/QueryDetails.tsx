@@ -14,27 +14,27 @@ export default function QueryDetails({ query }: { query: OneQuery }) {
       value: (
         <Link
           to={`${getRoutesPaths(useConfig()).REQUESTS}/${query.lens_entry_id}`}
-          className="text-blue-600 hover:underline font-semibold"
+          className="text-accent hover:text-accent-hover hover:underline font-semibold"
         >
           View Request
         </Link>
       ),
-      className: "text-gray-900 dark:text-gray-100",
+      className: "text-fg",
     },
     {
       label: "Time",
       value: <span>{formatDateWithTimeAgo(query.data.createdAt)}</span>,
-      className: "text-gray-900 dark:text-gray-100",
+      className: "text-fg",
     },
     {
       label: "Duration",
       value: <span>{query.data.duration}</span>,
-      className: "text-gray-900 dark:text-gray-100",
+      className: "text-fg",
     },
     {
       label: "Provider",
       value: <span>{query.data.type}</span>,
-      className: "text-gray-900 dark:text-gray-100",
+      className: "text-fg",
     },
   ].filter((item) => !!item);
 

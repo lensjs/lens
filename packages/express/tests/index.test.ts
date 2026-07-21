@@ -102,6 +102,7 @@ describe("lens()", () => {
       appName: "Lens",
       enabled: true,
       path: "/lens",
+      authEnabled: false,
     });
   });
 

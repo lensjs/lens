@@ -19,6 +19,7 @@ vi.mock("@lensjs/core", () => ({
       (sql, provider) => `formatted(${sql}, ${provider})`,
     ),
   },
+  getCurrentRequestId: vi.fn(() => "test-request-id"),
 }));
 
 vi.mock("@lensjs/date", () => ({
@@ -73,7 +74,7 @@ describe("createMikroOrmHandler", () => {
       duration: "10.5 ms",
       createdAt: "2025-09-18T12:00:00.000Z",
       type: "postgresql",
-    });
+    }, "test-request-id");
   });
 
   it("should handle undefined took as '0.0 ms'", async () => {
@@ -91,6 +92,7 @@ describe("createMikroOrmHandler", () => {
       expect.objectContaining({
         duration: "0.0 ms",
       }),
+      "test-request-id",
     );
   });
 
@@ -184,6 +186,7 @@ describe("createMikroOrmHandler", () => {
 
       expect(onQueryMock).toHaveBeenCalledWith(
         expect.objectContaining({ type: provider }),
+        "test-request-id",
       );
     }
   });

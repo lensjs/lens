@@ -7,6 +7,10 @@ const defaultRequest: OneRequest = {
   cacheEntries: [],
   exceptions: [],
   emails: [],
+  httpEntries: [],
+  eventEntries: [],
+  redisEntries: [],
+  fcmEntries: [],
   request: {
     created_at: "",
     data: {
@@ -52,9 +56,9 @@ export default function useRequests() {
     [getRequestById]
   );
   const fetchRequests = useCallback(
-    async (page?: number) => {
+    async (cursor?: number | null) => {
       setLoading(true);
-      getAllRequests(page)
+      getAllRequests(cursor)
         .then((res) => {
           setRequests(res.data!);
           setMeta(res.meta!);

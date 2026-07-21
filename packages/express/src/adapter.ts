@@ -9,7 +9,17 @@ import {
   lensContext,
   CacheWatcher,
   lensEmitter,
+  lensStream,
+  getLensStore,
   MailWatcher,
+  HttpWatcher,
+  EventWatcher,
+  RedisWatcher,
+  FcmWatcher,
+  createLensAuth,
+  type LensAuth,
+  type LensEntry,
+  type LensStreamMessage,
 } from "@lensjs/core";
 import { RequiredExpressAdapterConfig } from "./types";
 import { Express, Request, Response } from "express";
@@ -21,6 +31,7 @@ import { nowISO } from "@lensjs/date";
 export class ExpressAdapter extends LensAdapter {
   protected app!: Express;
   protected config!: RequiredExpressAdapterConfig;
+  private auth?: LensAuth;
 
   constructor({ app }: { app: Express }) {
     super();
@@ -30,6 +41,18 @@ export class ExpressAdapter extends LensAdapter {
   public setConfig(config: RequiredExpressAdapterConfig) {
     this.config = config;
     return this;
+  }
+
+  private getAuth(): LensAuth {
+    if (!this.auth) {
+      this.auth = createLensAuth(this.config?.auth);
+    }
+    return this.auth;
+  }
+
+  private lensApiPath(suffix: string): string {
+    const base = this.config.path.replace(/^\/+|\/+$/g, "");
+    return this.normalizePath(`/${base}/${suffix.replace(/^\/+/, "")}`);
   }
 
   setup(): void {
@@ -55,15 +78,51 @@ export class ExpressAdapter extends LensAdapter {
             void this.watchMail(watcher as MailWatcher);
           }
           break;
+        case WatcherTypeEnum.HTTP:
+          if (this.config.httpWatcherEnabled) {
+            void this.watchHttp(watcher as HttpWatcher);
+          }
+          break;
+        case WatcherTypeEnum.EVENT:
+          if (this.config.eventWatcherEnabled) {
+            void this.watchEvent(watcher as EventWatcher);
+          }
+          break;
+        case WatcherTypeEnum.REDIS:
+          if (this.config.redisWatcherEnabled) {
+            void this.watchRedis(watcher as RedisWatcher);
+          }
+          break;
+        case WatcherTypeEnum.FCM:
+          if (this.config.fcmWatcherEnabled) {
+            void this.watchFcm(watcher as FcmWatcher);
+          }
+          break;
       }
     }
   }
 
   registerRoutes(routes: RouteDefinition[]): void {
+    const auth = this.getAuth();
+
+    if (auth.enabled) {
+      this.registerLoginRoute(auth);
+    }
+
     routes.forEach((route) => {
       this.app[route.method.toLowerCase() as RouteHttpMethod](
         this.normalizePath(route.path),
         async (req: Request, res: Response) => {
+          if (
+            auth.enabled &&
+            route.path !== "/lens-config" &&
+            !auth.authorize(req.headers["authorization"])
+          ) {
+            return res
+              .status(401)
+              .json({ status: 401, message: "Unauthorized", data: null });
+          }
+
           const result = await route.handler({
             params: req.params,
             qs: req.query,
@@ -72,6 +131,140 @@ export class ExpressAdapter extends LensAdapter {
         },
       );
     });
+
+    this.registerStreamRoute(auth);
+  }
+
+  /**
+   * Server-Sent Events live tail. Fed by the in-process `lensStream`, with
+   * coalescing (throttled flush + bounded buffer → a "gap" event under overload),
+   * heartbeats, `Last-Event-ID`/`?after=` backfill, and `?token=` auth (the
+   * browser `EventSource` API can't send an Authorization header).
+   */
+  private registerStreamRoute(auth: LensAuth): void {
+    if (!this.config?.path) return;
+
+    this.app.get(
+      this.lensApiPath("api/stream"),
+      async (req: Request, res: Response) => {
+        if (auth.enabled) {
+          const token =
+            typeof req.query.token === "string" ? req.query.token : "";
+          if (!auth.authorize(token)) {
+            return res
+              .status(401)
+              .json({ status: 401, message: "Unauthorized", data: null });
+          }
+        }
+
+        res.writeHead(200, {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache, no-transform",
+          Connection: "keep-alive",
+          "X-Accel-Buffering": "no",
+        });
+        res.write("retry: 3000\n\n");
+        (res as unknown as { flushHeaders?: () => void }).flushHeaders?.();
+
+        const FLUSH_MS = 250;
+        const MAX_BUFFER = 200;
+        let buffer: LensEntry[] = [];
+        let dropped = 0;
+        let lastCursor = 0;
+
+        // Subscribe first so entries arriving during backfill are not lost
+        // (the client de-dupes any overlap by id).
+        const onEntry = (msg: LensStreamMessage) => {
+          buffer.push(msg.entry);
+          if (msg.cursor > lastCursor) lastCursor = msg.cursor;
+          if (buffer.length > MAX_BUFFER) {
+            dropped += buffer.length - MAX_BUFFER;
+            buffer = buffer.slice(buffer.length - MAX_BUFFER);
+          }
+        };
+        lensStream.on("entry", onEntry);
+
+        // Backfill anything missed since the client's last seen cursor.
+        const resumeFrom = Number(
+          req.headers["last-event-id"] ?? req.query.after,
+        );
+        if (Number.isInteger(resumeFrom) && resumeFrom > 0) {
+          try {
+            const backfill = await getLensStore().latest<
+              Omit<LensEntry, "data">[]
+            >({ after: resumeFrom, perPage: 100 }, false);
+            if (backfill.data?.length) {
+              lastCursor = Math.max(lastCursor, backfill.meta.headCursor ?? 0);
+              res.write(
+                `id: ${lastCursor}\nevent: entries\ndata: ${JSON.stringify(
+                  backfill.data,
+                )}\n\n`,
+              );
+            }
+          } catch {
+            // best-effort backfill; live stream continues regardless
+          }
+        }
+
+        const flush = () => {
+          if (dropped > 0) {
+            res.write(`event: gap\ndata: ${JSON.stringify({ dropped })}\n\n`);
+            dropped = 0;
+          }
+          if (buffer.length) {
+            const batch = buffer;
+            buffer = [];
+            res.write(
+              `id: ${lastCursor}\nevent: entries\ndata: ${JSON.stringify(
+                batch,
+              )}\n\n`,
+            );
+          }
+        };
+
+        const flushTimer = setInterval(flush, FLUSH_MS);
+        const heartbeat = setInterval(() => res.write(`: ping\n\n`), 15_000);
+
+        req.on("close", () => {
+          lensStream.off("entry", onEntry);
+          clearInterval(flushTimer);
+          clearInterval(heartbeat);
+          res.end();
+        });
+      },
+    );
+  }
+
+  private registerLoginRoute(auth: LensAuth): void {
+    this.app.post(
+      this.lensApiPath("api/auth/login"),
+      express.json(),
+      async (req: Request, res: Response) => {
+        const ip = this.config.getRequestIp?.(req) ?? this.getIp(req);
+        const result = auth.attemptLogin(ip, (req.body ?? {}).password);
+
+        if (result.ok) {
+          return res.status(200).json({
+            status: 200,
+            message: "Authenticated",
+            data: { token: result.token, expiresIn: result.expiresIn },
+          });
+        }
+
+        if (result.retryAfter != null) {
+          res.setHeader("Retry-After", String(result.retryAfter));
+          return res.status(429).json({
+            status: 429,
+            message: "Too many attempts. Please try again later.",
+            data: null,
+          });
+        }
+
+        return res
+          .status(401)
+          .json({ status: 401, message: "Invalid credentials", data: null });
+      },
+    );
   }
 
   serveUI(
@@ -117,13 +310,45 @@ export class ExpressAdapter extends LensAdapter {
     });
   }
 
+  private async watchHttp(watcher: HttpWatcher) {
+    if (!this.config.httpWatcherEnabled) return;
+
+    lensEmitter.on("http", async (data) => {
+      await watcher?.log(data);
+    });
+  }
+
+  private async watchEvent(watcher: EventWatcher) {
+    if (!this.config.eventWatcherEnabled) return;
+
+    lensEmitter.on("event", async (data) => {
+      await watcher?.log(data);
+    });
+  }
+
+  private async watchRedis(watcher: RedisWatcher) {
+    if (!this.config.redisWatcherEnabled) return;
+
+    lensEmitter.on("redis", async (data) => {
+      await watcher?.log(data);
+    });
+  }
+
+  private async watchFcm(watcher: FcmWatcher) {
+    if (!this.config.fcmWatcherEnabled) return;
+
+    lensEmitter.on("fcm", async (data) => {
+      await watcher?.log(data);
+    });
+  }
+
   private async watchQueries(watcher: QueryWatcher) {
     if (!this.config.queryWatcher.enabled) return;
 
     const handler = this.config.queryWatcher.handler;
 
     await handler({
-      onQuery: async (query) => {
+      onQuery: async (query, requestId) => {
         const queryPayload = {
           query: query.query,
           duration: query.duration || "0 ms",
@@ -133,7 +358,7 @@ export class ExpressAdapter extends LensAdapter {
 
         await watcher?.log({
           data: queryPayload,
-          requestId: lensContext.getStore()?.requestId,
+          requestId: requestId ?? lensContext.getStore()?.requestId,
         });
       },
     });

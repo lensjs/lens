@@ -1,11 +1,14 @@
+import { LensLogo } from "../LensLogo";
+
 const LoadingScreen = () => {
   return (
-    <div className="flex items-center justify-center h-screen bg-background">
-      <div className="relative">
-        <div className="w-28 h-28 border-t-4 border-b-4 border-neutral-200 rounded-full animate-spin"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white font-semibold text-lg">
-          Lens.js
-        </div>
+    <div className="flex min-h-screen items-center justify-center bg-canvas">
+      <div className="flex flex-col items-center gap-4">
+        <span className="relative flex h-14 w-14 items-center justify-center">
+          <span className="absolute inset-0 animate-ping rounded-2xl bg-accent/20" />
+          <LensLogo size={56} className="relative text-accent" />
+        </span>
+        <p className="text-sm font-medium text-muted">Loading Lens…</p>
       </div>
     </div>
   );

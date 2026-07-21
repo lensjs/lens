@@ -17,52 +17,42 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
   items,
   emptyMessage = "No data available",
 }) => {
-  if (!items || items.length === 0 || items.every((item) => !item.value)) {
-    return (
-      <div className="card-panel p-6 bg-slate-900 border-slate-800">
-        <h2 className="text-lg font-semibold text-slate-100 mb-4">
-          {title}
-        </h2>
-        <p className="text-center text-slate-500">
-          {emptyMessage}
-        </p>
-      </div>
-    );
-  }
+  const isEmpty =
+    !items || items.length === 0 || items.every((item) => !item.value);
 
   return (
-    <div className="card-panel overflow-hidden bg-slate-900 border-slate-800">
-      <div className="px-6 py-4 border-b border-slate-800 bg-slate-950/50">
-        <h2 className="text-lg font-semibold text-slate-100">
+    <div className="card-panel overflow-hidden">
+      <div className="border-b border-border bg-surface-2/40 px-5 py-3">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">
           {title}
         </h2>
       </div>
 
-      <div className="px-6 py-4">
-        <div className="space-y-4">
+      {isEmpty ? (
+        <p className="px-5 py-8 text-center text-sm text-dim">{emptyMessage}</p>
+      ) : (
+        <dl className="divide-y divide-border">
           {items.map((item, index) => (
             <div
               key={index}
-              className="flex flex-col sm:flex-row sm:items-start gap-2"
+              className="flex flex-col gap-1 px-5 py-2.5 sm:flex-row sm:items-start sm:gap-4"
             >
-              <div className="w-full sm:w-32 flex-shrink-0">
-                <span className="text-sm font-medium text-slate-500">
-                  {item.label}
-                </span>
-              </div>
-              <div className="flex-1">
+              <dt className="w-full flex-shrink-0 text-xs font-medium uppercase tracking-wide text-dim sm:w-36 sm:pt-0.5">
+                {item.label}
+              </dt>
+              <dd className="min-w-0 flex-1">
                 {typeof item.value === "string" ? (
-                  <span className={`text-sm text-slate-300 ${item.className || ""}`}>
+                  <span className={`text-sm text-fg ${item.className || ""}`}>
                     {item.value}
                   </span>
                 ) : (
-                  <div className="text-slate-300">{item.value}</div>
+                  <div className="text-fg">{item.value}</div>
                 )}
-              </div>
+              </dd>
             </div>
           ))}
-        </div>
-      </div>
+        </dl>
+      )}
     </div>
   );
 };

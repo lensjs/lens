@@ -6,9 +6,7 @@ vi.mock("@lensjs/core", () => ({
   lensEmitter: {
     emit: vi.fn(),
   },
-  lensContext: {
-    getStore: vi.fn(),
-  },
+  getCurrentRequestId: vi.fn(),
 }));
 
 // Mock addressparser at the top level
@@ -29,7 +27,7 @@ vi.mock("nodemailer/lib/addressparser", () => ({
 
 import { Readable } from "stream";
 import * as NodemailerUtils from "../src/mail/nodemailer"; // Import all as a namespace
-import { lensEmitter, lensContext } from "@lensjs/core";
+import { lensEmitter, getCurrentRequestId } from "@lensjs/core";
 import addressparser from "nodemailer/lib/addressparser";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 
@@ -38,11 +36,9 @@ describe("Nodemailer Handler", () => {
   const MOCKED_DATE_ISO = "2025-09-05T10:00:00.000Z";
 
   beforeEach(() => {
-    vi.clearAllMocks(); // Clear mocks on lensEmitter, lensContext
+    vi.clearAllMocks(); // Clear mocks on lensEmitter, getCurrentRequestId
     vi.mocked(addressparser).mockClear(); // Clear addressparser mock calls
-    (lensContext.getStore as Mock).mockReturnValue({
-      requestId: MOCKED_REQUEST_ID,
-    });
+    (getCurrentRequestId as Mock).mockReturnValue(MOCKED_REQUEST_ID);
     vi.useFakeTimers();
     vi.setSystemTime(new Date(MOCKED_DATE_ISO));
     vi.spyOn(fs.promises, "readFile").mockResolvedValue(Buffer.from("file content"));
@@ -573,9 +569,7 @@ describe("Nodemailer Handler", () => {
 
     beforeEach(async () => {
       vi.clearAllMocks(); // Clear mocks from previous describe blocks
-      (lensContext.getStore as Mock).mockReturnValue({
-        requestId: MOCKED_REQUEST_ID,
-      });
+      (getCurrentRequestId as Mock).mockReturnValue(MOCKED_REQUEST_ID);
       vi.useFakeTimers();
       vi.setSystemTime(new Date(MOCKED_DATE_ISO));
     });
@@ -673,7 +667,7 @@ describe("Nodemailer Handler", () => {
     });
 
     it("should handle missing requestId gracefully", async () => {
-      (lensContext.getStore as Mock).mockReturnValue(undefined);
+      (getCurrentRequestId as Mock).mockReturnValue(undefined);
 
       const transport = "smtp";
       const payload = {

@@ -15,10 +15,4 @@ export function useConfig() {
   return context.config;
 }
 
-export function getBasePath() {
-  const config = useConfig();
-
-  return config.path;
-}
-
 export default ConfigContext;

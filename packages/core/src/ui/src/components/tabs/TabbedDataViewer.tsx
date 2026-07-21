@@ -1,6 +1,5 @@
-"use client";
-
 import React, { useState, Suspense } from "react";
+import { cn } from "../../utils/cn";
 
 export interface TabbedDataProps {
   tabs: TabItem[];
@@ -11,7 +10,7 @@ export interface TabbedDataProps {
 export interface TabItem {
   id: string;
   label: string;
-  data?: Record<string, any> | string | string[];
+  data?: Record<string, unknown> | string | string[];
   content?: React.ReactNode;
   shouldShow?: boolean;
 }
@@ -25,11 +24,11 @@ const TabbedDataViewer: React.FC<TabbedDataProps> = ({
   defaultActiveTab,
 }) => {
   const visibleTabs = tabs.filter(
-    (tab) => tab.shouldShow === undefined || tab.shouldShow
+    (tab) => tab.shouldShow === undefined || tab.shouldShow,
   );
 
   const [activeTab, setActiveTab] = useState<string>(
-    defaultActiveTab || visibleTabs[0]?.id || ""
+    defaultActiveTab || visibleTabs[0]?.id || "",
   );
 
   if (!visibleTabs.length) {
@@ -37,47 +36,57 @@ const TabbedDataViewer: React.FC<TabbedDataProps> = ({
   }
 
   return (
-    <div className="card-panel overflow-hidden bg-slate-900 border-slate-800">
+    <div className="card-panel overflow-hidden">
       {/* Header */}
       {title && (
-        <div className="px-6 py-4 border-b border-slate-800 bg-slate-950/50">
-          <h2 className="text-lg font-semibold text-slate-100">
+        <div className="border-b border-border bg-surface-2/40 px-5 py-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">
             {title}
           </h2>
         </div>
       )}
 
       {/* Tabs */}
-      <div className="border-b border-slate-800 bg-slate-900">
-        <nav className="flex space-x-8 px-6" aria-label="Tabs">
+      <div className="border-b border-border px-3">
+        <nav className="flex gap-1 overflow-x-auto" aria-label="Tabs">
           {visibleTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 ${
+              aria-selected={activeTab === tab.id}
+              role="tab"
+              className={cn(
+                "relative whitespace-nowrap px-3 py-2.5 text-sm font-medium transition-colors",
                 activeTab === tab.id
-                  ? "border-blue-500 text-blue-400"
-                  : "border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700"
-              }`}
+                  ? "text-accent"
+                  : "text-muted hover:text-fg",
+              )}
             >
               {tab.label}
+              {activeTab === tab.id && (
+                <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-accent" />
+              )}
             </button>
           ))}
         </nav>
       </div>
 
       {/* Content */}
-      <div className="p-6">
+      <div className="p-5">
         {visibleTabs.map((tab) => (
           <div
             key={tab.id}
-            className={activeTab === tab.id ? "block animate-in fade-in duration-300" : "hidden"}
+            className={activeTab === tab.id ? "block" : "hidden"}
           >
             {tab.content ? (
-              <div className="text-slate-300">{tab.content}</div>
+              <div className="text-fg">{tab.content}</div>
             ) : (
               tab.data && (
-                <Suspense fallback={<div className="text-slate-500 text-sm">Loading viewer…</div>}>
+                <Suspense
+                  fallback={
+                    <div className="text-sm text-dim">Loading viewer…</div>
+                  }
+                >
                   <JsonViewer data={tab.data} />
                 </Suspense>
               )

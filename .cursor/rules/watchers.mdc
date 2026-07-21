@@ -1,0 +1,148 @@
+---
+description: How to build and wire watchers and handler integrations that capture a signal type
+globs: packages/core/src/watchers/**/*.ts,packages/handlers/src/**/*.ts
+alwaysApply: false
+---
+
+# Watchers & Handlers
+
+## Purpose
+
+Define exactly how a captured signal (request, query, cache, mail, exception) flows into the
+store, and how driver integrations (`@lensjs/watchers`) feed those watchers.
+
+## Why it exists
+
+Every signal must land in the store in the SAME normalized shape regardless of framework or
+driver, correlated to a `requestId`, with a `minimal_data`/`data` split the dashboard relies
+on. Divergence here corrupts the dashboard and the API.
+
+## The Watcher contract
+
+A watcher extends the tiny abstract base
+[core/watcher.ts](mdc:packages/core/src/core/watcher.ts):
+
+```typescript
+export default abstract class Watcher {
+  abstract name: WatcherTypeEnum;
+  abstract log(data: any): Promise<void>;
+}
+```
+
+Rules for a watcher:
+
+- `name` is a `WatcherTypeEnum` value; `Lens` keys watchers by it, so it must be unique.
+- `log()` is the ONLY entry point; it persists via `getStore().save(...)` and never touches a
+  concrete store or a framework.
+- Always resolve the store through `getStore()`
+  ([context.ts](mdc:packages/core/src/context/context.ts)) — never construct/import a store.
+- Correlate to the current request: read `requestId` from the entry (adapters set it) and
+  default to `""` when absent, mirroring
+  [query_watcher.ts](mdc:packages/core/src/watchers/query_watcher.ts).
+
+## The store `save()` payload (keep this shape)
+
+```typescript
+await getStore().save({
+  id?,                 // optional; store generates a UUID if omitted
+  type: this.name,     // WatcherTypeEnum
+  data,                // full detail payload (shown on the detail page)
+  minimal_data,        // compact list payload (shown in the table)
+  requestId,           // correlation id (default "")
+  timestamp?,          // ISO; store defaults to nowISO()
+});
+```
+
+- `minimal_data` = only the columns the list view renders (e.g. request: `method`, `path`,
+  `duration`, `status`, `createdAt`). `data` = everything for the detail view. Never dump the
+  whole entry into `minimal_data`.
+- Timestamps come from `@lensjs/date` (`nowISO()`), never `new Date()`/Luxon directly.
+
+## Built-in watchers (follow their shape)
+
+- [request_watcher.ts](mdc:packages/core/src/watchers/request_watcher.ts) — `log(data, hidden)`.
+  It builds `minimal_data`, lowercases + redacts headers, and hides body params. Redaction
+  defaults live here (`Authorization`/`Basic`, `password*`/`secret`) — see `security.mdc`.
+- [query_watcher.ts](mdc:packages/core/src/watchers/query_watcher.ts) — persists
+  `QueryEntry.data`.
+- [cache_watcher.ts](mdc:packages/core/src/watchers/cache_watcher.ts) — `normalizePayload`
+  extracts `{ key, value }` per `CacheAction`.
+- [exception_watcher.ts](mdc:packages/core/src/watchers/exception_watcher.ts) — generates an
+  `id`, stores the normalized `ExceptionEntry`.
+- [mail_watcher.ts](mdc:packages/core/src/watchers/mail_watcher.ts) — computes
+  `recipientsCount` for `minimal_data`.
+
+Export new watchers from [watchers/index.ts](mdc:packages/core/src/watchers/index.ts) as
+`export { default as XWatcher } from "./x_watcher"`.
+
+## When to create a watcher
+
+Only when capturing a genuinely new signal type. That requires: a new `WatcherTypeEnum`
+member, its neutral entry type in [types/index.ts](mdc:packages/core/src/types/index.ts), a
+`Store` read path + `ApiController` endpoint + route in
+[lens.ts](mdc:packages/core/src/core/lens.ts), and a dashboard view. Do not add a watcher for
+a variation an existing one already covers.
+
+## Handlers = driver -> core translators (`@lensjs/watchers`)
+
+Handlers live in `packages/handlers/src/<signal>/<tool>.ts`, one folder per signal, one file
+per tool, each folder with an `index.ts` barrel. They produce core's neutral shapes and NEVER
+import a web framework.
+
+Two emitters exist — use the right one:
+
+- `lensEmitter` (from core, [event_emitter.ts](mdc:packages/core/src/utils/event_emitter.ts)):
+  typed for `cache` and `mail`. Adapters subscribe; handlers emit into it directly.
+- `watcherEmitter` (local to handlers, `packages/handlers/src/utils/emitter.ts`): a bridge
+  typed for `kyselyQuery`/`sequelizeQuery`/`mikroOrmQuery`/`prismaQuery`, used when the ORM
+  config (or a Lens wrapper like `withLensPrisma`) emits from user code.
+
+Three integration patterns (pick by how the tool exposes events):
+
+1. In-context wrapper + `watcherEmitter` bridge — Prisma:
+   [prisma.ts](mdc:packages/handlers/src/query/prisma.ts). `withLensPrisma(client, { provider })`
+   wraps the client with a `$extends({ query: { $allOperations } })` extension that runs at
+   query-issue time, captures `getCurrentRequestId()`, times the op, and emits `prismaQuery`.
+   `createPrismaHandler({ provider })` consumes it and calls `onQuery(entry, requestId)`. The
+   legacy `createPrismaHandler({ prisma })` `$on("query")` path is retained but CANNOT correlate
+   (Prisma's engine emits from a detached native context).
+2. In-context hook/plugin + `watcherEmitter` bridge — Sequelize/Kysely/MikroORM
+   ([sequelize.ts](mdc:packages/handlers/src/query/sequelize.ts),
+   [kysely.ts](mdc:packages/handlers/src/query/kysely.ts),
+   [mikro-orm.ts](mdc:packages/handlers/src/query/mikro-orm.ts)). Their driver log/event fires
+   from a DETACHED context (connection pool / native callback), so the request id is captured
+   in-context at query-issue time and carried to the emit: `attachSequelizeLens`
+   (`beforeQuery`/`afterQuery` hooks), `createLensKyselyPlugin` (`transformQuery`, linked to the
+   log event via `queryId`), `attachMikroOrmLens` (underlying knex `query` event) — then threaded
+   through `onQuery(entry, requestId)`.
+3. Direct `lensEmitter.emit` — Cache/Mail
+   ([cache/index.ts](mdc:packages/handlers/src/cache/index.ts), `emitCacheEvent`;
+   [mail/nodemailer.ts](mdc:packages/handlers/src/mail/nodemailer.ts), `logNodeMailerEntry`).
+
+Handler conventions:
+
+- Factory naming: `create<Tool>Handler` (query), `emit<Signal>Event` (cache),
+  `log<Tool>Entry` (mail).
+- `duration` is a preformatted string ending in `" ms"` (e.g. `` `${e.duration} ms` ``).
+- Derive provider unions from core via `Extract` — never redefine `QueryType`/`CacheEntry`.
+- Capture `requestId` IN-CONTEXT (at query-issue time) with `getCurrentRequestId()` from core and
+  pass it via `onQuery(entry, requestId)`; adapters fall back to the async context when it is
+  omitted. NEVER rely on reading the async context from a driver's detached log/event callback
+  (native boundary/worker/external emitter) — it is already lost there. `emitCacheEvent`/mail read
+  `getCurrentRequestId()` directly because they emit in-context.
+- Filter transaction noise (`BEGIN`/`COMMIT`/`ROLLBACK`/`SAVEPOINT`) via the shared
+  `isTransactionQuery` helper (`packages/handlers/src/utils/query.ts`) — do not re-implement it.
+- Keep the driver an optional peer/dev dependency (see `packages.mdc`).
+
+## Anti-patterns
+
+- A watcher importing `BetterSqliteStore` or building SQL.
+- A handler importing express/fastify/nest, or emitting a shape it invented.
+- Putting full detail data in `minimal_data`, or omitting `minimal_data` entirely.
+- Timestamps via `new Date()`/`Date.now()` instead of `@lensjs/date`.
+
+## AI must never
+
+- Add capture logic to an adapter that belongs in a watcher/handler.
+- Emit `cache`/`mail` through `watcherEmitter`, or ORM bridge events through `lensEmitter`.
+- Persist unredacted headers/body (route request logging through `RequestWatcher`'s hiding).

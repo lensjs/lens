@@ -18,6 +18,7 @@ vi.mock("@lensjs/core", () => ({
     interpolateQuery: vi.fn((sql, params) => `${sql} -- ${JSON.stringify(params)}`),
     formatSqlQuery: vi.fn((sql, provider) => `formatted(${sql}, ${provider})`),
   },
+  getCurrentRequestId: vi.fn(() => "test-request-id"),
 }));
 
 vi.mock("@lensjs/date", () => ({
@@ -137,7 +138,7 @@ describe("createSequelizeHandler", () => {
       duration: "15.2 ms",
       type: "mysql",
       createdAt: "2025-09-18T12:00:00.000Z",
-    });
+    }, "test-request-id");
   });
 
   it("should handle queries without parameters", async () => {
@@ -158,7 +159,8 @@ describe("createSequelizeHandler", () => {
         query: "formatted(SELECT COUNT(*) FROM posts -- [], postgresql)",
         duration: "5.0 ms",
         type: "postgresql",
-      })
+      }),
+      "test-request-id"
     );
   });
 

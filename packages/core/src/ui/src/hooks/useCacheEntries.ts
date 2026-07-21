@@ -20,12 +20,12 @@ export default function useCacheEntries() {
           setLoading(false);
         });
     },
-    [getCacheEntries],
+    [getCacheEntryById],
   );
   const getItems = useCallback(
-    async (page?: number) => {
+    async (cursor?: number | null) => {
       setLoading(true);
-      await getCacheEntries(page ?? 1)
+      await getCacheEntries(cursor)
         .then((res) => {
           setItems(res.data!);
           setMeta(res.meta!);

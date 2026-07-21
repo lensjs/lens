@@ -1,0 +1,81 @@
+---
+description: How the AI reviews pull requests for LensJS — checklist and required output format. Apply when reviewing a PR, diff, or set of changes.
+alwaysApply: false
+---
+
+# Pull Request Review
+
+## Purpose
+
+Give the AI a strict, repeatable way to review LensJS changes so every PR is checked against the
+same architectural, quality, and safety bar.
+
+## How to review
+
+Read the full diff (all commits, not just the latest). Map each change to the package/layer it
+touches and evaluate it against the rule for that layer (`architecture`, `typescript`,
+`packages`, `watchers`, `stores`, `adapters`, `frontend`, `testing`, `documentation`,
+`performance`, `security`, `release`). Prefer citing the specific rule and file/line.
+
+## Review checklist
+
+Architecture & boundaries
+- Change lives in the correct package/layer; boundaries respected (no core->framework, no
+  adapter/handler re-implementing core, no cross-package relative imports).
+- No unnecessary new abstraction where an existing primitive (`lensUtils`, `@lensjs/date`,
+  a watcher/store/adapter/handler) would do.
+- No duplicated logic (search for an existing implementation first).
+
+API & compatibility
+- Public API/`exports`/barrel changes are intentional and backward compatible; breaking changes
+  carry a `major` changeset.
+- Neutral data contracts (`RequestEntry`/`QueryEntry`/`CacheEntry`/`MailEntry`/`Paginator`/
+  `ApiResponse`) and the store `save()` shape are unchanged (or bumped major).
+- Naming is consistent with the repo (`snake_case.ts`, `WatcherTypeEnum`, `create<Tool>Handler`).
+
+Dependencies & bundle
+- No unnecessary dependency; drivers/frameworks are peer/dev, not `dependencies`.
+- No node_modules bundling; no top-level import side effects; tree-shaking preserved.
+
+Performance & correctness
+- Instrumentation stays non-blocking (off the response critical path, `void` fire-and-forget,
+  try/catch), no sync/awaited I/O added to the host request path.
+- Async correctness: no floating promises; promises awaited or explicitly `void`ed.
+- Memory & cleanup: event listeners/timers/intervals are removed on shutdown; no leaks
+  (emitter subscriptions, `setInterval`, process handlers).
+- TypeScript correctness: no weakened strict flags, no `any` in public types, `override` used.
+
+Tests, docs, lint
+- Tests added/updated for the behavior change; they mock store/context/time and assert exact
+  payloads; `pnpm test` would pass.
+- Docs updated when public behavior changed, and any new page is wired into the docs sidebar.
+- Lint/format clean; JSDoc present on new exported utils.
+
+Security
+- No secrets/PII captured, logged, or persisted; redaction/purge/auth-gating preserved; no real
+  credentials in code/tests/fixtures/docs.
+
+Release hygiene
+- Conventional Commit messages; a changeset present for user-facing `@lensjs/*` changes; no
+  hand-edited `version`/`CHANGELOG.md`; hooks not skipped.
+
+## Required output format
+
+Produce exactly these sections:
+
+- **Summary** — what the PR does and which packages/layers it touches.
+- **Strengths** — what is done well.
+- **Problems** — concrete issues, each tagged with severity (blocker / major / minor / nit) and
+  the file/line + the rule it violates.
+- **Suggested fixes** — actionable remedy per problem (ideally a diff or precise instruction).
+- **Risk level** — Low / Medium / High, with a one-line justification (blast radius, API/perf/
+  security impact, test coverage).
+- **Merge recommendation** — Approve / Approve with nits / Request changes / Block, consistent
+  with the problems and risk.
+
+## AI must never
+
+- Approve a change that breaks a boundary, a public API (without a major changeset), or
+  redaction/security, regardless of how small.
+- Sign off without checking tests, docs, and changeset presence.
+- Invent issues not grounded in the diff or a rule; keep every problem cited and reproducible.

@@ -24,12 +24,12 @@ export default function useExceptions() {
           setLoading(false);
         });
     },
-    [getExceptions],
+    [getExceptionById],
   );
   const getItems = useCallback(
-    async (page?: number) => {
+    async (cursor?: number | null) => {
       setLoading(true);
-      await getExceptions(page ?? 1)
+      await getExceptions(cursor)
         .then((res) => {
           setItems(res.data!);
           setMeta(res.meta!);

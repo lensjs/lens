@@ -1,0 +1,115 @@
+---
+description: LensJS architecture, boundaries, dependency flow, and the golden rules every change must follow
+alwaysApply: true
+---
+
+# Architecture
+
+## Purpose
+
+Give every contributor (human or AI) a precise mental model of how LensJS is layered so
+changes land in the right package, reuse the right primitive, and never break a boundary.
+
+## Why it exists
+
+LensJS is a published, framework-agnostic observability library (Laravel Telescope for Node).
+It captures requests, DB queries, cache ops, sent mail, and exceptions and shows them in a
+bundled dashboard. Its value depends on stable boundaries: `@lensjs/core` is the engine,
+adapters are thin framework glue, handlers are thin driver glue, and none of them may leak
+into each other. Break a boundary and every downstream package breaks.
+
+## The layers (dependency flow)
+
+```
+@lensjs/date  <—  @lensjs/core  <—  @lensjs/{express,fastify,nestjs,adonis}
+                       ^                        (adapters)
+                       |
+                @lensjs/watchers  (handlers: prisma/kysely/sequelize/nodemailer)
+```
+
+- `@lensjs/core` — the engine. Abstract contracts (`Watcher`, `Store`, `Adapter`), the `Lens`
+  orchestrator, request context, DI container, the typed emitter, the API controller +
+  route table, the default queued SQLite store, and the bundled React dashboard.
+- `@lensjs/<framework>` — adapters. Translate one framework's request/response/error/DB
+  primitives into core calls. They NEVER re-implement capture, storage, or routing logic.
+- `@lensjs/watchers` (folder `packages/handlers`) — driver integrations. Translate one
+  ORM/mailer (Prisma, Kysely, Sequelize, Nodemailer) into core's neutral data shapes.
+- `@lensjs/date` — the only place time/formatting logic lives (UTC producers + UI presenters).
+- `@lensjs/typescript-config` — shared tsconfig presets.
+
+Dependencies only ever point LEFT (toward core/date). Core must not import an adapter or a
+handler; an adapter must not import another adapter's internals; a handler must not import a
+framework.
+
+## Core orchestration (how it boots)
+
+`Lens.start()` runs a fixed sequence — see [lens.ts](mdc:packages/core/src/core/lens.ts):
+
+1. bail early if `!config.enabled`;
+2. `bindContainerDeps()` registers the store + `uiConfig` singletons in the DI
+   [container.ts](mdc:packages/core/src/context/container.ts);
+3. `adapter.setWatchers(...).setup()` wires framework instrumentation;
+4. `adapter.registerRoutes(getRoutes(...).apiRoutes)` — **routes are defined in core**, the
+   adapter only mounts them;
+5. `adapter.serveUI(getUiPath(), config.path, getUiConfig())` serves the dashboard.
+
+Access the store only via the container: `getStore()` from
+[context.ts](mdc:packages/core/src/context/context.ts). Correlate events to a request via the
+`AsyncLocalStorage` `lensContext` in [async_context.ts](mdc:packages/core/src/utils/async_context.ts).
+
+## Neutral data contracts live in core
+
+`RequestEntry`, `QueryEntry`, `CacheEntry`, `MailEntry`, `ExceptionEntry`, `WatcherTypeEnum`,
+`LensConfig`, `Paginator<T>`, `ApiResponse<T>` are all defined in
+[types/index.ts](mdc:packages/core/src/types/index.ts) (mail in
+[types/mail.ts](mdc:packages/core/src/types/mail.ts)). Adapters and handlers only PRODUCE these
+shapes; they never redefine them. Provider unions are derived from core via `Extract<...>`.
+
+## Public vs internal (the contract surface)
+
+- PUBLIC = the package `exports` map + what the package barrel re-exports. For core that is
+  [src/index.ts](mdc:packages/core/src/index.ts) (`Lens`, `LensAdapter`, `LensStore`,
+  `LensWatcher`, the watchers, the stores, `lensUtils`, `lensExceptionUtils`, `lensEmitter`,
+  `lensContext`, `getLensStore`, types). Treat every public symbol and every `exports` entry
+  as a contract.
+- INTERNAL = everything not re-exported from the barrel (e.g. `Container`, `ApiController`,
+  raw files under `context/`, `mixins/`). Internals may change freely; public symbols may not
+  without a major changeset.
+
+## Extension points (the only sanctioned ways to extend)
+
+- New signal to capture  -> add a `Watcher` (see `watchers.mdc`).
+- New persistence backend -> extend `Store` and pass it to `Lens.setStore()` (see `stores.mdc`).
+- New web framework       -> extend `LensAdapter` (see `adapters.mdc`).
+- New ORM/mailer          -> add a handler in `@lensjs/watchers` (see `packages.mdc`).
+
+## What must NEVER be coupled
+
+- Adapters <-> `Store`: adapters never touch a store directly; they call watchers, which call
+  `getStore()`.
+- Handlers <-> a web framework: a handler for Prisma must work under any adapter.
+- Core <-> a specific framework/ORM: core stays framework- and driver-agnostic.
+- UI <-> a hardcoded mount path: the dashboard discovers its base + API paths at runtime.
+
+## Golden rules for every change
+
+1. Search for an existing implementation/utility first (`lensUtils`, `@lensjs/date`, existing
+   watchers/adapters/handlers). Reuse it. Never duplicate logic.
+2. Follow existing repository naming and file placement (see `typescript.mdc`, `packages.mdc`).
+3. Preserve the architecture and boundaries above. Reject changes that blur them.
+4. Keep public APIs backward compatible; a breaking change needs a `major` changeset.
+5. Add/update tests for any behavior change (see `testing.mdc`).
+6. Update docs when public behavior changes (see `documentation.mdc`).
+7. Keep changes minimal and scoped; do not opportunistically refactor unrelated code.
+8. Add a changeset for any user-facing `@lensjs/*` change (see `release.mdc`).
+9. Never log or persist secrets/PII (see `security.mdc`).
+10. Explain the architectural reasoning behind non-trivial changes.
+
+## AI must never
+
+- Put framework- or ORM-specific code in `@lensjs/core`.
+- Re-implement core capture/store/context/routing logic inside an adapter or handler.
+- Import across packages with relative paths (e.g. `../../core/dist/...`) — always use
+  `@lensjs/*`. (An existing offender in
+  [define_config.ts](mdc:packages/adonis/src/define_config.ts) is tech debt, not a pattern.)
+- Widen or break a public type/symbol to make an internal change easier.

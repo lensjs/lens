@@ -3,3 +3,7 @@ export { default as RequestWatcher } from "./request_watcher";
 export { default as CacheWatcher } from "./cache_watcher";
 export { default as ExceptionWatcher } from "./exception_watcher";
 export { default as MailWatcher } from "./mail_watcher";
+export { default as HttpWatcher } from "./http_watcher";
+export { default as EventWatcher } from "./event_watcher";
+export { default as RedisWatcher } from "./redis_watcher";
+export { default as FcmWatcher } from "./fcm_watcher";

@@ -1,0 +1,99 @@
+---
+description: How to build and maintain framework adapters (@lensjs/express, fastify, nestjs, adonis)
+globs: packages/express/**/*.ts,packages/fastify/**/*.ts,packages/nestjs/**/*.ts,packages/adonis/**/*.ts
+alwaysApply: false
+---
+
+# Framework Adapters
+
+## Purpose
+
+Adapters bridge one web framework to `@lensjs/core`. They translate framework primitives into
+core watchers/context/emitter calls — nothing more.
+
+## Why it exists
+
+The engine is framework-agnostic on purpose. All capture, storage, routing, and UI logic lives
+in core so every adapter behaves identically. An adapter that re-implements core logic creates
+drift and bugs across frameworks.
+
+## The contract
+
+Extend `LensAdapter` (from `@lensjs/core`,
+[abstracts/adapter.ts](mdc:packages/core/src/abstracts/adapter.ts)) and implement its three
+abstract methods; the base already provides `setWatchers`, `setIgnoredPaths`, `setOnlyPaths`
+(all chainable), `getWatchers()`, and `shouldIgnorePath()`.
+
+- `setup()`: iterate `this.getWatchers()`, `switch` on each watcher's `WatcherTypeEnum`
+  (`REQUEST`/`QUERY`/`CACHE`/`MAIL`), and wire it up only when enabled in `this.config`. Async
+  wiring is fire-and-forget with `void` (e.g. `void this.watchQueries(...)`).
+- `registerRoutes(routes)`: mount the core-provided `RouteDefinition[]` on the framework
+  router; call `route.handler({ params, qs })` and serialize the result as JSON. Routes are
+  DEFINED in core ([lens.ts](mdc:packages/core/src/core/lens.ts)) — the adapter only maps them.
+- `serveUI(uiPath, spaRoute, dataToInject)`: serve the bundled dashboard: static assets +
+  favicon + an SPA fallback to `index.html`, using `lensUtils.isStaticFile` and
+  `lensUtils.stripBeforeAssetsPath`. (Config is delivered at runtime via `GET /lens-config`, so
+  `dataToInject` is currently unused — see `frontend.mdc`.)
+
+`@lensjs/express` ([adapter.ts](mdc:packages/express/src/adapter.ts)) is the TEMPLATE. New
+adapters must stay symmetric with it.
+
+## Bootstrap pattern (the `lens()` factory)
+
+Express/Fastify/Nest expose a `lens(config)` factory (Adonis uses a service provider that does
+the same steps). Every bootstrap must:
+
+1. merge user config over a `defaultConfig`;
+2. build a watcher list gated by config flags (push only enabled watchers);
+3. `lensUtils.prepareIgnoredPaths(path, ignoredPaths)`;
+4. chain `adapter.setConfig(...).setIgnoredPaths(...).setOnlyPaths(...)`;
+5. `await Lens.setAdapter(adapter).setWatchers(watchers).start({ appName, enabled, path })`.
+
+See [express/src/index.ts](mdc:packages/express/src/index.ts).
+
+## Request correlation & capture (identical everywhere)
+
+- Generate one id per request with `lensUtils.generateRandomUuid()`.
+- Store it in `lensContext.run({ requestId }, ...)`
+  ([async_context.ts](mdc:packages/core/src/utils/async_context.ts)) so queries/cache/exceptions
+  read it back via `lensContext.getStore()?.requestId`. (Adonis instead stashes it on
+  `ctx.request.lensEntry` via a middleware — the same idea, framework-idiomatic.)
+- Build the SAME `RequestEntry` payload (`request { id, method, duration, path, headers, body,
+  status, ip, createdAt }`, `response { json, headers }`, `user`), with `createdAt: nowISO()`
+  from `@lensjs/date` and duration via a `prettyHrTime` helper.
+- Subscribe to `lensEmitter` for `cache`/`mail` and forward to the matching watcher's `log()`.
+- Respect `this.shouldIgnorePath(path)` before capturing.
+- Wrap finalization in try/catch + `console.error` so instrumentation NEVER breaks the host app.
+
+## Security (non-negotiable)
+
+- Pass `config.hiddenParams` as the second arg to `requestWatcher.log(payload, hiddenParams)`
+  — core redacts headers/body (see `security.mdc`).
+- Purge large/binary/file response bodies to the literal `"Purged By Lens"` (express does this
+  in `patchResponseMethods`, fastify in `parseResponsePayload`).
+- Only attach `user` when `await config.isAuthenticated?.(req)` is true, then
+  `await config.getUser?.(req)`; otherwise `user: null`.
+
+## Known divergences (match the sibling you extend)
+
+- Fastify: uses `onRequest`/`onSend`/`onResponse` hooks; framework is a `peerDependency`;
+  auto-registers an error handler behind `registerErrorHandler`.
+- NestJS: a META-ADAPTER — `ExpressNestAdapter`/`FastifyNestAdapter` are EMPTY subclasses of the
+  express/fastify adapters ([adapters/next.ts](mdc:packages/nestjs/lib/adapters/next.ts)); it
+  adds a global `LensExceptionFilter`. Source lives in `lib/`, not `src/`.
+- Adonis: framework-idiomatic — provider + `defineConfig` + `LensMiddleware` + ace `configure`
+  + stubs; captures via Adonis events; builds with `tsc`; has no mail watcher and no response
+  purge. Follow AdonisJS conventions there, not the express template.
+
+## When to create an adapter
+
+Only for a new web framework with no adapter yet. Reuse the express template's structure and
+core primitives; add a runnable example under `apps/<framework>`; document it (see
+`documentation.mdc`); add a changeset.
+
+## AI must never
+
+- Re-implement request/query/cache capture, storage, routing, or redaction inside an adapter.
+- Define Lens API routes in the adapter (they come from core `getRoutes`).
+- Capture a request without `lensContext`/`requestId` correlation, or without `shouldIgnorePath`.
+- Let a capture error propagate into the host application's request lifecycle.

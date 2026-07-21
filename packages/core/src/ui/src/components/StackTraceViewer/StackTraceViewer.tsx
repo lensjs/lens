@@ -16,12 +16,12 @@ const StackTraceViewer: React.FC<StackTraceViewerProps> = ({ trace }) => {
 
   try {
     return (
-      <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-900 shadow-lg">
+      <div className="border border-border rounded-lg overflow-hidden bg-surface shadow-lg">
         <StackTraceHeader frameCount={trace.length} />
 
         {/* Stack trace content */}
         <div className="overflow-auto max-h-96">
-          <div className="divide-y divide-gray-100 dark:divide-gray-800">
+          <div className="divide-y divide-border">
             {trace.map((line, index) => (
               <StackFrame
                 key={index}

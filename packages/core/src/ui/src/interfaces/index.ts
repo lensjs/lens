@@ -5,6 +5,9 @@ export interface UseLoadMoreOptions<T> {
     meta: PaginatorMeta;
     initialData: T[];
     loading: boolean;
-    fetchRawPage: (page: number) => Promise<ApiResponse<T[]>>;
+    fetchRawPage: (
+      cursor?: number | null,
+      after?: number | null,
+    ) => Promise<ApiResponse<T[]>>;
   };
 }

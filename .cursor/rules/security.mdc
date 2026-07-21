@@ -1,0 +1,62 @@
+---
+description: Security and privacy rules — never capture, log, or persist secrets or PII
+alwaysApply: true
+---
+
+# Security & Privacy
+
+## Purpose
+
+Lens captures real request/response/query/mail data. This rule keeps secrets and PII out of the
+store and the dashboard.
+
+## Why it exists
+
+A debugging tool that records credentials, tokens, or personal data becomes a liability and a
+breach vector. Redaction and purging are core features, not optional add-ons.
+
+## Redaction is centralized in the RequestWatcher
+
+`RequestWatcher.log(data, hidden)`
+([request_watcher.ts](mdc:packages/core/src/watchers/request_watcher.ts)) is the single place
+request headers/body are hidden. It lowercases header keys and replaces matched keys with
+`"*******"`. Defaults:
+
+- Headers: `Authorization`, `Basic`.
+- Body params: `password`, `passwordConfirmation`, `secret`, `password_confirmation`.
+
+Consumers extend these via `config.hiddenParams.{headers,bodyParams}`
+([LensConfig](mdc:packages/core/src/types/index.ts)). Adapters MUST forward `config.hiddenParams`
+as the second argument to `requestWatcher.log(...)`. Never build request logging that bypasses
+this hiding.
+
+## Purge large / binary / file bodies
+
+Adapters replace file-path, `Buffer`, and non-serializable response bodies with the literal
+`"Purged By Lens"` (express `patchResponseMethods`, fastify `parseResponsePayload`). Preserve
+this — never store raw file contents or buffers.
+
+## Gate user data behind auth callbacks
+
+Attach `user` only when `await config.isAuthenticated?.(req)` is true, then
+`await config.getUser?.(req)`; otherwise `user: null`. Never infer/scrape user identity from
+raw headers or bodies.
+
+## General rules
+
+- Never `console.log` captured payloads; log only operational events (connect, queue overflow,
+  save error).
+- Never add real secrets/tokens/PII to tests, fixtures, sample `.eml` files, changesets, or
+  docs examples. Use obviously fake values.
+- Treat the dashboard + Lens API as sensitive: they expose captured data. Do not add endpoints
+  that return more than the existing `ApiController` surface, and keep Lens's own routes in the
+  `prepareIgnoredPaths` ignore list so Lens does not record itself.
+- When adding a new watcher/handler, redact or omit sensitive fields BEFORE `save()`/`emit()`
+  (mirror the RequestWatcher approach); assume every captured field may contain secrets.
+
+## AI must never
+
+- Persist or log secrets, tokens, credentials, or PII.
+- Add request/response capture that skips `hiddenParams` redaction or body purging.
+- Weaken the default hidden headers/body params, or store raw files/buffers.
+- Commit real credentials in code, tests, fixtures, or documentation.

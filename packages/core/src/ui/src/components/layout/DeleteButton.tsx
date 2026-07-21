@@ -13,31 +13,29 @@ export default function DeleteButton() {
   return (
     <>
       <Modal visible={isOpen} onClose={() => setIsOpen(false)}>
-        <div className="flex flex-col items-center justify-center gap-6 sm:p-8 p-6 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white rounded-xl shadow-2xl border border-neutral-200 dark:border-neutral-800 max-w-md mx-auto">
-          <div className="flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full">
-            <Trash2 size={24} className="text-red-500 dark:text-red-400" />
+        <div className="mx-auto flex max-w-md flex-col items-center justify-center gap-6 rounded-2xl border border-border bg-elevated p-6 text-fg shadow-2xl sm:p-8">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-danger/10 ring-1 ring-inset ring-danger/20">
+            <Trash2 size={24} className="text-danger" />
           </div>
 
-          <div className="text-center space-y-2">
-            <h1 className="text-xl font-semibold text-neutral-900 dark:text-white">
-              Delete all entries?
-            </h1>
-            <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">
+          <div className="space-y-2 text-center">
+            <h1 className="text-xl font-semibold text-fg">Delete all entries?</h1>
+            <p className="text-sm leading-relaxed text-muted">
               This will permanently delete all entries from your database. This
               action cannot be undone.
             </p>
           </div>
 
-          <div className="flex items-center justify-center gap-3 w-full">
+          <div className="flex w-full items-center justify-center gap-3">
             <button
-              className="flex-1 px-4 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-lg transition-colors duration-200"
+              className="flex-1 rounded-lg bg-surface-2 px-4 py-2.5 text-sm font-medium text-fg transition-colors hover:bg-elevated"
               onClick={() => setIsOpen(false)}
               disabled={loading}
             >
               Cancel
             </button>
             <button
-              className="flex-1 px-4 py-2.5 text-sm font-medium bg-red-500 hover:bg-red-600 disabled:bg-red-300 dark:disabled:bg-red-800 text-white rounded-lg transition-colors duration-200 disabled:cursor-not-allowed"
+              className="flex-1 rounded-lg bg-danger px-4 py-2.5 text-sm font-medium text-white transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={loading}
               ref={confirmButton}
               onClick={async () => {
@@ -57,7 +55,7 @@ export default function DeleteButton() {
             >
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                   Deleting...
                 </div>
               ) : (
@@ -72,13 +70,13 @@ export default function DeleteButton() {
           setIsOpen(true);
           setTimeout(() => confirmButton.current?.focus(), 0);
         }}
-        className="group relative p-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 hover:border-red-300 dark:hover:border-red-700 bg-white dark:bg-neutral-800 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-200 shadow-sm hover:shadow-md"
+        className="group rounded-lg border border-border bg-surface-2/60 p-2 shadow-sm transition-all hover:border-danger/40 hover:bg-danger/10"
         aria-label="Delete all entries"
         title="Delete all entries"
       >
         <Trash2
-          size={18}
-          className="text-neutral-500 dark:text-neutral-400 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors duration-200"
+          size={17}
+          className="text-muted transition-colors group-hover:text-danger"
         />
       </button>
     </>

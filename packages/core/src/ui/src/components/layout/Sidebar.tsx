@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { getSidebarRoutes } from "../../router/routes";
 import { useConfig } from "../../utils/context";
+import { cn } from "../../utils/cn";
 
 interface SidebarProps {
   isMobileSidebarOpen: boolean;
@@ -19,46 +20,60 @@ const Sidebar = ({
       {/* Overlay for mobile */}
       {isMobileSidebarOpen && (
         <div
-          className="fixed inset-0  bg-opacity-50 z-10 lg:hidden"
+          className="fixed inset-0 z-10 bg-canvas/60 backdrop-blur-sm lg:hidden"
           onClick={onCloseMobileSidebar}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`
-        fixed lg:sticky top-0 z-20 lg:z-0
-        h-full lg:h-auto
-        w-3/4 sm:w-64 lg:w-auto min-w-60
-        p-4 lg:p-0
-        transform transition-transform duration-300 ease-in-out
-        ${isMobileSidebarOpen ? "translate-x-0 bg-slate-900" : "-translate-x-[120%] lg:translate-x-0"}
-        lg:bg-transparent
-      `}
+        className={cn(
+          "fixed left-0 top-14 z-20 h-[calc(100vh-3.5rem)] w-64 shrink-0 border-r border-border bg-canvas p-4",
+          "transition-transform duration-200 ease-out",
+          "lg:sticky lg:top-6 lg:z-0 lg:h-auto lg:w-56 lg:self-start lg:border-r-0 lg:bg-transparent lg:p-0",
+          isMobileSidebarOpen
+            ? "translate-x-0"
+            : "-translate-x-[110%] lg:translate-x-0",
+        )}
       >
-        <ul className="flex flex-col gap-2 text-slate-200">
+        <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-dim">
+          Monitor
+        </p>
+        <nav className="flex flex-col gap-0.5">
           {getSidebarRoutes(config).map((route) => {
             const isActive = location.pathname.startsWith(route.path);
             const Icon = route.icon;
 
             return (
-              <li key={route.path} className="contents">
-                <Link
-                  to={route.path}
-                  className={[
-                    "flex items-center gap-2 rounded-lg px-4 py-2 font-semibold transition-all duration-200",
+              <Link
+                key={route.path}
+                to={route.path}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-accent/10 text-fg"
+                    : "text-muted hover:bg-surface-2/60 hover:text-fg",
+                )}
+              >
+                {isActive && (
+                  <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-accent" />
+                )}
+                <span
+                  className={cn(
+                    "flex h-7 w-7 items-center justify-center rounded-md transition-colors",
                     isActive
-                      ? "bg-blue-900/20 text-blue-400 border border-blue-800/30 shadow-sm"
-                      : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-100",
-                  ].join(" ")}
+                      ? "bg-accent/15 text-accent"
+                      : "text-dim group-hover:text-muted",
+                  )}
                 >
                   <Icon size={16} />
-                  {route.label}
-                </Link>
-              </li>
+                </span>
+                {route.label}
+              </Link>
             );
           })}
-        </ul>
+        </nav>
       </aside>
     </>
   );

@@ -55,6 +55,7 @@
     "@adonisjs/core": "^6.20.0",
     "@adonisjs/cors": "^2.2.1",
     "@adonisjs/lucid": "^21.8.0",
+    "@adonisjs/mail": "^9.2.2",
     "@lensjs/adonis": "workspace:*",
     "@libsql/sqlite3": "^0.3.1",
     "@vinejs/vine": "^3.0.1",

@@ -9,7 +9,7 @@ import {
   MailHeader,
   MimePart,
   lensEmitter,
-  lensContext,
+  getCurrentRequestId,
 } from "@lensjs/core";
 import { AttachmentLike } from "nodemailer/lib/mailer";
 
@@ -485,7 +485,7 @@ export async function logNodeMailerEntry<T extends NodeMailerTransporter>(
   const headers = rawHeaders.length > 0 ? rawHeaders : payloadHeaders;
 
   const entry: MailEntry = {
-    requestId: lensContext.getStore()?.requestId ?? "",
+    requestId: getCurrentRequestId() ?? "",
     from:
       rawHeaders.length > 0
         ? normalizeAddresses(getHeader(rawHeaders, "From"))
