@@ -182,9 +182,55 @@ To integrate Kysely with the Query Watcher, follow these steps:
     bootstrap();
     ```
 
-With these configurations, your NestJS application is now set up to use the Lens Query Watcher for Sequelize, Prisma, or Kysely, providing enhanced visibility into your database operations.
+With these configurations, your NestJS application is now set up to use the Lens Query Watcher for Sequelize, Prisma, Kysely, or MikroORM, providing enhanced visibility into your database operations.
 
-## 4. Custom Handlers
+## 4. MikroORM
+
+To integrate MikroORM with the Query Watcher, follow these steps:
+
+1.  **Installation:** Install MikroORM and its NestJS integration following the [official MikroORM documentation](https://mikro-orm.io/docs/guide/first-entity).
+
+2.  **Configure MikroORM Logging:** In your MikroORM configuration (e.g., `mikro-orm.config.ts`), set `debug: true` and provide the `MikroOrmLensLogger` as the `loggerFactory`.
+
+    ```ts
+    // mikro-orm.config.ts
+    import { defineConfig } from "@mikro-orm/postgresql";
+    import { MikroOrmLensLogger } from "@lensjs/watchers";
+
+    export default defineConfig({
+      debug: true, // Required: enables query logging
+      loggerFactory: (options) => new MikroOrmLensLogger(options),
+      // ... your other MikroORM options (entities, dbName, etc.)
+    });
+    ```
+
+3.  **Integrate with `main.ts`:** In your `main.ts` file, import `createMikroOrmHandler` from `@lensjs/watchers` and pass it to the `queryWatcher` configuration within the `lens` function.
+
+    ```ts
+    import { NestFactory } from "@nestjs/core";
+    import { AppModule } from "./app.module.js";
+    import { lens } from "@lensjs/nestjs";
+    import { createMikroOrmHandler } from "@lensjs/watchers";
+
+    async function bootstrap() {
+      const app = await NestFactory.create(AppModule);
+
+      await lens({
+        app,
+        queryWatcher: {
+          enabled: true,
+          handler: createMikroOrmHandler({ provider: "postgresql" }),
+        },
+      });
+
+      await app.listen(process.env.PORT ?? 3000);
+    }
+    bootstrap();
+    ```
+
+> **Note:** Transaction queries (`BEGIN`, `COMMIT`, `ROLLBACK`, `SAVEPOINT`) are automatically filtered out by the handler.
+
+## 5. Custom Handlers
 
 If your ORM or database client is not supported by the built-in handlers, you can create your own custom handler to integrate with Lens.
 

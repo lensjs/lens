@@ -134,6 +134,43 @@ const sequelize = new Sequelize("DB_NAME", "DB_USER", "DB_PASSWORD", {
 });
 ```
 
+### 4. MikroORM
+
+Capture queries from **MikroORM** by using `createMikroOrmHandler` and `MikroOrmLensLogger`.
+
+**Dependencies:**
+
+```bash
+npm install @mikro-orm/core
+```
+
+**Usage Example (Fastify + MikroORM):**
+
+```ts
+import Fastify from "fastify";
+import { lens } from "@lensjs/fastify";
+import { MikroORM } from "@mikro-orm/core";
+import { createMikroOrmHandler, MikroOrmLensLogger } from "@lensjs/watchers";
+
+const app = Fastify();
+
+// Step 1: Configure MikroORM with the Lens logger
+const orm = await MikroORM.init({
+  debug: true,
+  loggerFactory: (options) => new MikroOrmLensLogger(options),
+  // ... your other MikroORM options
+});
+
+// Step 2: Register the query watcher with lens
+await lens({
+  app,
+  queryWatcher: {
+    enabled: true,
+    handler: createMikroOrmHandler({ provider: "postgresql" }),
+  },
+});
+```
+
 ## Custom Handlers
 
 If your ORM or query client is not supported by the built-in handlers, you can create your own custom handler to integrate with Lens.
@@ -216,6 +253,6 @@ await lens({
 
 ## Summary
 
-- Use **built-in handlers** for Prisma, Kysely, and Sequelize  
+- Use **built-in handlers** for Prisma, Kysely, Sequelize, and MikroORM  
 - Or build a **custom handler** for your ORM/client  
 - All queries are automatically captured and displayed in the **Lens UI**

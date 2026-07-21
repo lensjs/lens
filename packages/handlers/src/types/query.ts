@@ -13,3 +13,8 @@ export type KyselyQueryType = Extract<
   SqlQueryType,
   "mysql" | "postgresql" | "sqlite" | "mssql"
 >;
+
+export type MikroOrmQueryType = Extract<
+  SqlQueryType,
+  "mysql" | "postgresql" | "sqlite" | "mariadb" | "tsql"
+>;
