@@ -2,7 +2,9 @@ import { getStore, getUiConfig } from "../context/context";
 import { WatcherTypeEnum } from "../types";
 import type {
   ApiResponse,
+  FilterOp,
   LensEntry as LensEntry,
+  ListFilter,
   Paginator,
   RouteDefinitionHandler,
 } from "../types";
@@ -10,7 +12,7 @@ import type {
 export class ApiController {
   static async getRequests({ qs }: RouteDefinitionHandler) {
     return this.paginatedResponse(
-      await getStore().getAllRequests(this.extractPaginationParams(qs)),
+      await getStore().getAllRequests(this.extractListParams(qs)),
     );
   }
 
@@ -80,7 +82,7 @@ export class ApiController {
     qs,
   }: RouteDefinitionHandler): Promise<ApiResponse<LensEntry[]>> {
     const queries = await getStore().getAllQueries(
-      this.extractPaginationParams(qs),
+      this.extractListParams(qs),
     );
 
     return this.paginatedResponse(queries);
@@ -100,7 +102,7 @@ export class ApiController {
 
   static async getCacheEntries({ qs }: RouteDefinitionHandler) {
     return this.paginatedResponse(
-      await getStore().getAllCacheEntries(this.extractPaginationParams(qs)),
+      await getStore().getAllCacheEntries(this.extractListParams(qs)),
     );
   }
 
@@ -116,7 +118,7 @@ export class ApiController {
 
   static async getExceptions({ qs }: RouteDefinitionHandler) {
     return this.paginatedResponse(
-      await getStore().getAllExceptions(this.extractPaginationParams(qs)),
+      await getStore().getAllExceptions(this.extractListParams(qs)),
     );
   }
 
@@ -135,7 +137,7 @@ export class ApiController {
 
   static async getEmails({ qs }: RouteDefinitionHandler) {
     return this.paginatedResponse(
-      await getStore().getAllEmails(this.extractPaginationParams(qs)),
+      await getStore().getAllEmails(this.extractListParams(qs)),
     );
   }
 
@@ -153,7 +155,7 @@ export class ApiController {
     return this.paginatedResponse(
       await getStore().paginate<Omit<LensEntry, "data">[]>(
         WatcherTypeEnum.EVENT,
-        this.extractPaginationParams(qs),
+        this.extractListParams(qs),
         false,
       ),
     );
@@ -173,7 +175,7 @@ export class ApiController {
     return this.paginatedResponse(
       await getStore().paginate<Omit<LensEntry, "data">[]>(
         WatcherTypeEnum.HTTP,
-        this.extractPaginationParams(qs),
+        this.extractListParams(qs),
         false,
       ),
     );
@@ -193,7 +195,7 @@ export class ApiController {
     return this.paginatedResponse(
       await getStore().paginate<Omit<LensEntry, "data">[]>(
         WatcherTypeEnum.REDIS,
-        this.extractPaginationParams(qs),
+        this.extractListParams(qs),
         false,
       ),
     );
@@ -213,7 +215,7 @@ export class ApiController {
     return this.paginatedResponse(
       await getStore().paginate<Omit<LensEntry, "data">[]>(
         WatcherTypeEnum.FCM,
-        this.extractPaginationParams(qs),
+        this.extractListParams(qs),
         false,
       ),
     );
@@ -232,7 +234,7 @@ export class ApiController {
   static async getStream({ qs }: RouteDefinitionHandler) {
     return this.paginatedResponse(
       await getStore().latest<Omit<LensEntry, "data">[]>(
-        this.extractPaginationParams(qs),
+        this.extractListParams(qs),
         false,
       ),
     );
@@ -248,7 +250,30 @@ export class ApiController {
     return getUiConfig();
   }
 
-  private static extractPaginationParams(qs?: Record<string, any>) {
+  private static readonly RESERVED_LIST_KEYS = new Set([
+    "perPage",
+    "page",
+    "cursor",
+    "after",
+    "q",
+    "from",
+    "to",
+    "sort",
+    "dir",
+    "numericSort",
+    "group",
+  ]);
+
+  private static readonly FILTER_OPS = new Set<FilterOp>([
+    "eq",
+    "ne",
+    "gt",
+    "gte",
+    "lt",
+    "lte",
+  ]);
+
+  private static extractListParams(qs?: Record<string, any>) {
     let perPage = Number(qs?.perPage);
     if (!Number.isInteger(perPage) || perPage > 100 || perPage < 5) {
       perPage = 100;
@@ -259,10 +284,44 @@ export class ApiController {
       return Number.isInteger(n) && n > 0 ? n : undefined;
     };
 
+    const asString = (value: unknown) =>
+      typeof value === "string" && value.trim() ? value.trim() : undefined;
+
+    // Any non-reserved query key is a field filter: `field` (eq) or `field__op`.
+    const filters: ListFilter[] = [];
+    for (const [key, raw] of Object.entries(qs ?? {})) {
+      if (this.RESERVED_LIST_KEYS.has(key) || raw == null) continue;
+      const value = Array.isArray(raw) ? raw[0] : raw;
+      if (typeof value !== "string" && typeof value !== "number") continue;
+
+      let field = key;
+      let op: FilterOp = "eq";
+      const sep = key.indexOf("__");
+      if (sep !== -1) {
+        field = key.slice(0, sep);
+        const opStr = key.slice(sep + 2) as FilterOp;
+        if (!this.FILTER_OPS.has(opStr)) continue;
+        op = opStr;
+      }
+
+      if (!/^[A-Za-z0-9_.]+$/.test(field)) continue;
+      filters.push({ field, op, value: String(value) });
+    }
+
     return {
       cursor: toCursor(qs?.cursor),
       after: toCursor(qs?.after),
       perPage,
+      q: asString(qs?.q),
+      from: asString(qs?.from),
+      to: asString(qs?.to),
+      sort: asString(qs?.sort),
+      dir: qs?.dir === "asc" ? ("asc" as const) : qs?.dir === "desc" ? ("desc" as const) : undefined,
+      numericSort:
+        qs?.numericSort === "true" || qs?.numericSort === true
+          ? true
+          : undefined,
+      ...(filters.length ? { filters } : {}),
     };
   }
 

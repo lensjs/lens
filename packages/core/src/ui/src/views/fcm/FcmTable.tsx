@@ -28,6 +28,7 @@ const sorts: SortDef<FcmTableRow>[] = [
     key: "duration",
     label: "Duration",
     get: (r) => durationToMs(r.data.duration),
+    numeric: true,
   },
 ];
 

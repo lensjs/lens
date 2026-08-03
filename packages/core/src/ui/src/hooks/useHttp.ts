@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import type { HttpTableRow, OneHttp, PaginatorMeta } from "../types";
 import useLensApi, { DEFAULT_META } from "./useLensApi";
 
-export default function useHttp() {
+export default function useHttp(listParams?: Record<string, string>) {
   const [items, setItems] = useState<HttpTableRow[]>([]);
   const [item, setItem] = useState<OneHttp>();
   const [loading, setLoading] = useState(false);
@@ -27,7 +27,7 @@ export default function useHttp() {
   const getItems = useCallback(
     async (cursor?: number | null) => {
       setLoading(true);
-      await getHttpEntries(cursor)
+      await getHttpEntries(cursor, null, listParams)
         .then((res) => {
           setItems(res.data!);
           setMeta(res.meta!);
@@ -36,7 +36,7 @@ export default function useHttp() {
           setLoading(false);
         });
     },
-    [getHttpEntries],
+    [getHttpEntries, listParams],
   );
 
   const loadMoreItems = useMemo(
@@ -44,9 +44,10 @@ export default function useHttp() {
       initialData: items,
       meta,
       loading,
-      fetchRawPage: getHttpEntries,
+      fetchRawPage: (cursor?: number | null, after?: number | null) =>
+        getHttpEntries(cursor, after, listParams),
     }),
-    [items, meta, loading, getHttpEntries],
+    [items, meta, loading, getHttpEntries, listParams],
   );
 
   return {

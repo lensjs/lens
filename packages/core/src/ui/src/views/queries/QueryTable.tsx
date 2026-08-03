@@ -11,7 +11,12 @@ import useColumns from "./columns";
 
 const sorts: SortDef<QueryTableRow>[] = [
   { key: "time", label: "Time", get: (r) => toTime(r.data.createdAt) },
-  { key: "duration", label: "Duration", get: (r) => durationToMs(r.data.duration) },
+  {
+    key: "duration",
+    label: "Duration",
+    get: (r) => durationToMs(r.data.duration),
+    numeric: true,
+  },
 ];
 
 const QueryTable = ({

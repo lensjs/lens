@@ -28,6 +28,7 @@ const sorts: SortDef<RedisTableRow>[] = [
     key: "duration",
     label: "Duration",
     get: (r) => durationToMs(r.data.duration),
+    numeric: true,
   },
 ];
 

@@ -25,7 +25,7 @@ const defaultMail: OneMail = {
   type: "mail",
 };
 
-export default function useMail() {
+export default function useMail(listParams?: Record<string, string>) {
   const [mails, setMails] = useState<MailTableRow[]>([]);
   const [mail, setMail] = useState<OneMail>(defaultMail);
   const [loading, setLoading] = useState(false);
@@ -50,7 +50,7 @@ export default function useMail() {
   const fetchMails = useCallback(
     async (cursor?: number | null) => {
       setLoading(true);
-      getAllMail(cursor)
+      getAllMail(cursor, null, listParams)
         .then((res) => {
           setMails(res.data!);
           setMeta(res.meta!);
@@ -59,7 +59,7 @@ export default function useMail() {
           setLoading(false);
         });
     },
-    [getAllMail]
+    [getAllMail, listParams]
   );
 
   const loadMoreMails = useMemo(
@@ -67,9 +67,10 @@ export default function useMail() {
       initialData: mails,
       meta,
       loading,
-      fetchRawPage: getAllMail,
+      fetchRawPage: (cursor?: number | null, after?: number | null) =>
+        getAllMail(cursor, after, listParams),
     }),
-    [mails, meta, loading, getAllMail]
+    [mails, meta, loading, getAllMail, listParams]
   );
 
   const [search, setSearch] = useState("");

@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import type { CacheTableRow, OneCache, PaginatorMeta } from "../types";
 import useLensApi, { DEFAULT_META } from "./useLensApi";
 
-export default function useCacheEntries() {
+export default function useCacheEntries(listParams?: Record<string, string>) {
   const [items, setItems] = useState<CacheTableRow[]>([]);
   const [item, setItem] = useState<OneCache>();
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,7 @@ export default function useCacheEntries() {
   const getItems = useCallback(
     async (cursor?: number | null) => {
       setLoading(true);
-      await getCacheEntries(cursor)
+      await getCacheEntries(cursor, null, listParams)
         .then((res) => {
           setItems(res.data!);
           setMeta(res.meta!);
@@ -34,7 +34,7 @@ export default function useCacheEntries() {
           setLoading(false);
         });
     },
-    [getCacheEntries],
+    [getCacheEntries, listParams],
   );
 
   const loadMoreItems = useMemo(
@@ -42,9 +42,10 @@ export default function useCacheEntries() {
       initialData: items,
       meta,
       loading,
-      fetchRawPage: getCacheEntries,
+      fetchRawPage: (cursor?: number | null, after?: number | null) =>
+        getCacheEntries(cursor, after, listParams),
     }),
-    [items, meta, loading, getCacheEntries],
+    [items, meta, loading, getCacheEntries, listParams],
   );
 
   return {

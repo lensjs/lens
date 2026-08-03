@@ -32,6 +32,7 @@ const dedupeAppend = <T>(prev: T[], incoming: T[]): T[] => {
  */
 export function useLoadMore<T>({
   paginatedPage,
+  live = true,
 }: UseLoadMoreOptions<T>): HasMoreType<T> {
   const [data, setData] = useState<T[]>([]);
   const [olderCursor, setOlderCursor] = useState<number | null>(null);
@@ -64,9 +65,10 @@ export function useLoadMore<T>({
   ]);
 
   // Live feed: delta-poll only entries newer than the head cursor and prepend
-  // them. Paused via the global recording toggle (Telescope-style).
+  // them. Paused via the global recording toggle (Telescope-style) or when an
+  // explicit sort switches the view to offset pagination.
   useEffect(() => {
-    if (paused) return;
+    if (paused || !live) return;
 
     let active = true;
     const poll = async () => {
@@ -96,7 +98,7 @@ export function useLoadMore<T>({
       active = false;
       clearInterval(interval);
     };
-  }, [paused, fetchRawPage]);
+  }, [paused, live, fetchRawPage]);
 
   const loadMore = useCallback(async () => {
     if (loading || !hasMore || olderCursor == null) return;

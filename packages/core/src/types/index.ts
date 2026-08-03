@@ -207,12 +207,44 @@ export type RouteDefinition = {
   handler: (data: RouteDefinitionHandler) => any;
 };
 
+/** Comparison operator for a server-side list filter. */
+export type FilterOp = "eq" | "ne" | "gt" | "gte" | "lt" | "lte";
+
+/**
+ * A single server-side filter applied to a `minimal_data` JSON field, e.g.
+ * `{ field: "status", op: "gte", value: "200" }` ->
+ * `json_extract(minimal_data,'$.status') >= 200`.
+ */
+export type ListFilter = {
+  field: string;
+  op: FilterOp;
+  value: string;
+};
+
 export type PaginationParams = {
   /** Opaque cursor (row id) to fetch entries older than; omit for the newest page. */
   cursor?: number | null;
   /** Opaque cursor (row id) to fetch entries newer than (live delta polling). */
   after?: number | null;
   perPage: number;
+  /** Substring search across the compact `minimal_data` payload. */
+  q?: string;
+  /** ISO-8601 lower bound (inclusive) on `created_at`. */
+  from?: string;
+  /** ISO-8601 upper bound (inclusive) on `created_at`. */
+  to?: string;
+  /** Field filters AND-ed against the query. */
+  filters?: ListFilter[];
+  /**
+   * `minimal_data` key to sort by. Unset (or `"time"`) keeps the default
+   * newest-first rowid ordering with cursor pagination + live tail; any other
+   * key switches the query to offset-based ordering.
+   */
+  sort?: string;
+  /** Sort direction for `sort` (default `desc`). */
+  dir?: "asc" | "desc";
+  /** Sort the `sort` field numerically (CAST to REAL) instead of as text. */
+  numericSort?: boolean;
 };
 
 export type Paginator<T> = {

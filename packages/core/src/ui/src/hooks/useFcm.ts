@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import type { FcmTableRow, OneFcm, PaginatorMeta } from "../types";
 import useLensApi, { DEFAULT_META } from "./useLensApi";
 
-export default function useFcm() {
+export default function useFcm(listParams?: Record<string, string>) {
   const [items, setItems] = useState<FcmTableRow[]>([]);
   const [item, setItem] = useState<OneFcm>();
   const [loading, setLoading] = useState(false);
@@ -27,7 +27,7 @@ export default function useFcm() {
   const getItems = useCallback(
     async (cursor?: number | null) => {
       setLoading(true);
-      await getFcmEntries(cursor)
+      await getFcmEntries(cursor, null, listParams)
         .then((res) => {
           setItems(res.data!);
           setMeta(res.meta!);
@@ -36,7 +36,7 @@ export default function useFcm() {
           setLoading(false);
         });
     },
-    [getFcmEntries],
+    [getFcmEntries, listParams],
   );
 
   const loadMoreItems = useMemo(
@@ -44,9 +44,10 @@ export default function useFcm() {
       initialData: items,
       meta,
       loading,
-      fetchRawPage: getFcmEntries,
+      fetchRawPage: (cursor?: number | null, after?: number | null) =>
+        getFcmEntries(cursor, after, listParams),
     }),
-    [items, meta, loading, getFcmEntries],
+    [items, meta, loading, getFcmEntries, listParams],
   );
 
   return {

@@ -1,21 +1,30 @@
-import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 
 export type FilterDef<T> = {
   key: string;
   label: string;
-  get: (row: T) => string;
+  /** Optional row accessor, kept for client-side stats; unused for fetching. */
+  get?: (row: T) => string;
   options: { value: string; label: string }[];
+  /** URL/query param keys this filter owns (cleared together). Default: [key]. */
+  paramKeys?: string[];
+  /** Map a selected option value -> server query params. Default: { [key]: value }. */
+  toParams?: (value: string) => Record<string, string>;
+  /** Derive the selected option value from the URL. Default: params.get(key). */
+  fromParams?: (params: URLSearchParams) => string;
 };
 
 export type SortDef<T> = {
   key: string;
   label: string;
-  get: (row: T) => number;
+  /** Optional row accessor, kept for client-side stats; unused for fetching. */
+  get?: (row: T) => number;
+  /** Sort this field numerically on the server (CAST to REAL) instead of as text. */
+  numeric?: boolean;
 };
 
 export type ListViewConfig<T> = {
-  search: (row: T) => (string | number | undefined)[];
+  search?: (row: T) => (string | number | undefined)[];
   filters?: FilterDef<T>[];
   sorts?: SortDef<T>[];
 };
@@ -30,12 +39,18 @@ export type ListViewControls<T> = {
   dir: "asc" | "desc";
   setSort: (key: string) => void;
   toggleDir: () => void;
+  from: string;
+  to: string;
+  setDateRange: (from: string | null, to: string | null) => void;
+  clear: () => void;
   activeCount: number;
 };
 
 /**
- * Client-side, URL-synced search / filter / sort for accumulated list data.
- * State lives in the querystring so views are deep-linkable and shareable.
+ * URL-synced controls for a server-filtered list. Search, field filters,
+ * date-range, and sort are written to the querystring (so views stay
+ * deep-linkable) and read back by the container's `useListQuery` to drive the
+ * fetch — this hook no longer filters or sorts rows on the client.
  */
 export function useListView<T>(
   rows: T[],
@@ -46,7 +61,9 @@ export function useListView<T>(
   const q = params.get("q") ?? "";
   const sortKey = params.get("sort") ?? config.sorts?.[0]?.key ?? "";
   const dir = (params.get("dir") as "asc" | "desc") ?? "desc";
-  const paramsKey = params.toString();
+  const from = params.get("from") ?? "";
+  const to = params.get("to") ?? "";
+  const filters = config.filters ?? [];
 
   const patch = (changes: Record<string, string | null>) => {
     setParams(
@@ -62,55 +79,63 @@ export function useListView<T>(
     );
   };
 
-  const processed = useMemo(() => {
-    let out = rows;
-
-    const term = q.trim().toLowerCase();
-    if (term) {
-      out = out.filter((row) =>
-        config
-          .search(row)
-          .some(
-            (value) =>
-              value != null && String(value).toLowerCase().includes(term),
-          ),
-      );
-    }
-
-    for (const filter of config.filters ?? []) {
-      const value = params.get(filter.key);
-      if (value) out = out.filter((row) => filter.get(row) === value);
-    }
-
-    const sortDef = config.sorts?.find((s) => s.key === sortKey);
-    if (sortDef) {
-      out = [...out].sort((a, b) => {
-        const av = sortDef.get(a);
-        const bv = sortDef.get(b);
-        return dir === "asc" ? av - bv : bv - av;
-      });
-    }
-
-    return out;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rows, q, paramsKey, sortKey, dir]);
-
   const filterValues = Object.fromEntries(
-    (config.filters ?? []).map((f) => [f.key, params.get(f.key) ?? ""]),
+    filters.map((f) => [
+      f.key,
+      f.fromParams ? f.fromParams(params) : (params.get(f.key) ?? ""),
+    ]),
   );
+
+  const setFilter = (key: string, value: string) => {
+    const def = filters.find((f) => f.key === key);
+    const owned = def?.paramKeys ?? [key];
+    const changes: Record<string, string | null> = {};
+    for (const k of owned) changes[k] = null;
+    const mapped = value
+      ? def?.toParams
+        ? def.toParams(value)
+        : { [key]: value }
+      : {};
+    Object.assign(changes, mapped);
+    patch(changes);
+  };
+
+  const setSort = (key: string) => {
+    const def = config.sorts?.find((s) => s.key === key);
+    patch({ sort: key, numericSort: def?.numeric ? "true" : null });
+  };
+
+  const clear = () => {
+    const changes: Record<string, string | null> = {
+      q: null,
+      from: null,
+      to: null,
+    };
+    for (const f of filters) {
+      for (const k of f.paramKeys ?? [f.key]) changes[k] = null;
+    }
+    patch(changes);
+  };
+
   const activeCount =
-    (q ? 1 : 0) + Object.values(filterValues).filter(Boolean).length;
+    (q ? 1 : 0) +
+    Object.values(filterValues).filter(Boolean).length +
+    (from || to ? 1 : 0);
 
   return {
-    rows: processed,
+    rows,
     q,
     setQ: (value) => patch({ q: value || null }),
     filterValues,
-    setFilter: (key, value) => patch({ [key]: value || null }),
+    setFilter,
     sortKey,
     dir,
-    setSort: (key) => patch({ sort: key }),
+    setSort,
     toggleDir: () => patch({ dir: dir === "asc" ? "desc" : "asc" }),
+    from,
+    to,
+    setDateRange: (f, t) => patch({ from: f || null, to: t || null }),
+    clear,
     activeCount,
   };
 }

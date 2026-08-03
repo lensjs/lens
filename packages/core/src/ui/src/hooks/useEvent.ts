@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import type { EventTableRow, OneEvent, PaginatorMeta } from "../types";
 import useLensApi, { DEFAULT_META } from "./useLensApi";
 
-export default function useEvent() {
+export default function useEvent(listParams?: Record<string, string>) {
   const [items, setItems] = useState<EventTableRow[]>([]);
   const [item, setItem] = useState<OneEvent>();
   const [loading, setLoading] = useState(false);
@@ -27,7 +27,7 @@ export default function useEvent() {
   const getItems = useCallback(
     async (cursor?: number | null) => {
       setLoading(true);
-      await getEventEntries(cursor)
+      await getEventEntries(cursor, null, listParams)
         .then((res) => {
           setItems(res.data!);
           setMeta(res.meta!);
@@ -36,7 +36,7 @@ export default function useEvent() {
           setLoading(false);
         });
     },
-    [getEventEntries],
+    [getEventEntries, listParams],
   );
 
   const loadMoreItems = useMemo(
@@ -44,9 +44,10 @@ export default function useEvent() {
       initialData: items,
       meta,
       loading,
-      fetchRawPage: getEventEntries,
+      fetchRawPage: (cursor?: number | null, after?: number | null) =>
+        getEventEntries(cursor, after, listParams),
     }),
-    [items, meta, loading, getEventEntries],
+    [items, meta, loading, getEventEntries, listParams],
   );
 
   return {

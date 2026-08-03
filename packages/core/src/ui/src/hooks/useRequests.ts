@@ -35,7 +35,7 @@ const defaultRequest: OneRequest = {
   },
 };
 
-export default function useRequests() {
+export default function useRequests(listParams?: Record<string, string>) {
   const [requests, setRequests] = useState<RequestTableRow[]>([]);
   const [request, setRequest] = useState<OneRequest>(defaultRequest);
   const [loading, setLoading] = useState(false);
@@ -58,7 +58,7 @@ export default function useRequests() {
   const fetchRequests = useCallback(
     async (cursor?: number | null) => {
       setLoading(true);
-      getAllRequests(cursor)
+      getAllRequests(cursor, null, listParams)
         .then((res) => {
           setRequests(res.data!);
           setMeta(res.meta!);
@@ -67,7 +67,7 @@ export default function useRequests() {
           setLoading(false);
         });
     },
-    [getAllRequests]
+    [getAllRequests, listParams]
   );
 
   const loadMoreRequests = useMemo(
@@ -75,9 +75,10 @@ export default function useRequests() {
       initialData: requests,
       meta,
       loading,
-      fetchRawPage: getAllRequests,
+      fetchRawPage: (cursor?: number | null, after?: number | null) =>
+        getAllRequests(cursor, after, listParams),
     }),
-    [requests, meta, loading, getAllRequests]
+    [requests, meta, loading, getAllRequests, listParams]
   );
   const [search, setSearch] = useState("");
   const filterRequests =  (row:RequestTableRow) =>(

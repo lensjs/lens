@@ -3,8 +3,10 @@ import {
   AlertTriangle,
   ArrowDownWideNarrow,
   ArrowUpNarrowWide,
+  X,
 } from "lucide-react";
 import SearchInput from "./SearchInput";
+import DateRangePicker from "./DateRangePicker";
 import StatsBar, { type Stat } from "./StatsBar";
 import type {
   ListViewControls,
@@ -83,6 +85,11 @@ export default function ListToolbar<T>({
             ))}
           </Select>
         ))}
+        <DateRangePicker
+          from={controls.from}
+          to={controls.to}
+          onChange={controls.setDateRange}
+        />
         {sorts && sorts.length > 0 && (
           <div className="flex items-center gap-1">
             <Select
@@ -109,6 +116,16 @@ export default function ListToolbar<T>({
               )}
             </button>
           </div>
+        )}
+        {controls.activeCount > 0 && (
+          <button
+            onClick={controls.clear}
+            title="Clear all filters"
+            className="inline-flex items-center gap-1 rounded-lg border border-border bg-surface/70 px-2.5 py-2 text-sm text-muted transition-colors hover:border-border-strong hover:text-fg"
+          >
+            <X size={14} />
+            Clear ({controls.activeCount})
+          </button>
         )}
       </div>
     </div>

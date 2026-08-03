@@ -30,9 +30,13 @@ const useLensApi = () => {
   const config = useConfig();
 
   const getAllRequests = useCallback(
-    async (cursor?: number | null, after?: number | null) => {
+    async (
+      cursor?: number | null,
+      after?: number | null,
+      listParams?: Record<string, string>,
+    ) => {
       return fetchJson<RequestTableRow[]>(
-        prepareApiUrl(withQueryParams(config.api.requests, { cursor, after })),
+        prepareApiUrl(withQueryParams(config.api.requests, { cursor, after, ...listParams })),
       );
     },
     [config.api.requests],
@@ -48,9 +52,13 @@ const useLensApi = () => {
   );
 
   const getQueries = useCallback(
-    async (cursor?: number | null, after?: number | null) => {
+    async (
+      cursor?: number | null,
+      after?: number | null,
+      listParams?: Record<string, string>,
+    ) => {
       return fetchJson<QueryTableRow[]>(
-        prepareApiUrl(withQueryParams(config.api.queries, { cursor, after })),
+        prepareApiUrl(withQueryParams(config.api.queries, { cursor, after, ...listParams })),
       );
     },
     [config.api.queries],
@@ -64,9 +72,13 @@ const useLensApi = () => {
   );
 
   const getCacheEntries = useCallback(
-    async (cursor?: number | null, after?: number | null) => {
+    async (
+      cursor?: number | null,
+      after?: number | null,
+      listParams?: Record<string, string>,
+    ) => {
       return fetchJson<CacheTableRow[]>(
-        prepareApiUrl(withQueryParams(config.api.cache, { cursor, after })),
+        prepareApiUrl(withQueryParams(config.api.cache, { cursor, after, ...listParams })),
       );
     },
     [config.api.cache],
@@ -80,9 +92,13 @@ const useLensApi = () => {
   );
 
   const getExceptions = useCallback(
-    async (cursor?: number | null, after?: number | null) => {
+    async (
+      cursor?: number | null,
+      after?: number | null,
+      listParams?: Record<string, string>,
+    ) => {
       return fetchJson<ExceptionTableRow[]>(
-        prepareApiUrl(withQueryParams(config.api.exceptions, { cursor, after })),
+        prepareApiUrl(withQueryParams(config.api.exceptions, { cursor, after, ...listParams })),
       );
     },
     [config.api.exceptions],
@@ -98,9 +114,13 @@ const useLensApi = () => {
   );
 
   const getAllMail = useCallback(
-    async (cursor?: number | null, after?: number | null) => {
+    async (
+      cursor?: number | null,
+      after?: number | null,
+      listParams?: Record<string, string>,
+    ) => {
       return fetchJson<MailTableRow[]>(
-        prepareApiUrl(withQueryParams(config.api.mail, { cursor, after })),
+        prepareApiUrl(withQueryParams(config.api.mail, { cursor, after, ...listParams })),
       );
     },
     [config.api.mail],
@@ -114,9 +134,13 @@ const useLensApi = () => {
   );
 
   const getHttpEntries = useCallback(
-    async (cursor?: number | null, after?: number | null) => {
+    async (
+      cursor?: number | null,
+      after?: number | null,
+      listParams?: Record<string, string>,
+    ) => {
       return fetchJson<HttpTableRow[]>(
-        prepareApiUrl(withQueryParams(config.api.http, { cursor, after })),
+        prepareApiUrl(withQueryParams(config.api.http, { cursor, after, ...listParams })),
       );
     },
     [config.api.http],
@@ -130,9 +154,13 @@ const useLensApi = () => {
   );
 
   const getEventEntries = useCallback(
-    async (cursor?: number | null, after?: number | null) => {
+    async (
+      cursor?: number | null,
+      after?: number | null,
+      listParams?: Record<string, string>,
+    ) => {
       return fetchJson<EventTableRow[]>(
-        prepareApiUrl(withQueryParams(config.api.event, { cursor, after })),
+        prepareApiUrl(withQueryParams(config.api.event, { cursor, after, ...listParams })),
       );
     },
     [config.api.event],
@@ -146,9 +174,13 @@ const useLensApi = () => {
   );
 
   const getRedisEntries = useCallback(
-    async (cursor?: number | null, after?: number | null) => {
+    async (
+      cursor?: number | null,
+      after?: number | null,
+      listParams?: Record<string, string>,
+    ) => {
       return fetchJson<RedisTableRow[]>(
-        prepareApiUrl(withQueryParams(config.api.redis, { cursor, after })),
+        prepareApiUrl(withQueryParams(config.api.redis, { cursor, after, ...listParams })),
       );
     },
     [config.api.redis],
@@ -162,9 +194,13 @@ const useLensApi = () => {
   );
 
   const getFcmEntries = useCallback(
-    async (cursor?: number | null, after?: number | null) => {
+    async (
+      cursor?: number | null,
+      after?: number | null,
+      listParams?: Record<string, string>,
+    ) => {
       return fetchJson<FcmTableRow[]>(
-        prepareApiUrl(withQueryParams(config.api.fcm, { cursor, after })),
+        prepareApiUrl(withQueryParams(config.api.fcm, { cursor, after, ...listParams })),
       );
     },
     [config.api.fcm],

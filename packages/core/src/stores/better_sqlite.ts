@@ -119,7 +119,7 @@ export default class BetterSqliteStore extends Store {
 
   public async paginate<T>(
     type: WatcherTypeEnum,
-    { cursor, after, perPage }: PaginationParams,
+    params: PaginationParams,
     includeFullData: boolean = true,
   ): Promise<{
     meta: {
@@ -135,36 +135,71 @@ export default class BetterSqliteStore extends Store {
     // COUNT(*) — we fetch one extra row to cheaply detect whether more exist.
     // `after` fetches rows NEWER than a cursor (live delta polling); `cursor`
     // fetches rows OLDER than a cursor (infinite scroll); neither = newest page.
+    // Any explicit sort (a non-time field, or time ascending) switches to
+    // offset-based ordering, which cannot drive the live/delta feed.
+    const { cursor, after, perPage, sort, dir } = params;
     const columns = this.getSelectedColumns(includeFullData).replace(
       /^SELECT /,
       "SELECT rowid AS __cursor, ",
     );
     const limit = perPage + 1;
+    const filter = this.buildFilterSql(params);
+    const cursorAt = (row: any) => Number((row as { __cursor: number }).__cursor);
+
+    const sortField =
+      sort && sort !== "time" && /^[A-Za-z0-9_.]+$/.test(sort) ? sort : null;
+    const timeAscending = !sortField && dir === "asc";
+
+    if (sortField || timeAscending) {
+      const offset = cursor != null && cursor >= 0 ? cursor : 0;
+      const dirSql = dir === "asc" ? "ASC" : "DESC";
+      const orderBy = sortField
+        ? `${this.sortExpr(sortField, params.numericSort)} ${dirSql}, rowid DESC`
+        : "rowid ASC";
+
+      const rows = this.connection
+        .prepare(
+          `${columns} FROM ${TABLE_NAME} WHERE type = ?${filter.sql} ORDER BY ${orderBy} LIMIT ? OFFSET ?`,
+        )
+        .all(type, ...filter.args, limit, offset);
+
+      const hasMore = rows.length > perPage;
+      const pageRows = hasMore ? rows.slice(0, perPage) : rows;
+
+      return {
+        meta: {
+          nextCursor: hasMore ? offset + perPage : null,
+          headCursor: null,
+          hasMore,
+          perPage,
+        },
+        data: this.mapRows(pageRows, includeFullData) as T,
+      };
+    }
 
     let rows: any[];
     if (after != null) {
       rows = this.connection
         .prepare(
-          `${columns} FROM ${TABLE_NAME} WHERE type = ? AND rowid > ? ORDER BY rowid DESC LIMIT ?`,
+          `${columns} FROM ${TABLE_NAME} WHERE type = ?${filter.sql} AND rowid > ? ORDER BY rowid DESC LIMIT ?`,
         )
-        .all(type, after, limit);
+        .all(type, ...filter.args, after, limit);
     } else if (cursor != null) {
       rows = this.connection
         .prepare(
-          `${columns} FROM ${TABLE_NAME} WHERE type = ? AND rowid < ? ORDER BY rowid DESC LIMIT ?`,
+          `${columns} FROM ${TABLE_NAME} WHERE type = ?${filter.sql} AND rowid < ? ORDER BY rowid DESC LIMIT ?`,
         )
-        .all(type, cursor, limit);
+        .all(type, ...filter.args, cursor, limit);
     } else {
       rows = this.connection
         .prepare(
-          `${columns} FROM ${TABLE_NAME} WHERE type = ? ORDER BY rowid DESC LIMIT ?`,
+          `${columns} FROM ${TABLE_NAME} WHERE type = ?${filter.sql} ORDER BY rowid DESC LIMIT ?`,
         )
-        .all(type, limit);
+        .all(type, ...filter.args, limit);
     }
 
     const hasMore = rows.length > perPage;
     const pageRows = hasMore ? rows.slice(0, perPage) : rows;
-    const cursorAt = (row: any) => Number((row as { __cursor: number }).__cursor);
 
     // Rows are DESC: [0] is the newest (head), [last] is the oldest of the page.
     const headCursor = pageRows.length
@@ -181,6 +216,68 @@ export default class BetterSqliteStore extends Store {
       meta: { nextCursor, headCursor, hasMore, perPage },
       data: this.mapRows(pageRows, includeFullData) as T,
     };
+  }
+
+  /**
+   * Build the additional WHERE clause (search / date-range / field filters) that
+   * is AND-ed onto the base `type = ?` predicate. Field names are sanitized and
+   * every value is passed as a bound parameter, so this is injection-safe.
+   */
+  private buildFilterSql({ q, from, to, filters }: PaginationParams): {
+    sql: string;
+    args: any[];
+  } {
+    const parts: string[] = [];
+    const args: any[] = [];
+
+    if (from) {
+      parts.push("created_at >= ?");
+      args.push(from);
+    }
+    if (to) {
+      parts.push("created_at <= ?");
+      args.push(to);
+    }
+
+    for (const f of filters ?? []) {
+      if (!/^[A-Za-z0-9_.]+$/.test(f.field)) continue;
+      const path = `$.${f.field}`;
+
+      if (f.op === "eq" || f.op === "ne") {
+        parts.push(
+          `CAST(json_extract(minimal_data, ?) AS TEXT) ${
+            f.op === "eq" ? "=" : "<>"
+          } ?`,
+        );
+        args.push(path, f.value);
+      } else {
+        const num = Number(f.value);
+        if (!Number.isFinite(num)) continue;
+        const opSql = { gt: ">", gte: ">=", lt: "<", lte: "<=" }[f.op];
+        parts.push(
+          `CAST(json_extract(minimal_data, ?) AS REAL) ${opSql} ?`,
+        );
+        args.push(path, num);
+      }
+    }
+
+    if (q && q.trim()) {
+      parts.push("minimal_data LIKE ?");
+      args.push(`%${q.trim()}%`);
+    }
+
+    return { sql: parts.length ? ` AND ${parts.join(" AND ")}` : "", args };
+  }
+
+  /**
+   * SQL ORDER BY expression for a `minimal_data` field. `field` is pre-validated
+   * to a safe json-path charset by the caller before it reaches here.
+   */
+  private sortExpr(field: string, numeric?: boolean): string {
+    const path = `'$.${field}'`;
+    return numeric
+      ? `CAST(json_extract(minimal_data, ${path}) AS REAL)`
+      : `json_extract(minimal_data, ${path}) COLLATE NOCASE`;
   }
 
   override async latest<T>(

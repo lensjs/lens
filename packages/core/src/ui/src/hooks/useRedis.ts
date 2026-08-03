@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import type { RedisTableRow, OneRedis, PaginatorMeta } from "../types";
 import useLensApi, { DEFAULT_META } from "./useLensApi";
 
-export default function useRedis() {
+export default function useRedis(listParams?: Record<string, string>) {
   const [items, setItems] = useState<RedisTableRow[]>([]);
   const [item, setItem] = useState<OneRedis>();
   const [loading, setLoading] = useState(false);
@@ -27,7 +27,7 @@ export default function useRedis() {
   const getItems = useCallback(
     async (cursor?: number | null) => {
       setLoading(true);
-      await getRedisEntries(cursor)
+      await getRedisEntries(cursor, null, listParams)
         .then((res) => {
           setItems(res.data!);
           setMeta(res.meta!);
@@ -36,7 +36,7 @@ export default function useRedis() {
           setLoading(false);
         });
     },
-    [getRedisEntries],
+    [getRedisEntries, listParams],
   );
 
   const loadMoreItems = useMemo(
@@ -44,9 +44,10 @@ export default function useRedis() {
       initialData: items,
       meta,
       loading,
-      fetchRawPage: getRedisEntries,
+      fetchRawPage: (cursor?: number | null, after?: number | null) =>
+        getRedisEntries(cursor, after, listParams),
     }),
-    [items, meta, loading, getRedisEntries],
+    [items, meta, loading, getRedisEntries, listParams],
   );
 
   return {

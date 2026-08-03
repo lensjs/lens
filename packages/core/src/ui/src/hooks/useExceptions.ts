@@ -6,7 +6,7 @@ import type {
 } from "../types";
 import useLensApi, { DEFAULT_META } from "./useLensApi";
 
-export default function useExceptions() {
+export default function useExceptions(listParams?: Record<string, string>) {
   const [items, setItems] = useState<ExceptionTableRow[]>([]);
   const [item, setItem] = useState<OneException>();
   const [loading, setLoading] = useState(false);
@@ -29,7 +29,7 @@ export default function useExceptions() {
   const getItems = useCallback(
     async (cursor?: number | null) => {
       setLoading(true);
-      await getExceptions(cursor)
+      await getExceptions(cursor, null, listParams)
         .then((res) => {
           setItems(res.data!);
           setMeta(res.meta!);
@@ -38,7 +38,7 @@ export default function useExceptions() {
           setLoading(false);
         });
     },
-    [getExceptions],
+    [getExceptions, listParams],
   );
 
   const loadMoreItems = useMemo(
@@ -46,9 +46,10 @@ export default function useExceptions() {
       initialData: items,
       meta,
       loading,
-      fetchRawPage: getExceptions,
+      fetchRawPage: (cursor?: number | null, after?: number | null) =>
+        getExceptions(cursor, after, listParams),
     }),
-    [items, meta, loading, getExceptions],
+    [items, meta, loading, getExceptions, listParams],
   );
 
   return {

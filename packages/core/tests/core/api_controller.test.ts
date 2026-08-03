@@ -371,19 +371,19 @@ describe("ApiController", () => {
     });
   });
 
-  describe("extractPaginationParams", () => {
+  describe("extractListParams", () => {
     it("should return default perPage with no cursor if no qs", () => {
-      const result = (ApiController as any).extractPaginationParams();
+      const result = (ApiController as any).extractListParams();
       expect(result).toEqual({ cursor: undefined, perPage: 100 });
     });
 
     it("should return default perPage with no cursor if qs is empty", () => {
-      const result = (ApiController as any).extractPaginationParams({});
+      const result = (ApiController as any).extractListParams({});
       expect(result).toEqual({ cursor: undefined, perPage: 100 });
     });
 
     it("should parse a valid cursor and perPage", () => {
-      const result = (ApiController as any).extractPaginationParams({
+      const result = (ApiController as any).extractListParams({
         cursor: "42",
         perPage: "20",
       });
@@ -391,7 +391,7 @@ describe("ApiController", () => {
     });
 
     it("should parse a valid `after` cursor for delta polling", () => {
-      const result = (ApiController as any).extractPaginationParams({
+      const result = (ApiController as any).extractListParams({
         after: "42",
         perPage: "20",
       });
@@ -399,21 +399,21 @@ describe("ApiController", () => {
     });
 
     it("should cap perPage at 100", () => {
-      const result = (ApiController as any).extractPaginationParams({
+      const result = (ApiController as any).extractListParams({
         perPage: "200",
       });
       expect(result).toEqual({ cursor: undefined, perPage: 100 });
     });
 
     it("should set perPage to 100 if less than 5", () => {
-      const result = (ApiController as any).extractPaginationParams({
+      const result = (ApiController as any).extractListParams({
         perPage: "3",
       });
       expect(result).toEqual({ cursor: undefined, perPage: 100 });
     });
 
     it("should ignore invalid (non-numeric) cursor values", () => {
-      const result = (ApiController as any).extractPaginationParams({
+      const result = (ApiController as any).extractListParams({
         cursor: "abc",
         perPage: "10",
       });
@@ -421,11 +421,59 @@ describe("ApiController", () => {
     });
 
     it("should ignore non-positive cursor values", () => {
-      const result = (ApiController as any).extractPaginationParams({
+      const result = (ApiController as any).extractListParams({
         cursor: "0",
         perPage: "10",
       });
       expect(result).toEqual({ cursor: undefined, perPage: 10 });
+    });
+
+    it("parses search, date-range, and sort params", () => {
+      const result = (ApiController as any).extractListParams({
+        q: "  boom  ",
+        from: "2025-01-01T00:00:00.000Z",
+        to: "2025-01-02T00:00:00.000Z",
+        sort: "duration",
+        dir: "asc",
+        numericSort: "true",
+      });
+      expect(result).toMatchObject({
+        q: "boom",
+        from: "2025-01-01T00:00:00.000Z",
+        to: "2025-01-02T00:00:00.000Z",
+        sort: "duration",
+        dir: "asc",
+        numericSort: true,
+      });
+    });
+
+    it("collects non-reserved keys as field filters (with operators)", () => {
+      const result = (ApiController as any).extractListParams({
+        method: "GET",
+        status__gte: "200",
+        status__lt: "300",
+      });
+      expect(result.filters).toEqual([
+        { field: "method", op: "eq", value: "GET" },
+        { field: "status", op: "gte", value: "200" },
+        { field: "status", op: "lt", value: "300" },
+      ]);
+    });
+
+    it("rejects unknown operators and unsafe filter keys", () => {
+      const result = (ApiController as any).extractListParams({
+        "status__bogus": "1",
+        "a;drop": "1",
+        level: "error",
+      });
+      expect(result.filters).toEqual([
+        { field: "level", op: "eq", value: "error" },
+      ]);
+    });
+
+    it("omits filters when there are none", () => {
+      const result = (ApiController as any).extractListParams({ perPage: "10" });
+      expect(result.filters).toBeUndefined();
     });
   });
 });

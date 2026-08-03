@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import type { OneQuery, PaginatorMeta, QueryTableRow } from "../types";
 import useLensApi, { DEFAULT_META } from "./useLensApi";
 
-export default function useQueries() {
+export default function useQueries(listParams?: Record<string, string>) {
   const [queries, setQueries] = useState<QueryTableRow[]>([]);
   const [query, setQuery] = useState<OneQuery>();
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,7 @@ export default function useQueries() {
   const fetchQueries = useCallback(
     async (cursor?: number | null) => {
       setLoading(true);
-      await getQueries(cursor)
+      await getQueries(cursor, null, listParams)
         .then((res) => {
           setQueries(res.data!);
           setMeta(res.meta!);
@@ -34,7 +34,7 @@ export default function useQueries() {
           setLoading(false);
         });
     },
-    [getQueries]
+    [getQueries, listParams]
   );
 
   const loadMoreQueries = useMemo(
@@ -42,9 +42,10 @@ export default function useQueries() {
       initialData: queries,
       meta,
       loading,
-      fetchRawPage: getQueries,
+      fetchRawPage: (cursor?: number | null, after?: number | null) =>
+        getQueries(cursor, after, listParams),
     }),
-    [queries, meta, loading, getQueries]
+    [queries, meta, loading, getQueries, listParams]
   );
 
   return {

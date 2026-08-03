@@ -31,6 +31,7 @@ const sorts: SortDef<HttpTableRow>[] = [
     key: "duration",
     label: "Duration",
     get: (r) => durationToMs(r.data.duration),
+    numeric: true,
   },
 ];
 

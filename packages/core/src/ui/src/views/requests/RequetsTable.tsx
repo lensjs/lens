@@ -24,12 +24,39 @@ const filters: FilterDef<RequestTableRow>[] = [
     label: "Status",
     get: (r) => statusClass(r.data.status),
     options: ["2xx", "3xx", "4xx", "5xx"].map((v) => ({ value: v, label: v })),
+    // Status buckets map to a numeric range on the server.
+    paramKeys: ["status__gte", "status__lt"],
+    toParams: (value): Record<string, string> => {
+      const lows: Record<string, number> = {
+        "2xx": 200,
+        "3xx": 300,
+        "4xx": 400,
+        "5xx": 500,
+      };
+      const low = lows[value];
+      if (low === undefined) return {};
+      return { status__gte: String(low), status__lt: String(low + 100) };
+    },
+    fromParams: (params) => {
+      const buckets: Record<string, string> = {
+        "200": "2xx",
+        "300": "3xx",
+        "400": "4xx",
+        "500": "5xx",
+      };
+      return buckets[params.get("status__gte") ?? ""] ?? "";
+    },
   },
 ];
 
 const sorts: SortDef<RequestTableRow>[] = [
   { key: "time", label: "Time", get: (r) => toTime(r.data.createdAt) },
-  { key: "duration", label: "Duration", get: (r) => durationToMs(r.data.duration) },
+  {
+    key: "duration",
+    label: "Duration",
+    get: (r) => durationToMs(r.data.duration),
+    numeric: true,
+  },
 ];
 
 const RequestTable = ({

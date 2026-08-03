@@ -131,3 +131,17 @@ This page provides detailed information about a single exception.
 *   **Code Frame Viewer:** Specifically designed to show code context around an error.
 *   **Stack Trace Viewer:** Formats and highlights stack traces for easier debugging.
 *   **Syntax Highlighters:** Used for SQL, MongoDB queries, and code frames to improve readability.
+
+## 7. Filtering, Search, Sort & Date Range
+
+Every list view (Requests, Queries, Cache, Exceptions, Mail, HTTP, Events, Redis, FCM) has a toolbar that filters the **entire dataset on the server** — not only the rows already loaded. Every control is written to the URL, so a filtered view is deep-linkable and shareable.
+
+*   **Search:** Debounced substring match across an entry's summary fields — e.g. a request path or a Redis command.
+*   **Filters:** Per-view dropdowns (e.g. request Method/Status, cache Operation) narrow results by field.
+*   **Date range:** Choose a preset (Last 15 min / hour / 24 hours / 7 days) or a custom start/end. Bounds are stored as absolute timestamps, so the link stays stable over time.
+*   **Sort:** Sort by Time (default, newest first) or a column such as Duration, ascending or descending.
+*   **Clear:** The "Clear" button (showing the active-filter count) removes every active filter at once.
+
+### Live tail and sorting
+
+The default view — newest-first by time — keeps the **live feed** on, so new matching entries stream in automatically. Choosing an explicit sort (any column, or oldest-first) switches to a stable page-through ordering and **pauses the live feed** for that view. Clear the sort (or reload) to resume live updates.

@@ -382,6 +382,146 @@ describe("BetterSqliteStore", () => {
 
       expect(result.data[0].data).toEqual({ min: "data" });
     });
+
+    it("applies an equality filter as a bound json_extract clause", async () => {
+      const allSpy = vi.fn(() => []);
+      (mockConnection.prepare as Mock).mockReturnValue({ all: allSpy });
+
+      await store.paginate(WatcherTypeEnum.REQUEST, {
+        perPage: 5,
+        filters: [{ field: "method", op: "eq", value: "GET" }],
+      });
+
+      expect(mockConnection.prepare).toHaveBeenCalledWith(
+        expect.stringContaining(
+          "WHERE type = ? AND CAST(json_extract(minimal_data, ?) AS TEXT) = ? ORDER BY rowid DESC LIMIT ?",
+        ),
+      );
+      expect(allSpy).toHaveBeenCalledWith(
+        WatcherTypeEnum.REQUEST,
+        "$.method",
+        "GET",
+        6,
+      );
+    });
+
+    it("applies range filters, search, and date-range as bound clauses", async () => {
+      const allSpy = vi.fn(() => []);
+      (mockConnection.prepare as Mock).mockReturnValue({ all: allSpy });
+
+      await store.paginate(WatcherTypeEnum.REQUEST, {
+        perPage: 5,
+        from: "2025-01-01T00:00:00.000Z",
+        to: "2025-01-02T00:00:00.000Z",
+        filters: [
+          { field: "status", op: "gte", value: "200" },
+          { field: "status", op: "lt", value: "300" },
+        ],
+        q: "users",
+      });
+
+      const sql = (mockConnection.prepare as Mock).mock.calls[0][0];
+      expect(sql).toContain("created_at >= ?");
+      expect(sql).toContain("created_at <= ?");
+      expect(sql).toContain("CAST(json_extract(minimal_data, ?) AS REAL) >= ?");
+      expect(sql).toContain("CAST(json_extract(minimal_data, ?) AS REAL) < ?");
+      expect(sql).toContain("minimal_data LIKE ?");
+      expect(allSpy).toHaveBeenCalledWith(
+        WatcherTypeEnum.REQUEST,
+        "2025-01-01T00:00:00.000Z",
+        "2025-01-02T00:00:00.000Z",
+        "$.status",
+        200,
+        "$.status",
+        300,
+        "%users%",
+        6,
+      );
+    });
+
+    it("ignores filters with unsafe field names", async () => {
+      const allSpy = vi.fn(() => []);
+      (mockConnection.prepare as Mock).mockReturnValue({ all: allSpy });
+
+      await store.paginate(WatcherTypeEnum.REQUEST, {
+        perPage: 5,
+        filters: [{ field: "a; DROP TABLE x", op: "eq", value: "1" }],
+      });
+
+      const sql = (mockConnection.prepare as Mock).mock.calls[0][0];
+      expect(sql).toContain("WHERE type = ? ORDER BY rowid DESC");
+      expect(sql).not.toContain("json_extract");
+      expect(allSpy).toHaveBeenCalledWith(WatcherTypeEnum.REQUEST, 6);
+    });
+
+    it("switches to offset ordering for a custom numeric sort", async () => {
+      const rows = Array.from({ length: 6 }, (_, i) => ({
+        __cursor: i,
+        id: `e${i}`,
+        data: "{}",
+        minimal_data: "{}",
+        type: WatcherTypeEnum.REQUEST,
+        created_at: "now",
+        lens_entry_id: null,
+      }));
+      const allSpy = vi.fn(() => rows);
+      (mockConnection.prepare as Mock).mockReturnValue({ all: allSpy });
+
+      const result = await store.paginate(WatcherTypeEnum.REQUEST, {
+        perPage: 5,
+        sort: "duration",
+        dir: "desc",
+        numericSort: true,
+        cursor: 5,
+      });
+
+      expect(mockConnection.prepare).toHaveBeenCalledWith(
+        expect.stringContaining(
+          "ORDER BY CAST(json_extract(minimal_data, '$.duration') AS REAL) DESC, rowid DESC LIMIT ? OFFSET ?",
+        ),
+      );
+      // `cursor` is reused as the OFFSET in offset mode; limit is perPage + 1.
+      expect(allSpy).toHaveBeenCalledWith(WatcherTypeEnum.REQUEST, 6, 5);
+      expect(result.data).toHaveLength(5);
+      expect(result.meta).toEqual({
+        nextCursor: 10,
+        headCursor: null,
+        hasMore: true,
+        perPage: 5,
+      });
+    });
+
+    it("orders a non-numeric sort with COLLATE NOCASE", async () => {
+      const allSpy = vi.fn(() => []);
+      (mockConnection.prepare as Mock).mockReturnValue({ all: allSpy });
+
+      await store.paginate(WatcherTypeEnum.LOG, {
+        perPage: 5,
+        sort: "level",
+        dir: "asc",
+      });
+
+      expect(mockConnection.prepare).toHaveBeenCalledWith(
+        expect.stringContaining(
+          "ORDER BY json_extract(minimal_data, '$.level') COLLATE NOCASE ASC, rowid DESC LIMIT ? OFFSET ?",
+        ),
+      );
+    });
+
+    it("orders by rowid ASC (offset) when sorting time ascending", async () => {
+      const allSpy = vi.fn(() => []);
+      (mockConnection.prepare as Mock).mockReturnValue({ all: allSpy });
+
+      await store.paginate(WatcherTypeEnum.REQUEST, {
+        perPage: 5,
+        sort: "time",
+        dir: "asc",
+      });
+
+      expect(mockConnection.prepare).toHaveBeenCalledWith(
+        expect.stringContaining("ORDER BY rowid ASC LIMIT ? OFFSET ?"),
+      );
+    });
   });
 
   describe("count", () => {
