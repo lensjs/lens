@@ -23,3 +23,8 @@ export type MikroOrmQueryType = Extract<
   SqlQueryType,
   "mysql" | "postgresql" | "sqlite" | "mariadb" | "tsql"
 >;
+
+export type DrizzleQueryType = Extract<
+  SqlQueryType,
+  "mysql" | "postgresql" | "sqlite"
+>;

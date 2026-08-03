@@ -99,6 +99,14 @@ export default defineConfig({
                 text: "NestJS",
                 link: "/handlers/query/nestjs",
               },
+              {
+                text: "Drizzle",
+                link: "/handlers/query/drizzle",
+              },
+              {
+                text: "Mongoose",
+                link: "/handlers/query/mongoose",
+              },
             ],
           },
           {

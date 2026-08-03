@@ -17,6 +17,15 @@ export interface LensWatcherEvents {
     took?: number;
     requestId?: string;
   };
+  drizzleQuery: {
+    query: string;
+    params: unknown[];
+    requestId?: string;
+  };
+  mongooseQuery: {
+    query: string;
+    requestId?: string;
+  };
   prismaQuery: {
     query: string;
     duration: number;

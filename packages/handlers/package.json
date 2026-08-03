@@ -41,7 +41,9 @@
     "@mikro-orm/core": "^6.0.0",
     "agenda": "^5.0.0",
     "bullmq": "^5.0.0",
+    "drizzle-orm": ">=0.30.0",
     "ioredis": "^5.0.0",
+    "mongoose": ">=7.0.0",
     "nodemailer": "^8.0.1",
     "pino": "^8.0.0 || ^9.0.0 || ^10.0.0",
     "winston": "^3.0.0",
@@ -57,7 +59,13 @@
     "bullmq": {
       "optional": true
     },
+    "drizzle-orm": {
+      "optional": true
+    },
     "ioredis": {
+      "optional": true
+    },
+    "mongoose": {
       "optional": true
     },
     "nodemailer": {
