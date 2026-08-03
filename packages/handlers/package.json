@@ -26,8 +26,11 @@
     "@mikro-orm/core": "^6.6.16",
     "@types/nodemailer": "^7.0.10",
     "kysely": "^0.28.5",
+    "pino": "^10.3.1",
     "prisma": "^6.15.0",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "winston": "^3.19.0",
+    "winston-transport": "^4.9.0"
   },
   "dependencies": {
     "@lensjs/core": "workspace:*",
@@ -36,17 +39,37 @@
   },
   "peerDependencies": {
     "@mikro-orm/core": "^6.0.0",
+    "agenda": "^5.0.0",
+    "bullmq": "^5.0.0",
     "ioredis": "^5.0.0",
-    "nodemailer": "^8.0.1"
+    "nodemailer": "^8.0.1",
+    "pino": "^8.0.0 || ^9.0.0 || ^10.0.0",
+    "winston": "^3.0.0",
+    "winston-transport": "^4.0.0"
   },
   "peerDependenciesMeta": {
     "@mikro-orm/core": {
+      "optional": true
+    },
+    "agenda": {
+      "optional": true
+    },
+    "bullmq": {
       "optional": true
     },
     "ioredis": {
       "optional": true
     },
     "nodemailer": {
+      "optional": true
+    },
+    "pino": {
+      "optional": true
+    },
+    "winston": {
+      "optional": true
+    },
+    "winston-transport": {
       "optional": true
     }
   },

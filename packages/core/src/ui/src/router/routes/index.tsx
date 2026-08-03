@@ -5,8 +5,10 @@ import {
   Database,
   Globe,
   Layers,
+  ListChecks,
   Mail,
   Radio,
+  ScrollText,
   Server,
   Zap,
 } from "lucide-react";
@@ -65,6 +67,14 @@ const FcmContainer = lazy(() => import("../../containers/fcm/FcmContainer"));
 const FcmDetailsContainer = lazy(
   () => import("../../containers/fcm/FcmDetailsContainer"),
 );
+const LogContainer = lazy(() => import("../../containers/logs/LogContainer"));
+const LogDetailsContainer = lazy(
+  () => import("../../containers/logs/LogDetailsContainer"),
+);
+const JobContainer = lazy(() => import("../../containers/jobs/JobContainer"));
+const JobDetailsContainer = lazy(
+  () => import("../../containers/jobs/JobDetailsContainer"),
+);
 const LiveTailContainer = lazy(
   () => import("../../containers/liveTail/LiveTailContainer"),
 );
@@ -89,6 +99,10 @@ export function getRoutesPaths(config: LensConfig) {
     REDIS_DETAILS: `${config.path}/redis/:redisId`,
     FCM: `${config.path}/fcm`,
     FCM_DETAILS: `${config.path}/fcm/:fcmId`,
+    LOGS: `${config.path}/logs`,
+    LOG_DETAILS: `${config.path}/logs/:logId`,
+    JOBS: `${config.path}/jobs`,
+    JOB_DETAILS: `${config.path}/jobs/:jobId`,
     LIVE_TAIL: `${config.path}/live`,
   };
 }
@@ -146,6 +160,16 @@ export function getSidebarRoutes(config: LensConfig) {
       path: paths.FCM,
       label: "FCM",
       icon: Bell,
+    },
+    {
+      path: paths.LOGS,
+      label: "Logs",
+      icon: ScrollText,
+    },
+    {
+      path: paths.JOBS,
+      label: "Jobs",
+      icon: ListChecks,
     },
   ];
 }
@@ -237,6 +261,22 @@ export function getRoutes(config: LensConfig): RouteObject[] {
         {
           path: "fcm/:id",
           element: <FcmDetailsContainer />,
+        },
+        {
+          path: "logs",
+          element: <LogContainer />,
+        },
+        {
+          path: "logs/:id",
+          element: <LogDetailsContainer />,
+        },
+        {
+          path: "jobs",
+          element: <JobContainer />,
+        },
+        {
+          path: "jobs/:id",
+          element: <JobDetailsContainer />,
         },
         {
           path: "live",

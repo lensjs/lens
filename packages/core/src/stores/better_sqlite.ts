@@ -37,12 +37,25 @@ export default class BetterSqliteStore extends Store {
   }) {
     const id = entry.id ?? randomUUID();
     const createdAt = entry.timestamp ?? nowISO();
-    const lensEntryId = entry.requestId || null;
+    let lensEntryId = entry.requestId || null;
     const minimal = entry.minimal_data ?? {};
 
+    // An upsert of the same id without a request context (e.g. a job finishing in
+    // a worker after being enqueued in a request) must not null out the
+    // correlation captured on the first save — keep the existing one.
+    if (lensEntryId === null && entry.id) {
+      const existing = this.connection
+        .prepare(`SELECT lens_entry_id FROM ${TABLE_NAME} WHERE id = $id`)
+        .get({ id }) as { lens_entry_id: string | null } | undefined;
+      if (existing?.lens_entry_id) lensEntryId = existing.lens_entry_id;
+    }
+
+    // INSERT OR REPLACE so re-saving the same id (e.g. a job progressing from
+    // active -> completed) replaces the row with a fresh rowid; unique-id
+    // signals never conflict, so they behave as a plain insert.
     const info = this.connection
       .prepare(
-        `INSERT INTO ${TABLE_NAME} (id, data, type, created_at, lens_entry_id, minimal_data) values($id, $data, $type, $created_at, $lens_entry_id, $minimalData)`,
+        `INSERT OR REPLACE INTO ${TABLE_NAME} (id, data, type, created_at, lens_entry_id, minimal_data) values($id, $data, $type, $created_at, $lens_entry_id, $minimalData)`,
       )
       .run({
         id,

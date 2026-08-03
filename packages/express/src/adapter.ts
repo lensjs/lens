@@ -16,6 +16,8 @@ import {
   EventWatcher,
   RedisWatcher,
   FcmWatcher,
+  LogWatcher,
+  JobWatcher,
   createLensAuth,
   type LensAuth,
   type LensEntry,
@@ -96,6 +98,16 @@ export class ExpressAdapter extends LensAdapter {
         case WatcherTypeEnum.FCM:
           if (this.config.fcmWatcherEnabled) {
             void this.watchFcm(watcher as FcmWatcher);
+          }
+          break;
+        case WatcherTypeEnum.LOG:
+          if (this.config.logWatcherEnabled) {
+            void this.watchLog(watcher as LogWatcher);
+          }
+          break;
+        case WatcherTypeEnum.JOB:
+          if (this.config.jobWatcherEnabled) {
+            void this.watchJob(watcher as JobWatcher);
           }
           break;
       }
@@ -338,6 +350,22 @@ export class ExpressAdapter extends LensAdapter {
     if (!this.config.fcmWatcherEnabled) return;
 
     lensEmitter.on("fcm", async (data) => {
+      await watcher?.log(data);
+    });
+  }
+
+  private async watchLog(watcher: LogWatcher) {
+    if (!this.config.logWatcherEnabled) return;
+
+    lensEmitter.on("log", async (data) => {
+      await watcher?.log(data);
+    });
+  }
+
+  private async watchJob(watcher: JobWatcher) {
+    if (!this.config.jobWatcherEnabled) return;
+
+    lensEmitter.on("job", async (data) => {
       await watcher?.log(data);
     });
   }

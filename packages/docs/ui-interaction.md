@@ -134,10 +134,10 @@ This page provides detailed information about a single exception.
 
 ## 7. Filtering, Search, Sort & Date Range
 
-Every list view (Requests, Queries, Cache, Exceptions, Mail, HTTP, Events, Redis, FCM) has a toolbar that filters the **entire dataset on the server** — not only the rows already loaded. Every control is written to the URL, so a filtered view is deep-linkable and shareable.
+Every list view (Requests, Queries, Cache, Exceptions, Mail, HTTP, Events, Redis, FCM, Logs, Jobs) has a toolbar that filters the **entire dataset on the server** — not only the rows already loaded. Every control is written to the URL, so a filtered view is deep-linkable and shareable.
 
-*   **Search:** Debounced substring match across an entry's summary fields — e.g. a request path or a Redis command.
-*   **Filters:** Per-view dropdowns (e.g. request Method/Status, cache Operation) narrow results by field.
+*   **Search:** Debounced substring match across an entry's summary fields — e.g. a request path, a log message, or a Redis command.
+*   **Filters:** Per-view dropdowns (e.g. request Method/Status, log Level, cache Operation) narrow results by field.
 *   **Date range:** Choose a preset (Last 15 min / hour / 24 hours / 7 days) or a custom start/end. Bounds are stored as absolute timestamps, so the link stays stable over time.
 *   **Sort:** Sort by Time (default, newest first) or a column such as Duration, ascending or descending.
 *   **Clear:** The "Clear" button (showing the active-filter count) removes every active filter at once.

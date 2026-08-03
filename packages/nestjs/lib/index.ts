@@ -11,6 +11,8 @@ import {
   EventWatcher,
   RedisWatcher,
   FcmWatcher,
+  LogWatcher,
+  JobWatcher,
   WatcherTypeEnum,
 } from "@lensjs/core";
 import { NestLensConfig, RequiredNestLensConfig } from "./types";
@@ -34,6 +36,8 @@ const defaultConfig = {
   eventWatcherEnabled: false,
   redisWatcherEnabled: false,
   fcmWatcherEnabled: false,
+  logWatcherEnabled: false,
+  jobWatcherEnabled: false,
 };
 
 export async function lens(config: NestLensConfig) {
@@ -79,6 +83,14 @@ export async function lens(config: NestLensConfig) {
     {
       enabled: mergedConfig.fcmWatcherEnabled,
       watcher: new FcmWatcher(),
+    },
+    {
+      enabled: mergedConfig.logWatcherEnabled,
+      watcher: new LogWatcher(),
+    },
+    {
+      enabled: mergedConfig.jobWatcherEnabled,
+      watcher: new JobWatcher(),
     },
   ];
 

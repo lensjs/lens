@@ -14,6 +14,8 @@ import {
   EventWatcher,
   RedisWatcher,
   FcmWatcher,
+  LogWatcher,
+  JobWatcher,
   lensEmitter,
   createLensAuth,
   type LensAuth,
@@ -73,6 +75,12 @@ export default class AdonisAdapter extends LensAdapter {
             break
           case WatcherTypeEnum.FCM:
             this.watchFcm(watcher as unknown as FcmWatcher)
+            break
+          case WatcherTypeEnum.LOG:
+            this.watchLog(watcher as unknown as LogWatcher)
+            break
+          case WatcherTypeEnum.JOB:
+            this.watchJob(watcher as unknown as JobWatcher)
             break
         }
       }
@@ -316,6 +324,22 @@ export default class AdonisAdapter extends LensAdapter {
     if (!this.config.watchers.fcm) return
 
     lensEmitter.on('fcm', async (data) => {
+      await watcher.log(data)
+    })
+  }
+
+  protected watchLog(watcher: LogWatcher): void {
+    if (!this.config.watchers.log) return
+
+    lensEmitter.on('log', async (data) => {
+      await watcher.log(data)
+    })
+  }
+
+  protected watchJob(watcher: JobWatcher): void {
+    if (!this.config.watchers.job) return
+
+    lensEmitter.on('job', async (data) => {
       await watcher.log(data)
     })
   }

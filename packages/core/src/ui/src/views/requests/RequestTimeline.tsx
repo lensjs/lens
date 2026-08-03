@@ -4,7 +4,9 @@ import {
   Database,
   Globe,
   Layers,
+  ListChecks,
   Mail,
+  ScrollText,
   Server,
   Zap,
 } from "lucide-react";
@@ -20,7 +22,9 @@ type EventKind =
   | "http"
   | "event"
   | "redis"
-  | "fcm";
+  | "fcm"
+  | "log"
+  | "job";
 
 type TimelineEvent = {
   id: string;
@@ -42,6 +46,8 @@ const KIND_META: Record<
   event: { icon: Zap, tone: "text-info", label: "Event" },
   redis: { icon: Server, tone: "text-warning", label: "Redis" },
   fcm: { icon: Bell, tone: "text-accent", label: "FCM" },
+  log: { icon: ScrollText, tone: "text-muted", label: "Log" },
+  job: { icon: ListChecks, tone: "text-info", label: "Job" },
 };
 
 export default function RequestTimeline({ request }: { request: OneRequest }) {
@@ -101,6 +107,20 @@ export default function RequestTimeline({ request }: { request: OneRequest }) {
       kind: "fcm" as const,
       label: `${f.data.method}${f.data.target ? ` → ${f.data.target}` : ""}`,
       sub: `${f.data.status} · ${f.data.duration}`,
+    })),
+    ...(request.logEntries ?? []).map((l, i) => ({
+      id: `l${i}`,
+      time: l.data.createdAt,
+      kind: "log" as const,
+      label: l.data.message,
+      sub: l.data.level,
+    })),
+    ...(request.jobEntries ?? []).map((j, i) => ({
+      id: `j${i}`,
+      time: j.data.createdAt,
+      kind: "job" as const,
+      label: `${j.data.name} (${j.data.queue})`,
+      sub: `${j.data.status}${j.data.duration ? ` · ${j.data.duration}` : ""}`,
     })),
   ]
     .filter((e) => e.time)

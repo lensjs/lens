@@ -15,6 +15,8 @@ export type FastifyAdapterConfig = {
   eventWatcherEnabled?: boolean;
   redisWatcherEnabled?: boolean;
   fcmWatcherEnabled?: boolean;
+  logWatcherEnabled?: boolean;
+  jobWatcherEnabled?: boolean;
   registerErrorHandler?: boolean;
   queryWatcher?: {
     enabled: boolean;

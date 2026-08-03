@@ -160,6 +160,8 @@ describe("ApiController", () => {
           eventEntries: [],
           redisEntries: [],
           fcmEntries: [],
+          logEntries: [],
+          jobEntries: [],
         },
       });
     });
@@ -341,6 +343,135 @@ describe("ApiController", () => {
         message: "Could not find the requested resource",
         data: null,
       });
+    });
+  });
+
+  describe("getLogEntries", () => {
+    it("should return paginated log entries (minimal, LOG type)", async () => {
+      const mockLogEntries: Omit<LensEntry, "data">[] = [
+        {
+          id: "log1",
+          type: WatcherTypeEnum.LOG,
+          created_at: "now",
+          lens_entry_id: "req1",
+          data: {},
+        },
+      ];
+      const mockPaginator: Paginator<Omit<LensEntry, "data">[]> = {
+        data: mockLogEntries,
+        meta: { nextCursor: null, headCursor: null, hasMore: false, perPage: 100 },
+      };
+      mockStore.paginate.mockResolvedValue(mockPaginator);
+
+      const result = await ApiController.getLogEntries({
+        qs: { perPage: "10" },
+      });
+
+      expect(mockStore.paginate).toHaveBeenCalledWith(
+        WatcherTypeEnum.LOG,
+        { perPage: 10 },
+        false,
+      );
+      expect(result).toEqual({
+        status: 200,
+        message: "Data fetched successfully",
+        data: mockLogEntries,
+        meta: { nextCursor: null, headCursor: null, hasMore: false, perPage: 100 },
+      });
+    });
+  });
+
+  describe("getLogEntry", () => {
+    it("should return a single log entry", async () => {
+      const mockLogEntry: LensEntry = {
+        id: "log1",
+        type: WatcherTypeEnum.LOG,
+        created_at: "now",
+        lens_entry_id: "req1",
+        data: { level: "error", message: "boom" },
+      };
+      mockStore.find.mockResolvedValue(mockLogEntry);
+
+      const result = await ApiController.getLogEntry({
+        params: { id: "log1" },
+        qs: {},
+      });
+
+      expect(mockStore.find).toHaveBeenCalledWith(WatcherTypeEnum.LOG, "log1");
+      expect(result).toEqual({
+        status: 200,
+        message: "Data fetched successfully",
+        data: mockLogEntry,
+      });
+    });
+
+    it("should return 404 if log entry not found", async () => {
+      mockStore.find.mockResolvedValue(null);
+
+      const result = await ApiController.getLogEntry({
+        params: { id: "nonexistent" },
+        qs: {},
+      });
+
+      expect(mockStore.find).toHaveBeenCalledWith(
+        WatcherTypeEnum.LOG,
+        "nonexistent",
+      );
+      expect(result).toEqual({
+        status: 404,
+        message: "Could not find the requested resource",
+        data: null,
+      });
+    });
+  });
+
+  describe("getJobEntries / getJobEntry", () => {
+    it("returns paginated jobs (minimal, JOB type)", async () => {
+      const mockJobs: Omit<LensEntry, "data">[] = [
+        {
+          id: "emails:1",
+          type: WatcherTypeEnum.JOB,
+          created_at: "now",
+          lens_entry_id: null,
+          data: {},
+        },
+      ];
+      mockStore.paginate.mockResolvedValue({
+        data: mockJobs,
+        meta: { nextCursor: null, headCursor: null, hasMore: false, perPage: 100 },
+      });
+
+      const result = await ApiController.getJobEntries({ qs: { perPage: "10" } });
+
+      expect(mockStore.paginate).toHaveBeenCalledWith(
+        WatcherTypeEnum.JOB,
+        { perPage: 10 },
+        false,
+      );
+      expect(result.status).toBe(200);
+      expect(result.data).toEqual(mockJobs);
+    });
+
+    it("returns a single job by id", async () => {
+      const mockJob: LensEntry = {
+        id: "emails:1",
+        type: WatcherTypeEnum.JOB,
+        created_at: "now",
+        lens_entry_id: null,
+        data: { name: "sendEmail", status: "completed" },
+      };
+      mockStore.find.mockResolvedValue(mockJob);
+
+      const result = await ApiController.getJobEntry({
+        params: { id: "emails:1" },
+        qs: {},
+      });
+
+      expect(mockStore.find).toHaveBeenCalledWith(
+        WatcherTypeEnum.JOB,
+        "emails:1",
+      );
+      expect(result.data).toEqual(mockJob);
     });
   });
 

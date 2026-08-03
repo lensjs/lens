@@ -12,6 +12,8 @@ import {
   EventWatcher,
   RedisWatcher,
   FcmWatcher,
+  LogWatcher,
+  JobWatcher,
 } from "@lensjs/core";
 import type {
   FastifyAdapterConfig,
@@ -37,6 +39,8 @@ const defaultConfig = {
   eventWatcherEnabled: false,
   redisWatcherEnabled: false,
   fcmWatcherEnabled: false,
+  logWatcherEnabled: false,
+  jobWatcherEnabled: false,
 };
 
 export const lens = async (config: FastifyAdapterConfig) => {
@@ -83,6 +87,14 @@ export const lens = async (config: FastifyAdapterConfig) => {
     {
       enabled: mergedConfig.fcmWatcherEnabled,
       watcher: new FcmWatcher(),
+    },
+    {
+      enabled: mergedConfig.logWatcherEnabled,
+      watcher: new LogWatcher(),
+    },
+    {
+      enabled: mergedConfig.jobWatcherEnabled,
+      watcher: new JobWatcher(),
     },
   ];
 

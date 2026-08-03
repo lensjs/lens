@@ -11,6 +11,8 @@ import {
   EventWatcher,
   RedisWatcher,
   FcmWatcher,
+  LogWatcher,
+  JobWatcher,
 } from "@lensjs/core";
 import { ExpressAdapterConfig, RequiredExpressAdapterConfig } from "./types";
 import { ExpressAdapter } from "./adapter";
@@ -33,6 +35,8 @@ const defaultConfig = {
   eventWatcherEnabled: false,
   redisWatcherEnabled: false,
   fcmWatcherEnabled: false,
+  logWatcherEnabled: false,
+  jobWatcherEnabled: false,
 };
 
 export const lens = async (config: ExpressAdapterConfig) => {
@@ -79,6 +83,14 @@ export const lens = async (config: ExpressAdapterConfig) => {
     {
       enabled: mergedConfig.fcmWatcherEnabled,
       watcher: new FcmWatcher(),
+    },
+    {
+      enabled: mergedConfig.logWatcherEnabled,
+      watcher: new LogWatcher(),
+    },
+    {
+      enabled: mergedConfig.jobWatcherEnabled,
+      watcher: new JobWatcher(),
     },
   ];
 

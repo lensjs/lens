@@ -19,6 +19,10 @@ import type {
   OneRedis,
   FcmTableRow,
   OneFcm,
+  LogTableRow,
+  OneLog,
+  JobTableRow,
+  OneJob,
 } from "../types";
 import { prepareApiUrl } from "../utils/api";
 import { useConfig } from "../utils/context";
@@ -213,6 +217,50 @@ const useLensApi = () => {
     [config.api.fcm],
   );
 
+  const getLogEntries = useCallback(
+    async (
+      cursor?: number | null,
+      after?: number | null,
+      listParams?: Record<string, string>,
+    ) => {
+      return fetchJson<LogTableRow[]>(
+        prepareApiUrl(withQueryParams(config.api.logs, { cursor, after, ...listParams })),
+      );
+    },
+    [config.api.logs],
+  );
+
+  const getLogById = useCallback(
+    async (id: string) => {
+      return fetchJson<OneLog>(prepareApiUrl(`${config.api.logs}/${id}`));
+    },
+    [config.api.logs],
+  );
+
+  const getJobEntries = useCallback(
+    async (
+      cursor?: number | null,
+      after?: number | null,
+      listParams?: Record<string, string>,
+    ) => {
+      return fetchJson<JobTableRow[]>(
+        prepareApiUrl(
+          withQueryParams(config.api.jobs, { cursor, after, ...listParams }),
+        ),
+      );
+    },
+    [config.api.jobs],
+  );
+
+  const getJobById = useCallback(
+    async (id: string) => {
+      return fetchJson<OneJob>(
+        prepareApiUrl(`${config.api.jobs}/${encodeURIComponent(id)}`),
+      );
+    },
+    [config.api.jobs],
+  );
+
   return {
     getAllRequests,
     getRequestById,
@@ -232,6 +280,10 @@ const useLensApi = () => {
     getRedisById,
     getFcmEntries,
     getFcmById,
+    getLogEntries,
+    getLogById,
+    getJobEntries,
+    getJobById,
   };
 };
 

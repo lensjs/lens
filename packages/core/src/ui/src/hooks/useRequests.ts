@@ -11,6 +11,8 @@ const defaultRequest: OneRequest = {
   eventEntries: [],
   redisEntries: [],
   fcmEntries: [],
+  logEntries: [],
+  jobEntries: [],
   request: {
     created_at: "",
     data: {

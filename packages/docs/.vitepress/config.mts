@@ -175,6 +175,14 @@ export default defineConfig({
             text: "FCM",
             link: "/handlers/fcm",
           },
+          {
+            text: "Logs",
+            link: "/handlers/log",
+          },
+          {
+            text: "Jobs / Queues",
+            link: "/handlers/job",
+          },
         ],
       },
       {

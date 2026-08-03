@@ -1,5 +1,7 @@
 # Logs
 logs
+# …but not the dashboard's own Logs views, which live under src/.
+!src/**/logs/
 *.log
 npm-debug.log*
 yarn-debug.log*

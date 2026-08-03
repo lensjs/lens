@@ -76,7 +76,7 @@ describe("BetterSqliteStore", () => {
       await store.save(entry);
 
       expect(mockConnection.prepare).toHaveBeenCalledWith(
-        expect.stringContaining("INSERT INTO lens_entries"),
+        expect.stringContaining("INSERT OR REPLACE INTO lens_entries"),
       );
       expect(runSpy).toHaveBeenCalledWith({
         id: "mock-uuid",
@@ -141,6 +141,41 @@ describe("BetterSqliteStore", () => {
         expect.objectContaining({
           data: "some string data",
         }),
+      );
+    });
+
+    it("preserves an existing request correlation when an id is re-saved without one", async () => {
+      const getSpy = vi.fn(() => ({ lens_entry_id: "req-original" }));
+      const runSpy = vi.fn();
+      (mockConnection.prepare as Mock)
+        .mockReturnValueOnce({ get: getSpy }) // SELECT existing lens_entry_id
+        .mockReturnValueOnce({ run: runSpy }); // INSERT OR REPLACE
+
+      await store.save({
+        id: "job-1",
+        data: { status: "completed" },
+        type: WatcherTypeEnum.JOB,
+      });
+
+      expect(getSpy).toHaveBeenCalledWith({ id: "job-1" });
+      expect(runSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ id: "job-1", lens_entry_id: "req-original" }),
+      );
+    });
+
+    it("does not look up correlation for a fresh generated id", async () => {
+      const getSpy = vi.fn();
+      const runSpy = vi.fn();
+      (mockConnection.prepare as Mock).mockReturnValue({
+        get: getSpy,
+        run: runSpy,
+      });
+
+      await store.save({ data: { foo: 1 }, type: WatcherTypeEnum.REQUEST });
+
+      expect(getSpy).not.toHaveBeenCalled();
+      expect(runSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ lens_entry_id: null }),
       );
     });
   });

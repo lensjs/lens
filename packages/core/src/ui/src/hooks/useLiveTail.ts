@@ -28,10 +28,13 @@ export default function useLiveTail() {
   const prepend = useCallback((batch: LiveEntry[]) => {
     if (!batch.length) return;
     setItems((prev) => {
-      const seen = new Set(prev.map((i) => i.id));
-      const fresh = batch.filter((i) => !seen.has(i.id));
-      if (!fresh.length) return prev;
-      const next = [...fresh, ...prev];
+      // Replace already-seen rows in place (upserted entries like jobs update
+      // live) and prepend the genuinely new ones.
+      const byId = new Map(batch.map((i) => [i.id, i]));
+      const merged = prev.map((i) => byId.get(i.id) ?? i);
+      const prevIds = new Set(prev.map((i) => i.id));
+      const fresh = batch.filter((i) => !prevIds.has(i.id));
+      const next = fresh.length ? [...fresh, ...merged] : merged;
       return next.length > MAX_ITEMS ? next.slice(0, MAX_ITEMS) : next;
     });
   }, []);

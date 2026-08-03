@@ -14,6 +14,8 @@ import {
   EventWatcher,
   RedisWatcher,
   FcmWatcher,
+  LogWatcher,
+  JobWatcher,
   lensExceptionUtils,
   ExceptionWatcher,
   handleUncaughExceptions,
@@ -45,6 +47,8 @@ export default class LensServiceProvider {
       event: new EventWatcher(),
       redis: new RedisWatcher(),
       fcm: new FcmWatcher(),
+      log: new LogWatcher(),
+      job: new JobWatcher(),
     }
 
     if (!config) {

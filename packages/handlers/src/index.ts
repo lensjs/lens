@@ -6,4 +6,6 @@ export * from "./http";
 export * from "./event";
 export * from "./redis";
 export * from "./fcm";
+export * from "./log";
+export * from "./job";
 export { watcherEmitter } from "./utils/emitter";

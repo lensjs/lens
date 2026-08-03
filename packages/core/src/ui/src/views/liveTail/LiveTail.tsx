@@ -17,6 +17,8 @@ const TYPE_META: Record<LensEntryType, { label: string; tone: string }> = {
   event: { label: "Event", tone: "text-info" },
   redis: { label: "Redis", tone: "text-warning" },
   fcm: { label: "FCM", tone: "text-accent" },
+  log: { label: "Log", tone: "text-muted" },
+  job: { label: "Job", tone: "text-info" },
 };
 
 const STATUS_META: Record<LiveStatus, { label: string; cls: string }> = {
@@ -47,6 +49,10 @@ function summarize(e: LiveEntry): string {
       return `${d.command ?? ""}${d.args?.length ? ` ${d.args.join(" ")}` : ""}`.trim();
     case "fcm":
       return `${d.method ?? ""}${d.target ? ` → ${d.target}` : ""}`.trim();
+    case "log":
+      return `${d.level ? `[${d.level}] ` : ""}${d.message ?? ""}`.trim();
+    case "job":
+      return `${d.name ?? ""}${d.status ? ` · ${d.status}` : ""}${d.queue ? ` (${d.queue})` : ""}`.trim();
     default:
       return JSON.stringify(d);
   }
@@ -76,6 +82,8 @@ export default function LiveTailView({
       event: paths.EVENTS,
       redis: paths.REDIS,
       fcm: paths.FCM,
+      log: paths.LOGS,
+      job: paths.JOBS,
     })[t];
 
   const rows = useMemo(

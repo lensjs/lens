@@ -67,6 +67,12 @@ await lens({
   // Optional: Enable or disable the mail watcher. Defaults to `false`.
   mailWatcherEnabled: true,
 
+  // Optional: Enable or disable the logs watcher (console/pino/winston). Defaults to `false`.
+  logWatcherEnabled: true,
+
+  // Optional: Enable or disable the jobs watcher (BullMQ/Agenda). Defaults to `false`.
+  jobWatcherEnabled: true,
+
   // Optional: The URL path where the Lens dashboard will be accessible. Defaults to "/lens".
   path: "/lens",
 

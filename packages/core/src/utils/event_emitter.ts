@@ -4,7 +4,9 @@ import {
   EventEntry,
   FcmEntry,
   HttpEntry,
+  JobEntry,
   LensEntry,
+  LogEntry,
   MailEntry,
   RedisEntry,
 } from "../types";
@@ -16,6 +18,8 @@ type LensEvents = {
   event: EventEntry;
   redis: RedisEntry;
   fcm: FcmEntry;
+  log: LogEntry;
+  job: JobEntry;
 };
 
 /** A single persisted entry pushed to the live-tail stream (SSE). */

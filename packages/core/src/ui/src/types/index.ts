@@ -20,6 +20,8 @@ export type LensConfig = {
     event: string;
     redis: string;
     fcm: string;
+    logs: string;
+    jobs: string;
     stream: string;
     streamPoll: string;
     truncate: string;
@@ -36,7 +38,9 @@ export type LensEntryType =
   | "http"
   | "event"
   | "redis"
-  | "fcm";
+  | "fcm"
+  | "log"
+  | "job";
 
 export type EventEntry = {
   name: string;
@@ -87,6 +91,36 @@ export type HttpEntry = {
   requestBody?: unknown;
   responseBody?: unknown;
   error?: string;
+};
+
+export type LogLevel =
+  | "trace"
+  | "debug"
+  | "info"
+  | "warn"
+  | "error"
+  | "fatal";
+
+export type LogEntry = {
+  level: LogLevel;
+  message: string;
+  context?: Record<string, any>;
+  source?: string;
+  createdAt: string;
+};
+
+export type JobStatus = "active" | "completed" | "failed";
+export type JobEntry = {
+  id: string;
+  name: string;
+  queue: string;
+  status: JobStatus;
+  attempts?: number;
+  duration?: string;
+  data?: any;
+  result?: any;
+  failedReason?: string;
+  createdAt: string;
 };
 export type LanguageTypeOption = "ts" | "dart";
 export type PaginationParams = {
@@ -215,6 +249,8 @@ export type OneRequest = {
   eventEntries: EventTableRow[];
   redisEntries: RedisTableRow[];
   fcmEntries: FcmTableRow[];
+  logEntries: LogTableRow[];
+  jobEntries: JobTableRow[];
 };
 export type QueryTableRow = GenericLensEntry<QueryEntry>;
 export type OneQuery = GenericLensEntry<QueryEntry>;
@@ -228,6 +264,10 @@ export type RedisTableRow = GenericLensEntry<RedisEntry>;
 export type OneRedis = GenericLensEntry<RedisEntry>;
 export type FcmTableRow = GenericLensEntry<FcmEntry>;
 export type OneFcm = GenericLensEntry<FcmEntry>;
+export type LogTableRow = GenericLensEntry<LogEntry>;
+export type OneLog = GenericLensEntry<LogEntry>;
+export type JobTableRow = GenericLensEntry<JobEntry>;
+export type OneJob = GenericLensEntry<JobEntry>;
 export type ExceptionTableRow = GenericLensEntry<
   Pick<ExceptionEntry, "name" | "message" | "createdAt">
 >;

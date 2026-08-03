@@ -15,6 +15,8 @@ export type ExpressAdapterConfig = {
   eventWatcherEnabled?: boolean;
   redisWatcherEnabled?: boolean;
   fcmWatcherEnabled?: boolean;
+  logWatcherEnabled?: boolean;
+  jobWatcherEnabled?: boolean;
   queryWatcher?: {
     enabled: boolean;
     handler: QueryWatcherHandler;

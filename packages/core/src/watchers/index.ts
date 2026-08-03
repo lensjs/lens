@@ -7,3 +7,5 @@ export { default as HttpWatcher } from "./http_watcher";
 export { default as EventWatcher } from "./event_watcher";
 export { default as RedisWatcher } from "./redis_watcher";
 export { default as FcmWatcher } from "./fcm_watcher";
+export { default as LogWatcher } from "./log_watcher";
+export { default as JobWatcher } from "./job_watcher";

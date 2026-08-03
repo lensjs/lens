@@ -65,6 +65,16 @@ export class ApiController {
       WatcherTypeEnum.FCM,
     );
 
+    const logEntries = await getStore().allByRequestId(
+      request.id,
+      WatcherTypeEnum.LOG,
+    );
+
+    const jobEntries = await getStore().allByRequestId(
+      request.id,
+      WatcherTypeEnum.JOB,
+    );
+
     return this.resourceResponse({
       request,
       queries,
@@ -75,6 +85,8 @@ export class ApiController {
       eventEntries,
       redisEntries,
       fcmEntries,
+      logEntries,
+      jobEntries,
     });
   }
 
@@ -223,6 +235,46 @@ export class ApiController {
 
   static async getFcmEntry({ params }: RouteDefinitionHandler) {
     const entry = await getStore().find(WatcherTypeEnum.FCM, params.id);
+
+    if (!entry) {
+      return this.notFoundResponse();
+    }
+
+    return this.resourceResponse(entry);
+  }
+
+  static async getLogEntries({ qs }: RouteDefinitionHandler) {
+    return this.paginatedResponse(
+      await getStore().paginate<Omit<LensEntry, "data">[]>(
+        WatcherTypeEnum.LOG,
+        this.extractListParams(qs),
+        false,
+      ),
+    );
+  }
+
+  static async getLogEntry({ params }: RouteDefinitionHandler) {
+    const entry = await getStore().find(WatcherTypeEnum.LOG, params.id);
+
+    if (!entry) {
+      return this.notFoundResponse();
+    }
+
+    return this.resourceResponse(entry);
+  }
+
+  static async getJobEntries({ qs }: RouteDefinitionHandler) {
+    return this.paginatedResponse(
+      await getStore().paginate<Omit<LensEntry, "data">[]>(
+        WatcherTypeEnum.JOB,
+        this.extractListParams(qs),
+        false,
+      ),
+    );
+  }
+
+  static async getJobEntry({ params }: RouteDefinitionHandler) {
+    const entry = await getStore().find(WatcherTypeEnum.JOB, params.id);
 
     if (!entry) {
       return this.notFoundResponse();

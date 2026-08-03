@@ -97,7 +97,44 @@ export enum WatcherTypeEnum {
   EVENT = "event",
   REDIS = "redis",
   FCM = "fcm",
+  LOG = "log",
+  JOB = "job",
 }
+
+export type JobStatus = "active" | "completed" | "failed";
+
+export type JobEntry = {
+  /** Stable per-job id (`${queue}:${jobId}`) — the same entry is upserted as the job progresses. */
+  id: string;
+  name: string;
+  queue: string;
+  status: JobStatus;
+  attempts?: number;
+  duration?: string;
+  data?: any;
+  result?: any;
+  failedReason?: string;
+  requestId?: string;
+  createdAt: string;
+};
+
+export type LogLevel =
+  | "trace"
+  | "debug"
+  | "info"
+  | "warn"
+  | "error"
+  | "fatal";
+
+export type LogEntry = {
+  requestId?: string;
+  createdAt: string;
+  level: LogLevel;
+  message: string;
+  context?: Record<string, any>;
+  /** Which logger produced this entry (e.g. "console", "pino", "winston"). */
+  source?: string;
+};
 
 export type EventEntry = {
   requestId?: string;

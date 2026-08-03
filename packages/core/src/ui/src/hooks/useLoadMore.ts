@@ -9,9 +9,14 @@ const entryId = (row: unknown): string | number | undefined =>
   (row as { id?: string | number } | null)?.id;
 
 const dedupePrepend = <T>(prev: T[], incoming: T[]): T[] => {
-  const existing = new Set(prev.map(entryId));
-  const fresh = incoming.filter((row) => !existing.has(entryId(row)));
-  return fresh.length ? [...fresh, ...prev] : prev;
+  if (!incoming.length) return prev;
+  // Replace already-seen rows in place (so an upserted entry — e.g. a job going
+  // active -> completed — updates live) and prepend the genuinely new ones.
+  const byId = new Map(incoming.map((row) => [entryId(row), row]));
+  const merged = prev.map((row) => byId.get(entryId(row)) ?? row);
+  const prevIds = new Set(prev.map(entryId));
+  const fresh = incoming.filter((row) => !prevIds.has(entryId(row)));
+  return fresh.length ? [...fresh, ...merged] : merged;
 };
 
 const dedupeAppend = <T>(prev: T[], incoming: T[]): T[] => {

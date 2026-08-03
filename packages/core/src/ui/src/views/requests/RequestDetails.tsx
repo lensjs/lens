@@ -11,6 +11,8 @@ import getHttpColumns from "../http/columns";
 import getEventColumns from "../event/columns";
 import getRedisColumns from "../redis/columns";
 import getFcmColumns from "../fcm/columns";
+import getLogColumns from "../logs/columns";
+import getJobColumns from "../jobs/columns";
 import BasicRequestDetails from "./BasicRequestDetails";
 import RequestTimeline from "./RequestTimeline";
 
@@ -23,6 +25,8 @@ const RequestDetails = ({ request }: { request: OneRequest }) => {
   const eventColumns = getEventColumns();
   const redisColumns = getRedisColumns();
   const fcmColumns = getFcmColumns();
+  const logColumns = getLogColumns();
+  const jobColumns = getJobColumns();
 
   const dynamicTabs = [
     { id: "payload", label: "Payload", data: request?.request?.data?.body },
@@ -94,6 +98,18 @@ const RequestDetails = ({ request }: { request: OneRequest }) => {
       label: `FCM (${request?.fcmEntries?.length || 0})`,
       shouldShow: (request?.fcmEntries?.length || 0) > 0,
       content: <Table columns={fcmColumns} data={request?.fcmEntries ?? []} />,
+    },
+    {
+      id: "request-logs",
+      label: `Logs (${request?.logEntries?.length || 0})`,
+      shouldShow: (request?.logEntries?.length || 0) > 0,
+      content: <Table columns={logColumns} data={request?.logEntries ?? []} />,
+    },
+    {
+      id: "request-jobs",
+      label: `Jobs (${request?.jobEntries?.length || 0})`,
+      shouldShow: (request?.jobEntries?.length || 0) > 0,
+      content: <Table columns={jobColumns} data={request?.jobEntries ?? []} />,
     },
   ];
 

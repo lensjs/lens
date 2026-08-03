@@ -24,6 +24,8 @@ export type LensConfig = {
     event?: boolean
     redis?: boolean
     fcm?: boolean
+    log?: boolean
+    job?: boolean
   },
   isAuthenticated?: (ctx: HttpContext) => Promise<boolean>,
   getUser?: (ctx: HttpContext) => Promise<UserEntry>,

@@ -203,6 +203,30 @@ export default class Lens {
       },
       {
         method: "GET" as const,
+        path: `/${path}/api/logs`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getLogEntries(data),
+      },
+      {
+        method: "GET" as const,
+        path: `/${path}/api/logs/:id`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getLogEntry(data),
+      },
+      {
+        method: "GET" as const,
+        path: `/${path}/api/jobs`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getJobEntries(data),
+      },
+      {
+        method: "GET" as const,
+        path: `/${path}/api/jobs/:id`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getJobEntry(data),
+      },
+      {
+        method: "GET" as const,
         path: `/${path}/api/stream/poll`,
         handler: async (data: RouteDefinitionHandler) =>
           await ApiController.getStream(data),
@@ -235,6 +259,8 @@ export default class Lens {
           event: `/${this.config.path}/api/event`,
           redis: `/${this.config.path}/api/redis`,
           fcm: `/${this.config.path}/api/fcm`,
+          logs: `/${this.config.path}/api/logs`,
+          jobs: `/${this.config.path}/api/jobs`,
           stream: `/${this.config.path}/api/stream`,
           streamPoll: `/${this.config.path}/api/stream/poll`,
           truncate: `/${this.config.path}/api/truncate`,
