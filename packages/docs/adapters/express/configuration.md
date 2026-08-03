@@ -140,3 +140,23 @@ await lens({
   },
 });
 ```
+
+## Retention
+
+Automatically purge entries older than a max age, per signal type — complementing the size-based `dbMaxSizeGb`/`dbPruneSizeGb` pruning. Configured on `storeQueueConfig.retention`:
+
+```ts
+await lens({
+  app,
+  storeQueueConfig: {
+    retention: {
+      defaultMaxAgeMs: 7 * 24 * 60 * 60 * 1000, // Keep 7 days by default.
+      perType: {
+        request: 3 * 24 * 60 * 60 * 1000, // Keep requests for 3 days.
+        query: 24 * 60 * 60 * 1000, // Keep queries for 1 day.
+      },
+      sweepIntervalMs: 5 * 60 * 1000, // How often to sweep (default: 5 min).
+    },
+  },
+});
+```

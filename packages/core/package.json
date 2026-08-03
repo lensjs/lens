@@ -27,8 +27,11 @@
     "@lensjs/typescript-config": "workspace:*",
     "@tailwindcss/vite": "^4.1.13",
     "@types/luxon": "^3.7.1",
+    "@types/pg": "^8.11.10",
     "@types/stack-utils": "^2.0.3",
     "cross-env": "^10.0.0",
+    "mysql2": "^3.15.0",
+    "pg": "^8.13.1",
     "vitest": "^3.2.4"
   },
   "dependencies": {
@@ -40,6 +43,18 @@
     "sql-formatter": "^15.7.1",
     "stack-utils": "^2.0.6",
     "tailwind-merge": "^3.4.1"
+  },
+  "peerDependencies": {
+    "mysql2": "^3.0.0",
+    "pg": "^8.0.0"
+  },
+  "peerDependenciesMeta": {
+    "mysql2": {
+      "optional": true
+    },
+    "pg": {
+      "optional": true
+    }
   },
   "gitHead": "a229fde5700970ec290ff31f1e3b7d84cc56d325"
 }

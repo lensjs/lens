@@ -315,6 +315,19 @@ export type HttpMethod =
 export type RouteHttpMethod = "get" | "post" | "put" | "delete" | "patch";
 export type Constructor = new (...args: any[]) => any;
 
+/**
+ * Age-based retention: periodically purge entries older than a max age, per
+ * signal type. Complements the size-based `dbMaxSizeGb`/`dbPruneSizeGb` pruning.
+ */
+export type LensRetentionConfig = {
+  /** Fallback max age (ms) applied to any signal type without a `perType` override. */
+  defaultMaxAgeMs?: number;
+  /** Per-signal-type max age (ms), keyed by `WatcherTypeEnum` value. */
+  perType?: Partial<Record<`${WatcherTypeEnum}`, number>>;
+  /** How often the retention sweep runs (ms). Defaults to 300000 (5 minutes). */
+  sweepIntervalMs?: number;
+};
+
 export interface QueuedStoreConfig {
   batchSize?: number;
   processIntervalMs?: number;
@@ -322,6 +335,8 @@ export interface QueuedStoreConfig {
   preallocate?: boolean;
   dbMaxSizeGb?: number;
   dbPruneSizeGb?: number;
+  /** Age-based retention policy (per signal type). */
+  retention?: LensRetentionConfig;
 }
 
 export * from './mail'

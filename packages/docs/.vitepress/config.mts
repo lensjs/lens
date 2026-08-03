@@ -18,6 +18,10 @@ export default defineConfig({
             text: "Securing the Dashboard",
             link: "/getting-started/securing-the-dashboard",
           },
+          {
+            text: "Storage Backends",
+            link: "/getting-started/stores",
+          },
         ],
       },
       {

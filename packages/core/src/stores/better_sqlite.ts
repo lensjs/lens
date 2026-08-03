@@ -353,6 +353,22 @@ export default class BetterSqliteStore extends Store {
     return Number(result.count);
   }
 
+  override async pruneOlderThan(
+    cutoffISO: string,
+    type?: WatcherTypeEnum,
+  ): Promise<number> {
+    const sql = type
+      ? `DELETE FROM ${TABLE_NAME} WHERE created_at < ? AND type = ?`
+      : `DELETE FROM ${TABLE_NAME} WHERE created_at < ?`;
+    const args = type ? [cutoffISO, type] : [cutoffISO];
+
+    const result = this.connection.prepare(sql).run(...args) as {
+      changes?: number;
+    };
+
+    return Number(result.changes ?? 0);
+  }
+
   public async find(type: WatcherTypeEnum, id: string) {
     const row = this.connection
       .prepare(

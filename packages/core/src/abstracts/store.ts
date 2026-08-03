@@ -44,6 +44,18 @@ export default abstract class Store {
   abstract count(type: WatcherTypeEnum): Promise<number>;
 
   /**
+   * Delete entries older than an ISO-8601 cutoff, optionally scoped to a single
+   * watcher type; returns the number of rows deleted. Defaults to a no-op so
+   * custom stores keep working until they opt into age-based retention.
+   */
+  pruneOlderThan(
+    _cutoffISO: string,
+    _type?: WatcherTypeEnum,
+  ): Promise<number> {
+    return Promise.resolve(0);
+  }
+
+  /**
    * Newest entries across ALL watcher types (cursor/delta paginated). Powers the
    * unified live-tail feed and its polling fallback. Defaults to empty so custom
    * stores keep working until they opt in.
