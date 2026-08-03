@@ -6,10 +6,29 @@ import {
   stripBeforeAssetsPath,
   prepareIgnoredPaths,
   prettyHrTime,
+  parseDurationMs,
 } from "../../src/utils/index";
 import { DateTime } from "luxon";
 
 describe("utils", () => {
+  describe("parseDurationMs", () => {
+    it("parses ms/s/µs/ns/min units into milliseconds", () => {
+      expect(parseDurationMs("9 ms")).toBe(9);
+      expect(parseDurationMs("1.2 s")).toBeCloseTo(1200);
+      expect(parseDurationMs("500 µs")).toBeCloseTo(0.5);
+      expect(parseDurationMs("2000000 ns")).toBeCloseTo(2);
+      expect(parseDurationMs("2 min")).toBe(120000);
+      expect(parseDurationMs("42")).toBe(42); // bare number defaults to ms
+    });
+
+    it("passes through numbers and defaults to 0 when unparseable", () => {
+      expect(parseDurationMs(15)).toBe(15);
+      expect(parseDurationMs(undefined)).toBe(0);
+      expect(parseDurationMs(null)).toBe(0);
+      expect(parseDurationMs("Purged")).toBe(0);
+    });
+  });
+
   describe("interpolateQuery", () => {
     // Array-based ?
     it("should replace ? placeholders with array values", () => {

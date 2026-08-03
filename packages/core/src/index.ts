@@ -1,5 +1,17 @@
 export { default as Lens } from "./core/lens";
 
+export { createLensMetrics } from "./core/metrics";
+export type {
+  LensMetrics,
+  LensOverview,
+  MetricsGranularity,
+  ThroughputPoint,
+  LatencyPoint,
+  EndpointStat,
+  SlowQueryStat,
+  ExceptionGroupStat,
+} from "./core/metrics";
+
 export * from "./stores";
 export * from "./watchers";
 export * from "./types/index";

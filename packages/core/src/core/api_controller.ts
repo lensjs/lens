@@ -8,6 +8,7 @@ import type {
   Paginator,
   RouteDefinitionHandler,
 } from "../types";
+import { createLensMetrics } from "./metrics";
 
 export class ApiController {
   static async getRequests({ qs }: RouteDefinitionHandler) {
@@ -281,6 +282,20 @@ export class ApiController {
     }
 
     return this.resourceResponse(entry);
+  }
+
+  static async getMetrics({ qs }: RouteDefinitionHandler) {
+    const from =
+      typeof qs?.from === "string" && qs.from.trim() ? qs.from.trim() : undefined;
+    const to =
+      typeof qs?.to === "string" && qs.to.trim() ? qs.to.trim() : undefined;
+
+    const overview = await createLensMetrics(getStore()).getOverview({
+      from,
+      to,
+    });
+
+    return this.resourceResponse(overview);
   }
 
   static async getStream({ qs }: RouteDefinitionHandler) {

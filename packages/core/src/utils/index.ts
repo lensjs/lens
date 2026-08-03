@@ -185,4 +185,37 @@ export function normalizePath(path: string) {
   return path.startsWith("/") ? path : `/${path}`;
 }
 
+/**
+ * Parse a human duration string produced by {@link prettyHrTime} (e.g. "9 ms",
+ * "1.2 s") back into milliseconds. Tolerates a raw number and other units
+ * (µs/ns/min). Returns 0 when unparseable.
+ */
+export function parseDurationMs(duration?: string | number | null): number {
+  if (duration == null) return 0;
+  if (typeof duration === "number") return duration;
+
+  const match = String(duration)
+    .trim()
+    .match(/([\d.]+)\s*(ms|s|µs|us|ns|m|min)?/i);
+  if (!match || !match[1]) return 0;
+
+  const value = parseFloat(match[1]);
+  const unit = (match[2] || "ms").toLowerCase();
+
+  switch (unit) {
+    case "s":
+      return value * 1000;
+    case "m":
+    case "min":
+      return value * 60_000;
+    case "us":
+    case "µs":
+      return value / 1000;
+    case "ns":
+      return value / 1_000_000;
+    default:
+      return value;
+  }
+}
+
 export * from "./compose";

@@ -7,6 +7,7 @@ import type {
   RequestTableRow,
   MailTableRow,
   OneMail,
+  Overview,
 } from "../types";
 import { prepareApiUrl } from "../utils/api";
 import { useConfig } from "../utils/context";
@@ -101,6 +102,22 @@ export function useAllMail(
             page,
           }),
         ),
+      ),
+    ...options,
+  });
+}
+
+export function useOverview(
+  params: Record<string, string>,
+  options?: UseQueryOptions<ApiResponse<Overview>>,
+) {
+  const config = useConfig();
+  const key = new URLSearchParams(params).toString();
+  return useQuery<ApiResponse<Overview>>({
+    queryKey: ["overview", key],
+    queryFn: () =>
+      fetchJson<Overview>(
+        prepareApiUrl(withQueryParams(config.api.metrics, params)),
       ),
     ...options,
   });

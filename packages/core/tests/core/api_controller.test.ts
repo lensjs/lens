@@ -475,6 +475,34 @@ describe("ApiController", () => {
     });
   });
 
+  describe("getMetrics", () => {
+    it("forwards from/to to the metrics window and returns an overview", async () => {
+      mockStore.paginate.mockResolvedValue({ meta: {}, data: [] });
+
+      const result = await ApiController.getMetrics({
+        qs: {
+          from: "2025-01-01T00:00:00.000Z",
+          to: "2025-01-02T00:00:00.000Z",
+        },
+      });
+
+      expect(mockStore.paginate).toHaveBeenCalledWith(
+        WatcherTypeEnum.REQUEST,
+        expect.objectContaining({
+          from: "2025-01-01T00:00:00.000Z",
+          to: "2025-01-02T00:00:00.000Z",
+        }),
+        false,
+      );
+      expect(result.status).toBe(200);
+      expect(result.data).toEqual(
+        expect.objectContaining({
+          summary: expect.objectContaining({ totalRequests: 0 }),
+        }),
+      );
+    });
+  });
+
   describe("truncate", () => {
     it("should call store.truncate and return success response", async () => {
       mockStore.truncate.mockResolvedValue(undefined);

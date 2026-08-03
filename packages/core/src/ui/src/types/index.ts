@@ -22,11 +22,56 @@ export type LensConfig = {
     fcm: string;
     logs: string;
     jobs: string;
+    metrics: string;
     stream: string;
     streamPoll: string;
     truncate: string;
     login: string;
   };
+};
+
+export type MetricsGranularity = "minute" | "hour" | "day";
+export type ThroughputPoint = { bucket: string; total: number; errors: number };
+export type LatencyPoint = { bucket: string; avg: number; p95: number };
+export type EndpointStat = {
+  method: string;
+  path: string;
+  count: number;
+  avg: number;
+  p95: number;
+};
+export type SlowQueryStat = {
+  id: string;
+  query: string;
+  duration: number;
+  createdAt: string;
+};
+export type ExceptionGroupStat = {
+  name: string;
+  message: string;
+  count: number;
+  lastSeen: string;
+  sampleId: string;
+};
+export type Overview = {
+  range: { from: string; to: string; granularity: MetricsGranularity };
+  summary: {
+    totalRequests: number;
+    requestsPerMinute: number;
+    errorRate: number;
+    clientErrorRate: number;
+    p50: number;
+    p95: number;
+    p99: number;
+    totalExceptions: number;
+    totalQueries: number;
+    avgQueryTime: number;
+  };
+  throughput: ThroughputPoint[];
+  latencyTrend: LatencyPoint[];
+  slowestEndpoints: EndpointStat[];
+  slowestQueries: SlowQueryStat[];
+  topExceptions: ExceptionGroupStat[];
 };
 
 export type LensEntryType =

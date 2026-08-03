@@ -6,6 +6,7 @@ This document provides a guide on how to navigate and interact with the Lens UI,
 
 The Lens UI is organized into several main sections, accessible via the sidebar on the left.
 
+*   **Overview:** The home dashboard with key metrics and charts (the default landing page).
 *   **Requests:** View all incoming HTTP requests.
 *   **Queries:** Monitor database queries executed by your application.
 *   **Cache:** Track cache hits, misses, writes, and deletes.
@@ -14,7 +15,7 @@ The Lens UI is organized into several main sections, accessible via the sidebar 
 ### 1.1. Header
 
 The header, located at the top of the page, displays:
-*   **Application Name:** Click on the application name to return to the main Requests list.
+*   **Application Name:** Click on the application name to return to the Overview dashboard.
 *   **Delete Button:** A trash icon button. Clicking this will open a confirmation modal to **permanently delete all recorded entries** across all categories (requests, queries, cache, exceptions). Use with caution.
 *   **Mobile Menu Toggle:** On smaller screens, a menu icon (`☰`) will appear to toggle the sidebar visibility.
 
@@ -145,3 +146,16 @@ Every list view (Requests, Queries, Cache, Exceptions, Mail, HTTP, Events, Redis
 ### Live tail and sorting
 
 The default view — newest-first by time — keeps the **live feed** on, so new matching entries stream in automatically. Choosing an explicit sort (any column, or oldest-first) switches to a stable page-through ordering and **pauses the live feed** for that view. Clear the sort (or reload) to resume live updates.
+
+## 8. Overview (Home Dashboard)
+
+The **Overview** is the landing page (`/lens/overview`) — a real-time analytics summary over a selectable time range (default: the last 24 hours; use the date-range picker to change it).
+
+*   **Stat cards:** Total requests and throughput (req/min), 5xx error rate, p50/p95/p99 latency, and exception/query counts.
+*   **Requests over time:** An area chart of request volume per bucket (minute/hour/day, chosen automatically from the range) with 5xx errors overlaid.
+*   **p95 latency over time:** The latency trend across the same buckets.
+*   **Slowest endpoints:** Top routes by p95 latency (grouped by method + path); click a row to open the filtered Requests list.
+*   **Slowest queries:** The slowest individual database queries; click to open the query.
+*   **Top exceptions:** The most frequent exceptions (grouped by name + message) with occurrence counts; click to open a sample.
+
+Every panel respects the selected time range and refreshes when you change it.

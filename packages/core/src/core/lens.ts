@@ -227,6 +227,12 @@ export default class Lens {
       },
       {
         method: "GET" as const,
+        path: `/${path}/api/metrics`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getMetrics(data),
+      },
+      {
+        method: "GET" as const,
         path: `/${path}/api/stream/poll`,
         handler: async (data: RouteDefinitionHandler) =>
           await ApiController.getStream(data),
@@ -261,6 +267,7 @@ export default class Lens {
           fcm: `/${this.config.path}/api/fcm`,
           logs: `/${this.config.path}/api/logs`,
           jobs: `/${this.config.path}/api/jobs`,
+          metrics: `/${this.config.path}/api/metrics`,
           stream: `/${this.config.path}/api/stream`,
           streamPoll: `/${this.config.path}/api/stream/poll`,
           truncate: `/${this.config.path}/api/truncate`,

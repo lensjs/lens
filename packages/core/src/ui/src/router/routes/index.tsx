@@ -5,6 +5,7 @@ import {
   Database,
   Globe,
   Layers,
+  LayoutDashboard,
   ListChecks,
   Mail,
   Radio,
@@ -75,12 +76,16 @@ const JobContainer = lazy(() => import("../../containers/jobs/JobContainer"));
 const JobDetailsContainer = lazy(
   () => import("../../containers/jobs/JobDetailsContainer"),
 );
+const OverviewContainer = lazy(
+  () => import("../../containers/overview/OverviewContainer"),
+);
 const LiveTailContainer = lazy(
   () => import("../../containers/liveTail/LiveTailContainer"),
 );
 
 export function getRoutesPaths(config: LensConfig) {
   return {
+    OVERVIEW: `${config.path}/overview`,
     REQUESTS: `${config.path}/requests`,
     QUERIES: `${config.path}/queries`,
     REQUEST_DETAILS: `${config.path}/requests/:requestId`,
@@ -111,6 +116,11 @@ export function getSidebarRoutes(config: LensConfig) {
   const paths = getRoutesPaths(config);
 
   return [
+    {
+      path: paths.OVERVIEW,
+      label: "Overview",
+      icon: LayoutDashboard,
+    },
     {
       path: paths.LIVE_TAIL,
       label: "Live Tail",
@@ -180,7 +190,7 @@ export function getRoutes(config: LensConfig): RouteObject[] {
   return [
     {
       path: "/",
-      element: <Navigate to={paths.REQUESTS} replace />,
+      element: <Navigate to={paths.OVERVIEW} replace />,
     },
     {
       path: config.path,
@@ -188,7 +198,11 @@ export function getRoutes(config: LensConfig): RouteObject[] {
       children: [
         {
           index: true,
-          element: <Navigate to="requests" replace />,
+          element: <Navigate to="overview" replace />,
+        },
+        {
+          path: "overview",
+          element: <OverviewContainer />,
         },
         {
           path: "requests",
