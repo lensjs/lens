@@ -1,4 +1,9 @@
-import { getCurrentRequestId, lensEmitter, type HttpEntry } from "@lensjs/core";
+import {
+  getActiveTraceparent,
+  getCurrentRequestId,
+  lensEmitter,
+  type HttpEntry,
+} from "@lensjs/core";
 import { nowISO } from "@lensjs/date";
 
 const REDACTED = "Purged By Lens";
@@ -88,6 +93,21 @@ export function instrumentFetch(options: InstrumentFetchOptions = {}): void {
     );
     const requestBody =
       captureBody && typeof init?.body === "string" ? cap(init.body) : undefined;
+
+    // Propagate W3C trace context so downstream services join this request's
+    // trace (only when tracing is enabled and the caller hasn't set one).
+    const traceparent = getActiveTraceparent();
+    if (traceparent) {
+      const headers = new Headers(
+        init?.headers ??
+          (input && typeof input === "object" ? input.headers : undefined),
+      );
+      if (!headers.has("traceparent")) {
+        headers.set("traceparent", traceparent);
+        init = { ...(init ?? {}), headers };
+      }
+    }
+
     const start = process.hrtime.bigint();
 
     const finish = (durationMs: number, extra: Partial<HttpEntry>) => {

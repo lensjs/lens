@@ -11,8 +11,12 @@ import {
   instrumentEmitter,
   withLensRedis,
   withLensFcm,
+  patchConsole,
+  emitLensLog,
+  emitLensJob,
 } from "@lensjs/watchers";
 import { lens } from "@lensjs/express";
+import { createLensOtel } from "@lensjs/otel";
 import MemoryCache from "./concrete/cache/memory_cache";
 import nodemailer from "nodemailer";
 import { sendEmail } from "./concrete/mail/nodemailer";
@@ -21,8 +25,19 @@ const app = express();
 const port = Number(process.env.PORT) || 3000;
 const cache = new MemoryCache();
 
-// Capture outgoing HTTP calls (global fetch) for the HTTP watcher.
+// Capture outgoing HTTP calls (global fetch) for the HTTP watcher. Also
+// propagates the W3C `traceparent` header when tracing is enabled below.
 instrumentFetch();
+
+// Export every captured request (and its queries, HTTP calls, cache ops and
+// exceptions) as OpenTelemetry spans when LENS_OTEL_ENDPOINT points at an OTLP
+// collector, e.g. `LENS_OTEL_ENDPOINT=http://localhost:4318 pnpm dev`.
+if (process.env.LENS_OTEL_ENDPOINT) {
+  createLensOtel({
+    endpoint: process.env.LENS_OTEL_ENDPOINT,
+    serviceName: "lens-express-example",
+  });
+}
 
 // Any emit() on this emitter is captured by the event watcher, correlated to
 // the active request.
@@ -102,16 +117,23 @@ const sequelize = new Sequelize({
 // the driver's detached context, which loses correlation for real databases).
 attachSequelizeLens(sequelize);
 
-const testEmailAccount = await nodemailer.createTestAccount();
-const mailTransporter = nodemailer.createTransport({
-  host: testEmailAccount.smtp.host,
-  port: testEmailAccount.smtp.port,
-  secure: testEmailAccount.smtp.secure,
-  auth: {
-    user: testEmailAccount.user,
-    pass: testEmailAccount.pass,
-  },
-});
+// Use Ethereal for real preview URLs when online; fall back to an offline JSON
+// transport so the example (and the mail watcher) still work without network.
+let mailTransporter: nodemailer.Transporter;
+try {
+  const testEmailAccount = await nodemailer.createTestAccount();
+  mailTransporter = nodemailer.createTransport({
+    host: testEmailAccount.smtp.host,
+    port: testEmailAccount.smtp.port,
+    secure: testEmailAccount.smtp.secure,
+    auth: {
+      user: testEmailAccount.user,
+      pass: testEmailAccount.pass,
+    },
+  });
+} catch {
+  mailTransporter = nodemailer.createTransport({ jsonTransport: true });
+}
 
 app.use(
   cors({
@@ -127,6 +149,8 @@ const { handleExceptions } = await lens({
   eventWatcherEnabled: true,
   redisWatcherEnabled: true,
   fcmWatcherEnabled: true,
+  logWatcherEnabled: true,
+  jobWatcherEnabled: true,
   queryWatcher: {
     enabled: true,
     handler: createSequelizeHandler({ provider: "sqlite" }),
@@ -134,6 +158,11 @@ const { handleExceptions } = await lens({
   // Password-lock the dashboard when LENS_PASSWORD is set (e.g. on staging).
   auth: process.env.LENS_PASSWORD
     ? { password: process.env.LENS_PASSWORD }
+    : undefined,
+  // Post an alert to Slack/Discord/webhook on a new exception issue when
+  // LENS_ALERT_WEBHOOK is set (provider inferred from the URL).
+  alerts: process.env.LENS_ALERT_WEBHOOK
+    ? { webhookUrl: process.env.LENS_ALERT_WEBHOOK }
     : undefined,
   isAuthenticated: async (_req) => {
     return true;
@@ -146,6 +175,10 @@ const { handleExceptions } = await lens({
     };
   },
 });
+
+// Capture console output for the Logs watcher, correlated to the active request.
+// (Called after `lens()` so the watcher is already subscribed to the emitter.)
+patchConsole();
 
 class User extends Model {
   declare id: number;
@@ -325,6 +358,49 @@ app.get("/fcm-demo", async (_req, res) => {
   res.json({ message: "FCM notifications sent", results });
 });
 
+// Emits application logs captured by the Logs watcher, correlated to this
+// request — via the patched console and the structured emitLensLog API. The
+// sensitive `apiKey` in the context is redacted before storage.
+app.get("/log-demo", async (_req, res) => {
+  console.info("Processing log demo for user %d", 42);
+  console.warn("Cache is warming up", { region: "eu-west-1" });
+  emitLensLog({
+    level: "error",
+    message: "Payment gateway timed out",
+    context: { orderId: "ORD-2001", attempt: 3, apiKey: "sk_live_secret" },
+    source: "payments",
+  });
+
+  res.json({ message: "Emitted demo logs" });
+});
+
+// Enqueues a background job captured by the Jobs watcher. The same row updates
+// in place from "active" to "completed" (one row per job) via emitLensJob.
+app.get("/job-demo", async (_req, res) => {
+  const id = `emails:${rand(1000, 9999)}`;
+  const createdAt = new Date().toISOString();
+  const shared = {
+    id,
+    name: "sendWelcomeEmail",
+    queue: "emails",
+    data: { to: "user@example.com" },
+    createdAt,
+  };
+
+  emitLensJob({ ...shared, status: "active" });
+  setTimeout(() => {
+    emitLensJob({
+      ...shared,
+      status: "completed",
+      attempts: 1,
+      duration: `${rand(50, 900)} ms`,
+      result: { messageId: `msg_${rand(100000, 999999)}` },
+    });
+  }, 1500);
+
+  res.json({ message: "Job enqueued", id });
+});
+
 // Runs a few Redis commands captured by the Redis watcher and correlated to
 // this request.
 app.get("/redis-demo", async (_req, res) => {
@@ -443,6 +519,14 @@ app.get("/all-watchers", async (_req, _res) => {
   await fcm.send({
     token: "demo-device-token",
     notification: { title: "All watchers", body: "Every signal in one request" },
+  });
+
+  // Logs watcher
+  console.info("all-watchers demo ran with %d users", users.length);
+  emitLensLog({
+    level: "warn",
+    message: "All watchers demo about to throw",
+    source: "demo",
   });
 
   // Exception watcher — intentional; recorded and correlated to this request.

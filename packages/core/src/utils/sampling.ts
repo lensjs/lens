@@ -1,5 +1,6 @@
 import { getStore } from "../context/context";
 import { lensContext, type LensSamplingState } from "./async_context";
+import { flushTrace, recordTraceEntry } from "./tracing";
 import type { LensSamplingConfig, StoreSaveEntry } from "../types/index";
 
 /**
@@ -15,6 +16,10 @@ export async function persistEntry(
   entry: StoreSaveEntry,
   opts?: { force?: boolean },
 ): Promise<void> {
+  // Collect the entry onto the active trace (if tracing is enabled) regardless
+  // of the sampling decision; the trace is only exported if the request is kept.
+  recordTraceEntry(entry);
+
   const state = lensContext.getStore()?.sampling;
 
   if (state?.pending) {
@@ -81,4 +86,18 @@ export async function finalizeSampling(
   }
 
   return true;
+}
+
+/**
+ * Finalize capture for a completed request: apply the sampling decision and,
+ * when the request is kept, flush its collected trace to the registered sink.
+ * Adapters call this once the response has completed.
+ */
+export async function finalizeCapture(
+  status: number,
+  durationMs: number,
+  sampling?: LensSamplingConfig,
+): Promise<void> {
+  const kept = await finalizeSampling(status, durationMs, sampling);
+  if (kept) await flushTrace();
 }

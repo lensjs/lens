@@ -224,6 +224,10 @@ export default defineConfig({
         ],
       },
       {
+        text: "OpenTelemetry (Tracing)",
+        link: "/opentelemetry",
+      },
+      {
         text: "MCP Server (AI)",
         link: "/mcp",
       },

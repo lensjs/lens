@@ -1,6 +1,7 @@
 import {
   createSamplingState,
-  finalizeSampling,
+  createTraceContext,
+  finalizeCapture,
   lensContext,
   lensUtils,
   lensExceptionUtils,
@@ -78,7 +79,7 @@ export function createWithLens(opts: {
           };
 
           await reqWatcher.log(payload, config.hiddenParams);
-          await finalizeSampling(
+          await finalizeCapture(
             status,
             elapsed[0] * 1000 + elapsed[1] / 1e6,
             config.sampling,
@@ -89,11 +90,16 @@ export function createWithLens(opts: {
       };
 
       const samplingState = createSamplingState(config.sampling);
+      const traceState = createTraceContext(
+        request.headers.get("traceparent"),
+      );
       const runContext: {
         requestId: string;
         sampling?: ReturnType<typeof createSamplingState>;
+        trace?: ReturnType<typeof createTraceContext>;
       } = { requestId };
       if (samplingState) runContext.sampling = samplingState;
+      if (traceState) runContext.trace = traceState;
 
       return lensContext.run(runContext, async () => {
         try {

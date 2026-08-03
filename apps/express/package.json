@@ -10,6 +10,7 @@
     "@lensjs/core": "workspace:*",
     "@lensjs/date": "workspace:*",
     "@lensjs/express": "workspace:*",
+    "@lensjs/otel": "workspace:*",
     "@lensjs/watchers": "workspace:*",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",

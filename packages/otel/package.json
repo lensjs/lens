@@ -1,0 +1,50 @@
+{
+  "name": "@lensjs/otel",
+  "version": "0.0.0",
+  "description": "OpenTelemetry (OTLP) trace export for LensJs — turns captured requests, queries, and more into spans",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "opentelemetry",
+    "otel",
+    "otlp",
+    "tracing",
+    "observability",
+    "lens",
+    "monitoring"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lensjs/lens.git",
+    "directory": "packages/otel"
+  },
+  "homepage": "https://lensjs.vercel.app/",
+  "bugs": {
+    "url": "https://github.com/lensjs/lens/issues"
+  },
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup --clean",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@lensjs/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@lensjs/typescript-config": "workspace:*",
+    "@types/node": "^24.10.13",
+    "vitest": "^3.2.4"
+  }
+}

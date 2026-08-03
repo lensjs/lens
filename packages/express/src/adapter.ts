@@ -1,7 +1,8 @@
 import {
   LensAdapter,
   createSamplingState,
-  finalizeSampling,
+  createTraceContext,
+  finalizeCapture,
   lensUtils,
   RequestWatcher,
   RouteDefinition,
@@ -403,11 +404,18 @@ export class ExpressAdapter extends LensAdapter {
       const context: {
         requestId: string;
         sampling?: ReturnType<typeof createSamplingState>;
+        trace?: ReturnType<typeof createTraceContext>;
       } = {
         requestId: lensUtils.generateRandomUuid(),
       };
       const sampling = createSamplingState(this.config.sampling);
       if (sampling) context.sampling = sampling;
+      const trace = createTraceContext(
+        typeof req.headers["traceparent"] === "string"
+          ? req.headers["traceparent"]
+          : undefined,
+      );
+      if (trace) context.trace = trace;
 
       lensContext.run(context, () => {
         const start = process.hrtime();
@@ -500,7 +508,7 @@ export class ExpressAdapter extends LensAdapter {
       };
 
       await requestWatcher.log(logPayload, this.config.hiddenParams);
-      await finalizeSampling(
+      await finalizeCapture(
         res.statusCode,
         elapsed[0] * 1000 + elapsed[1] / 1e6,
         this.config.sampling,

@@ -58,3 +58,11 @@ The watcher only instruments the global `fetch`. HTTP clients that use Node's
 `http`/`https` modules directly (e.g. `axios` in Node) are not captured unless
 they are configured to use `fetch`.
 :::
+
+## Trace propagation
+
+When [OpenTelemetry export](/opentelemetry) is enabled, instrumented calls also
+carry a W3C `traceparent` header pointing at the current request's root span, so
+the service you call joins the same distributed trace. Nothing is added when
+tracing is off, and an existing `traceparent` you set yourself is never
+overwritten.

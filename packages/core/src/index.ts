@@ -45,4 +45,18 @@ export {
 export {
   createSamplingState,
   finalizeSampling,
+  finalizeCapture,
 } from "./utils/sampling";
+export {
+  setLensTraceSink,
+  isTracingEnabled,
+  createTraceContext,
+  getActiveTraceparent,
+  flushTrace,
+  buildTraceparent,
+  parseTraceparent,
+  generateTraceId,
+  generateSpanId,
+} from "./utils/tracing";
+export type { LensTrace, LensTraceSink } from "./utils/tracing";
+export type { LensTraceContext } from "./utils/async_context";

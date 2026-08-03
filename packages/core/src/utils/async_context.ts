@@ -10,9 +10,23 @@ export type LensSamplingState = {
   buffer: StoreSaveEntry[];
 };
 
+/**
+ * Per-request trace context (W3C). IDs are minted at request start so outbound
+ * `traceparent` propagation and the reconstructed spans share the same ids;
+ * captured entries are collected here and turned into spans at request finish.
+ */
+export type LensTraceContext = {
+  traceId: string;
+  rootSpanId: string;
+  parentSpanId?: string;
+  sampled: boolean;
+  entries: StoreSaveEntry[];
+};
+
 type LensContext = {
   requestId: string;
   sampling?: LensSamplingState;
+  trace?: LensTraceContext;
 };
 
 export const lensContext = new AsyncLocalStorage<LensContext>();

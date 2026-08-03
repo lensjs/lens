@@ -1,7 +1,8 @@
 import {
   LensAdapter,
   createSamplingState,
-  finalizeSampling,
+  createTraceContext,
+  finalizeCapture,
   lensUtils,
   RequestWatcher,
   type RouteDefinition,
@@ -452,9 +453,12 @@ export class HonoAdapter extends LensAdapter {
       const context: {
         requestId: string;
         sampling?: ReturnType<typeof createSamplingState>;
+        trace?: ReturnType<typeof createTraceContext>;
       } = { requestId: lensUtils.generateRandomUuid() };
       const sampling = createSamplingState(this.config.sampling);
       if (sampling) context.sampling = sampling;
+      const trace = createTraceContext(c.req.header("traceparent"));
+      if (trace) context.trace = trace;
       const start = process.hrtime();
 
       await lensContext.run(context, async () => {
@@ -521,7 +525,7 @@ export class HonoAdapter extends LensAdapter {
       };
 
       await requestWatcher.log(logPayload, this.config.hiddenParams);
-      await finalizeSampling(
+      await finalizeCapture(
         response.status,
         elapsed[0] * 1000 + elapsed[1] / 1e6,
         this.config.sampling,
