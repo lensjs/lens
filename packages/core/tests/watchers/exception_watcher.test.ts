@@ -1,18 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import ExceptionWatcher from "../../src/watchers/exception_watcher";
-import { getStore } from "../../src/context/context";
+import { getStore, getNotifier } from "../../src/context/context";
 import { WatcherTypeEnum } from "../../src/types";
 import LensStore from "../../src/abstracts/store";
 import * as lensUtils from "../../src/utils"; // Import lensUtils
 import { constructErrorObject } from "../../src/utils/exception";
 
-// Mock the getStore function
+// Mock the context accessors
 vi.mock("../../src/context/context", async (importOriginal) => {
   const actual =
     await importOriginal<typeof import("../../src/context/context")>();
   return {
     ...actual,
     getStore: vi.fn(),
+    getNotifier: vi.fn(() => null),
   };
 });
 
@@ -70,6 +71,7 @@ describe("ExceptionWatcher", () => {
         minimal_data: {
           name: exceptionData.name,
           message: exceptionData.message,
+          fingerprint: exceptionData.fingerprint,
           createdAt: exceptionData.createdAt,
         },
       });
@@ -91,9 +93,29 @@ describe("ExceptionWatcher", () => {
         minimal_data: {
           name: exceptionData.name,
           message: exceptionData.message,
+          fingerprint: exceptionData.fingerprint,
           createdAt: exceptionData.createdAt,
         },
       });
+    });
+
+    it("fires the notifier with the entry and generated id when bound", async () => {
+      const notifyException = vi.fn();
+      vi.mocked(getNotifier).mockReturnValue({ notifyException });
+
+      const exceptionData = constructErrorObject(new Error("TestError"));
+      await watcher.log(exceptionData);
+
+      expect(notifyException).toHaveBeenCalledWith({
+        ...exceptionData,
+        id: "mock-uuid",
+      });
+    });
+
+    it("does not throw when no notifier is bound", async () => {
+      vi.mocked(getNotifier).mockReturnValue(null);
+      const exceptionData = constructErrorObject(new Error("TestError"));
+      await expect(watcher.log(exceptionData)).resolves.toBeUndefined();
     });
   });
 });

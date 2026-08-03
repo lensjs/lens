@@ -1,4 +1,5 @@
 import type Store from "../abstracts/store";
+import type { LensNotifier } from "../core/notifier";
 
 type Factory<T = any> = () => T;
 
@@ -12,6 +13,7 @@ type ContextStore = {
       queries: string;
     };
   };
+  notifier: LensNotifier;
 };
 
 export default class Container {

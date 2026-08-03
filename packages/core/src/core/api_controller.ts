@@ -8,7 +8,7 @@ import type {
   Paginator,
   RouteDefinitionHandler,
 } from "../types";
-import { createLensMetrics } from "./metrics";
+import { createLensMetrics, groupExceptions } from "./metrics";
 
 export class ApiController {
   static async getRequests({ qs }: RouteDefinitionHandler) {
@@ -146,6 +146,17 @@ export class ApiController {
     }
 
     return this.resourceResponse(exception);
+  }
+
+  static async getExceptionGroups({ qs }: RouteDefinitionHandler) {
+    const params = this.extractListParams(qs);
+    const page = await getStore().paginate<LensEntry[]>(
+      WatcherTypeEnum.EXCEPTION,
+      { ...params, perPage: 20_000 },
+      false,
+    );
+
+    return this.resourceResponse(groupExceptions(page.data));
   }
 
   static async getEmails({ qs }: RouteDefinitionHandler) {

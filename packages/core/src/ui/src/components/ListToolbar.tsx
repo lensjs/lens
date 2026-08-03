@@ -44,6 +44,7 @@ export default function ListToolbar<T>({
   stats,
   searchPlaceholder,
   hasGap,
+  actions,
 }: {
   controls: ListViewControls<T>;
   filters?: FilterDef<T>[];
@@ -51,6 +52,8 @@ export default function ListToolbar<T>({
   stats?: Stat[];
   searchPlaceholder?: string;
   hasGap?: boolean;
+  /** Extra controls rendered on the right of the toolbar (e.g. a view toggle). */
+  actions?: ReactNode;
 }) {
   return (
     <div className="mb-4 flex flex-col gap-3">
@@ -127,6 +130,7 @@ export default function ListToolbar<T>({
             Clear ({controls.activeCount})
           </button>
         )}
+        <div className="ml-auto flex items-center gap-2">{actions}</div>
       </div>
     </div>
   );

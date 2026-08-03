@@ -108,6 +108,7 @@ This page displays a table of all recorded exceptions.
     *   **Happened:** A human-readable timestamp indicating when the exception occurred.
     *   **Actions:** An arrow icon to navigate to the exception's detail page.
 *   **Load More:** A "Load More" button will appear if there are additional exceptions to fetch.
+*   **Group by issue:** Toggle **Grouped** to collapse repeat errors into issues (by fingerprint) with occurrence counts and last-seen. Click an issue to drill into all of its occurrences. See [Alerts & Notifications](./getting-started/alerts-and-notifications.md) to get notified when a new issue appears.
 
 ### 5.2. Exception Details (`/lens/exceptions/:id`)
 

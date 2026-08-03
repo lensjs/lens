@@ -12,6 +12,7 @@ import { getUiConfig } from "../context/context";
 import Container from "../context/container";
 import { QueuedSqliteStore } from "../stores/index";
 import { getMeta } from "../utils/index";
+import { createLensNotifier } from "./notifier";
 
 export default class Lens {
   private static watchers: Map<WatcherTypeEnum, Watcher> = new Map();
@@ -137,6 +138,12 @@ export default class Lens {
       },
       {
         method: "GET" as const,
+        path: `/${path}/api/exceptions/groups`,
+        handler: async (data: RouteDefinitionHandler) =>
+          await ApiController.getExceptionGroups(data),
+      },
+      {
+        method: "GET" as const,
         path: `/${path}/api/exceptions/:id`,
         handler: async (data: RouteDefinitionHandler) =>
           await ApiController.getException(data),
@@ -250,6 +257,12 @@ export default class Lens {
   private static async bindContainerDeps() {
     const dbStore = await this.getStore();
     Container.singleton("store", () => dbStore);
+
+    if (this.config.alerts?.webhookUrl) {
+      Container.singleton("notifier", () =>
+        createLensNotifier(this.config.alerts!),
+      );
+    }
     Container.singleton("uiConfig", () => {
       return {
         appName: this.config.appName,
@@ -260,6 +273,7 @@ export default class Lens {
           queries: `/${this.config.path}/api/queries`,
           cache: `/${this.config.path}/api/cache`,
           exceptions: `/${this.config.path}/api/exceptions`,
+          exceptionGroups: `/${this.config.path}/api/exceptions/groups`,
           mail: `/${this.config.path}/api/mail`,
           http: `/${this.config.path}/api/http`,
           event: `/${this.config.path}/api/event`,

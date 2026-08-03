@@ -15,6 +15,7 @@ export type LensConfig = {
     queries: string;
     cache: string;
     exceptions: string;
+    exceptionGroups: string;
     mail: string;
     http: string;
     event: string;
@@ -250,9 +251,20 @@ export type GenericLensEntry<T> = {
 /** A single entry as delivered by the live-tail stream (any watcher type). */
 export type LiveEntry = GenericLensEntry<Record<string, any>>;
 
+export type ExceptionGroup = {
+  name: string;
+  message: string;
+  count: number;
+  firstSeen: string;
+  lastSeen: string;
+  sampleId: string;
+  fingerprint?: string;
+};
+
 export type ExceptionEntry = {
   name: string;
   message: string;
+  fingerprint?: string;
   cause?: Record<string, any> | string | null;
   trace?: string[];
   requestId?: string;
@@ -314,7 +326,7 @@ export type OneLog = GenericLensEntry<LogEntry>;
 export type JobTableRow = GenericLensEntry<JobEntry>;
 export type OneJob = GenericLensEntry<JobEntry>;
 export type ExceptionTableRow = GenericLensEntry<
-  Pick<ExceptionEntry, "name" | "message" | "createdAt">
+  Pick<ExceptionEntry, "name" | "message" | "createdAt" | "fingerprint">
 >;
 export type OneException = GenericLensEntry<ExceptionEntry>;
 export type MailTableRow = GenericLensEntry<

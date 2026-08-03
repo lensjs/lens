@@ -7,8 +7,11 @@ import useListQuery from "../../hooks/useListQuery";
 const ExceptionsTable = lazy(
   () => import("../../views/exceptions/ExceptionTable"),
 );
+const ExceptionGroups = lazy(
+  () => import("../../views/exceptions/ExceptionGroups"),
+);
 
-const ExceptionContainer = () => {
+const FlatExceptions = () => {
   const { params, key, isCustomSort } = useListQuery();
   const { loadMoreItems, getItems } = useExceptions(params);
   const hasMoreObject = useLoadMore<ExceptionTableRow>({
@@ -22,6 +25,11 @@ const ExceptionContainer = () => {
   }, [key]);
 
   return <ExceptionsTable hasMoreObject={hasMoreObject} />;
+};
+
+const ExceptionContainer = () => {
+  const { params } = useListQuery();
+  return params.group === "1" ? <ExceptionGroups /> : <FlatExceptions />;
 };
 
 export default ExceptionContainer;

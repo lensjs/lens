@@ -73,6 +73,12 @@ await lens({
   // Optional: Enable or disable the jobs watcher (BullMQ/Agenda). Defaults to `false`.
   jobWatcherEnabled: true,
 
+  // Optional: Outbound alerting on new exception issues (Slack/Discord/webhook).
+  // See "Alerts & Notifications" for all options.
+  alerts: {
+    webhookUrl: process.env.LENS_ALERT_WEBHOOK!,
+  },
+
   // Optional: The URL path where the Lens dashboard will be accessible. Defaults to "/lens".
   path: "/lens",
 

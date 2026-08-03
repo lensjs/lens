@@ -1,6 +1,7 @@
 import StackUtils from "stack-utils";
 import path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { ExceptionEntry } from "../types";
 import { nowISO } from "@lensjs/date";
 
@@ -99,6 +100,41 @@ export function extractCodeFrame({
 }
 
 /**
+ * Mask variable data (ids, uuids, hex, quoted literals) in a message so
+ * otherwise-identical errors ("User 12 not found" / "User 34 not found") share
+ * a fingerprint. Only used when there is no stack location to group by.
+ */
+export function normalizeMessage(message?: string): string {
+  return (message ?? "")
+    .replace(
+      /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi,
+      "<uuid>",
+    )
+    .replace(/0x[0-9a-f]+/gi, "<hex>")
+    .replace(/["'`][^"'`]*["'`]/g, "<str>")
+    .replace(/\d+/g, "<n>")
+    .trim();
+}
+
+/**
+ * Compute a stable fingerprint that collapses repeat occurrences of the same
+ * error into one issue. Groups by the originating location (name + file +
+ * function) — line/column are excluded so it survives edits — and falls back to
+ * the normalized message when no location is available.
+ */
+export function fingerprintError(
+  name: string,
+  fileInfo?: { file?: string; function?: string },
+  message?: string,
+): string {
+  const basis = fileInfo?.file
+    ? `${name}|${fileInfo.file}|${fileInfo.function ?? ""}`
+    : `${name}|${normalizeMessage(message)}`;
+
+  return createHash("sha1").update(basis).digest("hex").slice(0, 16);
+}
+
+/**
  * Construct a normalized error object with metadata, stack trace, and code frame.
  */
 export function constructErrorObject(err: Error): ExceptionEntry {
@@ -113,6 +149,11 @@ export function constructErrorObject(err: Error): ExceptionEntry {
     name: err.name,
     message: err.message,
     createdAt: nowISO(),
+    fingerprint: fingerprintError(
+      err.name,
+      { file: fileInfo.file, function: fileInfo.function },
+      err.message,
+    ),
     fileInfo: {
       file: fileInfo.file,
       function: fileInfo.function,

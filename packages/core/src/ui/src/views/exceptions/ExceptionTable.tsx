@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { LoadMoreButton } from "../../components/LoadMore";
 import Table from "../../components/Table";
 import ListToolbar from "../../components/ListToolbar";
+import GroupToggle from "../../components/GroupToggle";
 import { useListView, type SortDef } from "../../hooks/useListView";
 import { toTime } from "../../utils/format";
 import { getRoutesPaths } from "../../router/routes";
@@ -26,6 +27,9 @@ const ExceptionTable = ({
   const controls = useListView<ExceptionTableRow>(hasMoreObject.data, {
     search: (r) => [r.data.name, r.data.message],
     sorts,
+    // A grouped-issue drill-down scopes the flat list by fingerprint; make it a
+    // clearable, counted filter so the Clear button surfaces and resets it.
+    extraParams: ["fingerprint"],
   });
 
   const stats = [{ label: "Loaded", value: hasMoreObject.data.length }];
@@ -38,6 +42,7 @@ const ExceptionTable = ({
         stats={stats}
         searchPlaceholder="Search by type or message…"
         hasGap={hasMoreObject.hasGap}
+        actions={<GroupToggle />}
       />
       <Table
         columns={columns}

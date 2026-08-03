@@ -132,6 +132,7 @@ export const lens = async (config: FastifyAdapterConfig) => {
     enabled: mergedConfig.enabled,
     path: normalizedPath,
     authEnabled: !!mergedConfig.auth?.password,
+    alerts: mergedConfig.alerts,
   });
 
   const exceptionWatcher = watchers.find(

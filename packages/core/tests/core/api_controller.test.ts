@@ -475,6 +475,68 @@ describe("ApiController", () => {
     });
   });
 
+  describe("getExceptionGroups", () => {
+    it("groups exceptions by fingerprint over the window", async () => {
+      const rows: LensEntry[] = [
+        {
+          id: "e1",
+          type: WatcherTypeEnum.EXCEPTION,
+          created_at: "2025-01-01T00:00:01.000Z",
+          lens_entry_id: null,
+          data: {
+            name: "TypeError",
+            message: "x",
+            fingerprint: "fp1",
+            createdAt: "2025-01-01T00:00:01.000Z",
+          },
+        },
+        {
+          id: "e2",
+          type: WatcherTypeEnum.EXCEPTION,
+          created_at: "2025-01-01T00:00:02.000Z",
+          lens_entry_id: null,
+          data: {
+            name: "TypeError",
+            message: "x",
+            fingerprint: "fp1",
+            createdAt: "2025-01-01T00:00:02.000Z",
+          },
+        },
+        {
+          id: "e3",
+          type: WatcherTypeEnum.EXCEPTION,
+          created_at: "2025-01-01T00:00:03.000Z",
+          lens_entry_id: null,
+          data: {
+            name: "RangeError",
+            message: "y",
+            fingerprint: "fp2",
+            createdAt: "2025-01-01T00:00:03.000Z",
+          },
+        },
+      ];
+      mockStore.paginate.mockResolvedValue({ meta: {}, data: rows });
+
+      const result = await ApiController.getExceptionGroups({
+        qs: { from: "2025-01-01T00:00:00.000Z" },
+      });
+
+      expect(mockStore.paginate).toHaveBeenCalledWith(
+        WatcherTypeEnum.EXCEPTION,
+        expect.objectContaining({
+          from: "2025-01-01T00:00:00.000Z",
+          perPage: 20_000,
+        }),
+        false,
+      );
+      expect(result.status).toBe(200);
+      expect(result.data).toEqual([
+        expect.objectContaining({ fingerprint: "fp1", count: 2, sampleId: "e2" }),
+        expect.objectContaining({ fingerprint: "fp2", count: 1, sampleId: "e3" }),
+      ]);
+    });
+  });
+
   describe("getMetrics", () => {
     it("forwards from/to to the metrics window and returns an overview", async () => {
       mockStore.paginate.mockResolvedValue({ meta: {}, data: [] });

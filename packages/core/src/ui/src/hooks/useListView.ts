@@ -27,6 +27,12 @@ export type ListViewConfig<T> = {
   search?: (row: T) => (string | number | undefined)[];
   filters?: FilterDef<T>[];
   sorts?: SortDef<T>[];
+  /**
+   * Extra URL params that scope the list without a toolbar control (e.g. a
+   * drill-down `fingerprint`). They count toward `activeCount` and are removed
+   * by `clear()`, so the Clear button appears and resets them.
+   */
+  extraParams?: string[];
 };
 
 export type ListViewControls<T> = {
@@ -64,6 +70,7 @@ export function useListView<T>(
   const from = params.get("from") ?? "";
   const to = params.get("to") ?? "";
   const filters = config.filters ?? [];
+  const extraParams = config.extraParams ?? [];
 
   const patch = (changes: Record<string, string | null>) => {
     setParams(
@@ -114,13 +121,15 @@ export function useListView<T>(
     for (const f of filters) {
       for (const k of f.paramKeys ?? [f.key]) changes[k] = null;
     }
+    for (const k of extraParams) changes[k] = null;
     patch(changes);
   };
 
   const activeCount =
     (q ? 1 : 0) +
     Object.values(filterValues).filter(Boolean).length +
-    (from || to ? 1 : 0);
+    (from || to ? 1 : 0) +
+    extraParams.filter((k) => params.get(k)).length;
 
   return {
     rows,

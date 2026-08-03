@@ -115,6 +115,7 @@ export const lens = async (config: ExpressAdapterConfig) => {
     enabled: mergedConfig.enabled,
     path: normalizedPath,
     authEnabled: !!mergedConfig.auth?.password,
+    alerts: mergedConfig.alerts,
   });
 
   return {

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { constructErrorObject, cleanStack, getFileInfo, getStackTrace, extractCodeFrame } from '../../src/utils/exception';
+import { constructErrorObject, cleanStack, getFileInfo, getStackTrace, extractCodeFrame, fingerprintError, normalizeMessage } from '../../src/utils/exception';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
@@ -14,6 +14,36 @@ vi.mock('node:fs', async (importOriginal) => {
 });
 
 describe('exception utils', () => {
+  describe('fingerprintError', () => {
+    it('is stable for the same location regardless of variable message data', () => {
+      const a = fingerprintError('TypeError', { file: '/app/svc.ts', function: 'load' }, 'User 12 not found');
+      const b = fingerprintError('TypeError', { file: '/app/svc.ts', function: 'load' }, 'User 999 not found');
+      expect(a).toBe(b);
+    });
+
+    it('differs by name, file, or function', () => {
+      const base = fingerprintError('TypeError', { file: '/app/svc.ts', function: 'load' }, 'x');
+      expect(fingerprintError('RangeError', { file: '/app/svc.ts', function: 'load' }, 'x')).not.toBe(base);
+      expect(fingerprintError('TypeError', { file: '/app/other.ts', function: 'load' }, 'x')).not.toBe(base);
+      expect(fingerprintError('TypeError', { file: '/app/svc.ts', function: 'save' }, 'x')).not.toBe(base);
+    });
+
+    it('falls back to the normalized message when there is no location', () => {
+      const a = fingerprintError('Error', undefined, 'timeout after 30 ms');
+      const b = fingerprintError('Error', {}, 'timeout after 45 ms');
+      expect(a).toBe(b);
+    });
+  });
+
+  describe('normalizeMessage', () => {
+    it('masks ids, uuids, hex and quoted literals', () => {
+      expect(normalizeMessage('User 123 not found')).toBe('User <n> not found');
+      expect(normalizeMessage('id 550e8400-e29b-41d4-a716-446655440000')).toBe('id <uuid>');
+      expect(normalizeMessage('at 0xDEADBEEF')).toBe('at <hex>');
+      expect(normalizeMessage(`missing key "userId"`)).toBe('missing key <str>');
+    });
+  });
+
   describe('constructErrorObject', () => {
     const mockFilePathForStack = path.resolve(process.cwd(), 'mock-stack-file.ts');
     const mockFileContentForStack = 'line 1\nline 2\nline 3 with error\nline 4\nline 5';

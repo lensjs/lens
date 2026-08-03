@@ -1,5 +1,8 @@
 export { default as Lens } from "./core/lens";
 
+export { createLensNotifier } from "./core/notifier";
+export type { LensNotifier } from "./core/notifier";
+
 export { createLensMetrics } from "./core/metrics";
 export type {
   LensMetrics,

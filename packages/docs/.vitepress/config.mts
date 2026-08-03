@@ -19,6 +19,10 @@ export default defineConfig({
             link: "/getting-started/securing-the-dashboard",
           },
           {
+            text: "Alerts & Notifications",
+            link: "/getting-started/alerts-and-notifications",
+          },
+          {
             text: "Storage Backends",
             link: "/getting-started/stores",
           },

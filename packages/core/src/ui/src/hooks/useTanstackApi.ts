@@ -1,13 +1,14 @@
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import type {
   ApiResponse,
+  ExceptionGroup,
   OneRequest,
+  Overview,
   QueryEntry,
   QueryTableRow,
   RequestTableRow,
   MailTableRow,
   OneMail,
-  Overview,
 } from "../types";
 import { prepareApiUrl } from "../utils/api";
 import { useConfig } from "../utils/context";
@@ -118,6 +119,22 @@ export function useOverview(
     queryFn: () =>
       fetchJson<Overview>(
         prepareApiUrl(withQueryParams(config.api.metrics, params)),
+      ),
+    ...options,
+  });
+}
+
+export function useExceptionGroups(
+  params: Record<string, string>,
+  options?: UseQueryOptions<ApiResponse<ExceptionGroup[]>>,
+) {
+  const config = useConfig();
+  const key = new URLSearchParams(params).toString();
+  return useQuery<ApiResponse<ExceptionGroup[]>>({
+    queryKey: ["exception-groups", key],
+    queryFn: () =>
+      fetchJson<ExceptionGroup[]>(
+        prepareApiUrl(withQueryParams(config.api.exceptionGroups, params)),
       ),
     ...options,
   });

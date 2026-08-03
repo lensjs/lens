@@ -96,6 +96,7 @@ export default class LensServiceProvider {
         enabled: config.enabled,
         appName: config.appName,
         authEnabled: !!config.auth?.password,
+        alerts: config.alerts,
       })
     })
   }

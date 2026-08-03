@@ -153,5 +153,6 @@ export async function lens(config: NestLensConfig) {
     enabled: mergedConfig.enabled,
     path: normalizedPath,
     authEnabled: !!mergedConfig.auth?.password,
+    alerts: mergedConfig.alerts,
   });
 }

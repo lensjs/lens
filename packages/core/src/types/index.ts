@@ -41,6 +41,8 @@ export type CacheEntry =
 export type ExceptionEntry = {
   name: string;
   message: string;
+  /** Stable hash that collapses repeat occurrences into a single issue. */
+  fingerprint?: string;
   cause?: Record<string, any> | string | null;
   trace?: string[];
   requestId?: string;
@@ -193,6 +195,24 @@ export type FcmEntry = {
   recipients?: FcmRecipient[];
 };
 
+export type AlertProvider = "slack" | "discord" | "webhook";
+
+/**
+ * Outbound alerting for new exception issues. Setting `webhookUrl` enables it.
+ */
+export type LensAlertsConfig = {
+  /** Incoming webhook URL (Slack / Discord / generic). */
+  webhookUrl: string;
+  /** Payload format; inferred from the URL when omitted. */
+  provider?: AlertProvider;
+  /** Suppress repeat alerts for the same fingerprint within this window (default 5 min). */
+  cooldownMs?: number;
+  /** Alert on every occurrence instead of only new/renewed issues (default false). */
+  everyOccurrence?: boolean;
+  /** Dashboard base URL, used to build a link back to the exception. */
+  dashboardUrl?: string;
+};
+
 export type LensConfig = {
   path: string;
   appName: string;
@@ -204,6 +224,8 @@ export type LensConfig = {
     headers?: string[];
     bodyParams?: string[];
   };
+  /** Outbound alerting on new exception issues. */
+  alerts?: LensAlertsConfig;
 };
 
 /**
