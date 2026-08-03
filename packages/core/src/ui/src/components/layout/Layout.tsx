@@ -4,10 +4,14 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 import CommandPalette from "../CommandPalette";
+import Toaster from "../Toaster";
+import { useExceptionToasts } from "../../hooks/useExceptionToasts";
 
 const Layout = () => {
   const location = useLocation();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  useExceptionToasts();
 
   useEffect(() => {
     setIsMobileSidebarOpen(false);
@@ -33,6 +37,7 @@ const Layout = () => {
 
       <Footer />
       <CommandPalette />
+      <Toaster />
     </div>
   );
 };

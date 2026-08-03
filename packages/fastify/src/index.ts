@@ -1,4 +1,5 @@
 import {
+  assertValidConfig,
   CacheWatcher,
   ExceptionWatcher,
   Lens,
@@ -50,6 +51,8 @@ export const lens = async (config: FastifyAdapterConfig) => {
     ...defaultConfig,
     ...config,
   } as RequiredFastifyAdapterConfig;
+
+  assertValidConfig(mergedConfig);
 
   const defaultWatchers = [
     {

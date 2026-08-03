@@ -4,6 +4,7 @@ import type { ApplicationService } from '@adonisjs/core/types'
 import { LensConfig } from '../src/define_config.js'
 import {
   QueryEntry,
+  assertValidConfig,
   Lens,
   lensUtils,
   RequestWatcher,
@@ -56,6 +57,8 @@ export default class LensServiceProvider {
         'Invalid "config/lens.ts" file. Make sure you are using the "defineConfig" method'
       )
     }
+
+    assertValidConfig(config)
 
     const { normalizedPath, ignoredPaths } = lensUtils.prepareIgnoredPaths(
       config.path,

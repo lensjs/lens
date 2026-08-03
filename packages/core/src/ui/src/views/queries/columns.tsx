@@ -9,6 +9,9 @@ import {
   highlightMongo,
   highlightSql,
 } from "../../components/common/highlights/SqlHighlights";
+import { durationToMs } from "../../utils/format";
+import { SLOW_QUERY_MS } from "../../utils/queryFlags";
+import QueryFlagBadge from "../../components/QueryFlagBadge";
 
 function highlightQuery(query: string, type?: string) {
   return type === "mongodb" ? highlightMongo(query) : highlightSql(query);
@@ -21,13 +24,16 @@ const useColumns = (): TableColumn<QueryTableRow>[] => {
     {
       name: "Query",
       render: (row) => (
-        <div className="max-w-xl">
+        <div className="flex max-w-xl items-center gap-2">
           <code
             className="text-sm font-mono text-fg leading-relaxed line-clamp-1"
             title={row.data.query}
           >
             {highlightQuery(row.data.query, row.data.type)}
           </code>
+          {durationToMs(row.data.duration) >= SLOW_QUERY_MS && (
+            <QueryFlagBadge flag="slow" />
+          )}
         </div>
       ),
     },

@@ -13,6 +13,10 @@ import {
 import { humanDifferentDate } from "@lensjs/date";
 import type { OneRequest } from "../../types";
 import { cn } from "../../utils/cn";
+import { analyzeQueries, type QueryFlags } from "../../utils/queryFlags";
+import QueryFlagBadge, {
+  type QueryFlag,
+} from "../../components/QueryFlagBadge";
 
 type EventKind =
   | "query"
@@ -32,7 +36,17 @@ type TimelineEvent = {
   kind: EventKind;
   label: string;
   sub?: string;
+  flags?: QueryFlag[];
 };
+
+function toFlagList(f?: QueryFlags): QueryFlag[] {
+  if (!f) return [];
+  const list: QueryFlag[] = [];
+  if (f.nPlusOne) list.push("n+1");
+  else if (f.duplicate) list.push("duplicate");
+  if (f.slow) list.push("slow");
+  return list;
+}
 
 const KIND_META: Record<
   EventKind,
@@ -51,6 +65,8 @@ const KIND_META: Record<
 };
 
 export default function RequestTimeline({ request }: { request: OneRequest }) {
+  const queryAnalysis = analyzeQueries(request.queries.map((q) => q.data));
+
   const events: TimelineEvent[] = [
     ...request.queries.map((q, i) => ({
       id: `q${i}`,
@@ -58,6 +74,7 @@ export default function RequestTimeline({ request }: { request: OneRequest }) {
       kind: "query" as const,
       label: q.data.query,
       sub: q.data.duration,
+      flags: toFlagList(queryAnalysis.flags[i]),
     })),
     ...request.cacheEntries.map((c, i) => ({
       id: `c${i}`,
@@ -130,10 +147,14 @@ export default function RequestTimeline({ request }: { request: OneRequest }) {
 
   return (
     <div className="card-panel overflow-hidden">
-      <div className="border-b border-border bg-surface-2/40 px-5 py-3">
+      <div className="flex items-center gap-2 border-b border-border bg-surface-2/40 px-5 py-3">
         <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">
           Timeline ({events.length})
         </h2>
+        {queryAnalysis.summary.nPlusOne > 0 && <QueryFlagBadge flag="n+1" />}
+        {queryAnalysis.summary.duplicate > 0 && (
+          <QueryFlagBadge flag="duplicate" />
+        )}
       </div>
       <ol className="relative space-y-1 p-5">
         <span
@@ -163,7 +184,12 @@ export default function RequestTimeline({ request }: { request: OneRequest }) {
                     {t.label}
                   </span>
                 </div>
-                <p className="truncate font-mono text-sm text-fg">{ev.label}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="truncate font-mono text-sm text-fg">
+                    {ev.label}
+                  </p>
+                  {ev.flags?.map((f) => <QueryFlagBadge key={f} flag={f} />)}
+                </div>
                 {ev.sub && <p className="truncate text-xs text-muted">{ev.sub}</p>}
               </div>
             </li>

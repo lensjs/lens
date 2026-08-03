@@ -1,4 +1,4 @@
-import { getStore } from "../context/context";
+import { persistEntry } from "../utils/sampling";
 import Watcher from "../core/watcher";
 import { CacheEntry, WatcherTypeEnum } from "../types";
 
@@ -13,7 +13,7 @@ export default class CacheWatcher extends Watcher {
       createdAt: data.createdAt,
     };
 
-    await getStore().save({
+    await persistEntry({
       requestId: data.requestId ?? "",
       type: this.name,
       data: payload,

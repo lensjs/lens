@@ -15,8 +15,21 @@ import getLogColumns from "../logs/columns";
 import getJobColumns from "../jobs/columns";
 import BasicRequestDetails from "./BasicRequestDetails";
 import RequestTimeline from "./RequestTimeline";
+import { Download } from "lucide-react";
+import { buildHar, downloadFile, timestampSlug } from "../../utils/export";
 
 const RequestDetails = ({ request }: { request: OneRequest }) => {
+  const exportHar = () => {
+    const data = request?.request?.data;
+    if (!data) return;
+    const id = request?.request?.id ?? "request";
+    downloadFile(
+      `lens-request-${id}-${timestampSlug()}.har`,
+      JSON.stringify(buildHar(data), null, 2),
+      "application/json",
+    );
+  };
+
   const queriesColumns = getQueriesColumns();
   const exceptionsColumns = getExceptionsColumns();
   const cacheColumns = getCacheColumns();
@@ -115,6 +128,16 @@ const RequestDetails = ({ request }: { request: OneRequest }) => {
 
   return (
     <div className="flex flex-col gap-3">
+      <div className="flex justify-end">
+        <button
+          onClick={exportHar}
+          title="Export this request as HAR"
+          className="inline-flex items-center gap-1 rounded-lg border border-border bg-surface/70 px-2.5 py-2 text-sm text-muted transition-colors hover:border-border-strong hover:text-fg"
+        >
+          <Download size={14} />
+          Export HAR
+        </button>
+      </div>
       <BasicRequestDetails request={request} />
 
       <div className="grid gap-3 xl:grid-cols-2">

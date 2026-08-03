@@ -1,4 +1,4 @@
-import { getStore } from "../context/context";
+import { persistEntry } from "../utils/sampling";
 import Watcher from "../core/watcher";
 import { WatcherTypeEnum, type RequestEntry } from "../types/index";
 
@@ -60,7 +60,7 @@ export default class RequestWatcher extends Watcher {
 
     payload.data.body = this.hideSensitive(payload.data.body, bodyParamsToHide, false);
 
-    await getStore().save(payload);
+    await persistEntry(payload);
   }
 
   /**

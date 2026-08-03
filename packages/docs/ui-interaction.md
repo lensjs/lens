@@ -47,6 +47,7 @@ This page provides a comprehensive view of a single HTTP request.
 *   **Response Data Tabs:**
     *   **Body:** The response body (e.g., JSON response).
     *   **Headers:** All response headers.
+*   **Timeline:** A chronological view of everything captured during the request (queries, cache, exceptions, mail, HTTP, …). Repeated queries are flagged with **N+1** and **Duplicate** badges to surface inefficient query patterns.
 *   **Related Entries Tabs:**
     *   **Queries:** A table listing all database queries executed during this request. Click on a query to view its details.
     *   **Cache:** A table listing all cache operations performed during this request. Click on a cache entry to view its details.
@@ -59,7 +60,7 @@ This page provides a comprehensive view of a single HTTP request.
 This page displays a table of all recorded database queries.
 
 *   **Columns:**
-    *   **Query:** The SQL or MongoDB query string.
+    *   **Query:** The SQL or MongoDB query string. A **Slow** badge marks queries over the slow threshold.
     *   **Duration:** The time taken to execute the query.
     *   **Provider:** The database type (e.g., `sql`, `mongodb`).
     *   **Happened:** A human-readable timestamp indicating when the query occurred.
@@ -143,6 +144,7 @@ Every list view (Requests, Queries, Cache, Exceptions, Mail, HTTP, Events, Redis
 *   **Date range:** Choose a preset (Last 15 min / hour / 24 hours / 7 days) or a custom start/end. Bounds are stored as absolute timestamps, so the link stays stable over time.
 *   **Sort:** Sort by Time (default, newest first) or a column such as Duration, ascending or descending.
 *   **Clear:** The "Clear" button (showing the active-filter count) removes every active filter at once.
+*   **Export:** The **Export** menu downloads the currently loaded (and filtered) rows as **JSON** or **CSV**. On a request's detail page, use **Export HAR** to download that request as an HTTP Archive (HAR) file.
 
 ### Live tail and sorting
 
@@ -160,3 +162,7 @@ The **Overview** is the landing page (`/lens/overview`) — a real-time analytic
 *   **Top exceptions:** The most frequent exceptions (grouped by name + message) with occurrence counts; click to open a sample.
 
 Every panel respects the selected time range and refreshes when you change it.
+
+## 9. Live Exception Toasts
+
+When a new exception is captured, a toast appears in the corner of the dashboard, fed by the live stream. Toasts are deduplicated by issue fingerprint, respect the recording-pause toggle, and clicking one opens that exception's detail page.

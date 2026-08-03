@@ -1,5 +1,5 @@
 import { nowISO } from "@lensjs/date";
-import { getStore } from "../context/context";
+import { persistEntry } from "../utils/sampling";
 import Watcher from "../core/watcher";
 import { MailEntry, WatcherTypeEnum } from "../types";
 
@@ -10,7 +10,7 @@ export default class MailWatcher extends Watcher {
     const recipientsCount =
       (data.to?.length ?? 0) + (data.cc?.length ?? 0) + (data.bcc?.length ?? 0);
 
-    await getStore().save({
+    await persistEntry({
       requestId: data.requestId ?? "",
       type: this.name,
       minimal_data: {

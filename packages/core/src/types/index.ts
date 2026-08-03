@@ -213,6 +213,30 @@ export type LensAlertsConfig = {
   dashboardUrl?: string;
 };
 
+/**
+ * Trace/request sampling: capture only a fraction of traffic, with always-on
+ * rules so errors and slow requests are never dropped. Correlated signals
+ * (queries, cache, logs, ...) are kept or dropped together with their request.
+ */
+export type LensSamplingConfig = {
+  /** Fraction of requests to capture, 0..1. Omit or set 1 to capture all. */
+  rate: number;
+  /** Always capture requests that errored (status >= 500). Defaults to true. */
+  alwaysOnErrors?: boolean;
+  /** Always capture requests slower than this many milliseconds. */
+  alwaysOnSlowMs?: number;
+};
+
+/** The neutral entry shape passed to `Store.save()`. */
+export type StoreSaveEntry = {
+  id?: string;
+  data: Record<string, any>;
+  minimal_data?: Record<string, any>;
+  type: WatcherTypeEnum;
+  timestamp?: string;
+  requestId?: string;
+};
+
 export type LensConfig = {
   path: string;
   appName: string;
@@ -226,6 +250,8 @@ export type LensConfig = {
   };
   /** Outbound alerting on new exception issues. */
   alerts?: LensAlertsConfig;
+  /** Request/trace sampling with error- and slow-biased always-on rules. */
+  sampling?: LensSamplingConfig;
 };
 
 /**

@@ -1,9 +1,18 @@
 import { AsyncLocalStorage } from "async_hooks";
-import { ExceptionWatcher } from "../watchers";
+import type { ExceptionWatcher } from "../watchers";
 import { constructErrorObject } from "./exception";
+import type { StoreSaveEntry } from "../types/index";
+
+/** Per-request sampling buffer: holds entries until the request outcome is known. */
+export type LensSamplingState = {
+  pending: boolean;
+  keep: boolean;
+  buffer: StoreSaveEntry[];
+};
 
 type LensContext = {
   requestId: string;
+  sampling?: LensSamplingState;
 };
 
 export const lensContext = new AsyncLocalStorage<LensContext>();

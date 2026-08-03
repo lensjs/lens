@@ -1,4 +1,5 @@
-import { getNotifier, getStore } from "../context/context";
+import { getNotifier } from "../context/context";
+import { persistEntry } from "../utils/sampling";
 import Watcher from "../core/watcher";
 import { ExceptionEntry, WatcherTypeEnum } from "../types";
 import { generateRandomUuid } from "../utils";
@@ -9,19 +10,22 @@ export default class ExceptionWatcher extends Watcher {
   async log(payload: ExceptionEntry) {
     const id = generateRandomUuid();
 
-    await getStore().save({
-      id,
-      type: WatcherTypeEnum.EXCEPTION,
-      requestId: payload.requestId,
-      timestamp: payload.createdAt,
-      data: payload,
-      minimal_data: {
-        name: payload.name,
-        message: payload.message,
-        fingerprint: payload.fingerprint,
-        createdAt: payload.createdAt,
+    await persistEntry(
+      {
+        id,
+        type: WatcherTypeEnum.EXCEPTION,
+        requestId: payload.requestId,
+        timestamp: payload.createdAt,
+        data: payload,
+        minimal_data: {
+          name: payload.name,
+          message: payload.message,
+          fingerprint: payload.fingerprint,
+          createdAt: payload.createdAt,
+        },
       },
-    });
+      { force: true },
+    );
 
     // Fire configured outbound alerts (non-blocking; never breaks capture).
     try {

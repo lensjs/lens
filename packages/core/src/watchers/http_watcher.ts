@@ -1,5 +1,5 @@
 import Watcher from "../core/watcher";
-import { getStore } from "../context/context";
+import { persistEntry } from "../utils/sampling";
 import { HttpEntry, WatcherTypeEnum } from "../types";
 import { nowISO } from "@lensjs/date";
 
@@ -7,7 +7,7 @@ export default class HttpWatcher extends Watcher {
   name = WatcherTypeEnum.HTTP;
 
   async log(data: HttpEntry) {
-    await getStore().save({
+    await persistEntry({
       requestId: data.requestId ?? "",
       type: this.name,
       minimal_data: {

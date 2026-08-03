@@ -1,5 +1,5 @@
-import { getStore } from "../context/context";
 import Watcher from "../core/watcher";
+import { persistEntry } from "../utils/sampling";
 import { JobEntry, WatcherTypeEnum } from "../types";
 import { nowISO } from "@lensjs/date";
 
@@ -11,7 +11,7 @@ export default class JobWatcher extends Watcher {
 
     // A stable `id` + `timestamp` are what let the store upsert the same row as
     // the job moves from active -> completed/failed (see BetterSqliteStore.save).
-    await getStore().save({
+    await persistEntry({
       id: data.id,
       requestId: data.requestId ?? "",
       type: this.name,

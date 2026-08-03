@@ -1,5 +1,5 @@
 import Watcher from "../core/watcher";
-import { getStore } from "../context/context";
+import { persistEntry } from "../utils/sampling";
 import { RedisEntry, WatcherTypeEnum } from "../types";
 import { nowISO } from "@lensjs/date";
 
@@ -7,7 +7,7 @@ export default class RedisWatcher extends Watcher {
   name = WatcherTypeEnum.REDIS;
 
   async log(data: RedisEntry) {
-    await getStore().save({
+    await persistEntry({
       requestId: data.requestId ?? "",
       type: this.name,
       minimal_data: {

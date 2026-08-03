@@ -147,6 +147,23 @@ await lens({
 });
 ```
 
+## Sampling
+
+Capture only a fraction of traffic while never dropping errors or slow requests. Correlated signals (queries, cache, logs, …) are kept or discarded together with their request.
+
+```ts
+await lens({
+  app,
+  sampling: {
+    rate: 0.2, // Capture 20% of requests (0..1; omit or 1 = capture all).
+    alwaysOnErrors: true, // Always capture 5xx responses. Defaults to true.
+    alwaysOnSlowMs: 1000, // Always capture requests slower than 1s.
+  },
+});
+```
+
+> Sampling is applied on **Express**, where the request context wraps the full lifecycle. When a request is sampled-out, its entries are buffered and only written if an always-on rule keeps it (so an errored request keeps its queries too).
+
 ## Retention
 
 Automatically purge entries older than a max age, per signal type — complementing the size-based `dbMaxSizeGb`/`dbPruneSizeGb` pruning. Configured on `storeQueueConfig.retention`:
@@ -166,3 +183,7 @@ await lens({
   },
 });
 ```
+
+## Configuration Validation
+
+Lens validates your configuration at boot and throws a single, aggregated error listing every problem it finds (for example an out-of-range `sampling.rate`, a malformed `alerts.webhookUrl`, or a non-numeric retention age), so misconfigurations fail fast with an actionable message.

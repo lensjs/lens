@@ -1,5 +1,7 @@
 import {
   LensAdapter,
+  createSamplingState,
+  finalizeSampling,
   lensUtils,
   RequestWatcher,
   RouteDefinition,
@@ -398,9 +400,14 @@ export class ExpressAdapter extends LensAdapter {
     this.app.use((req, res, next) => {
       if (this.shouldIgnorePath(req.path)) return next();
 
-      const context = {
+      const context: {
+        requestId: string;
+        sampling?: ReturnType<typeof createSamplingState>;
+      } = {
         requestId: lensUtils.generateRandomUuid(),
       };
+      const sampling = createSamplingState(this.config.sampling);
+      if (sampling) context.sampling = sampling;
 
       lensContext.run(context, () => {
         const start = process.hrtime();
@@ -468,7 +475,8 @@ export class ExpressAdapter extends LensAdapter {
     start: [number, number],
   ) {
     try {
-      const duration = lensUtils.prettyHrTime(process.hrtime(start));
+      const elapsed = process.hrtime(start);
+      const duration = lensUtils.prettyHrTime(elapsed);
       const logPayload = {
         request: {
           id:
@@ -492,6 +500,11 @@ export class ExpressAdapter extends LensAdapter {
       };
 
       await requestWatcher.log(logPayload, this.config.hiddenParams);
+      await finalizeSampling(
+        res.statusCode,
+        elapsed[0] * 1000 + elapsed[1] / 1e6,
+        this.config.sampling,
+      );
     } catch (err) {
       console.error("Error finalizing request log:", err);
     }

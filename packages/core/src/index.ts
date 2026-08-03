@@ -1,5 +1,7 @@
 export { default as Lens } from "./core/lens";
 
+export { assertValidConfig } from "./core/validate_config";
+
 export { createLensNotifier } from "./core/notifier";
 export type { LensNotifier } from "./core/notifier";
 
@@ -37,3 +39,7 @@ export {
   handleUncaughExceptions,
   getCurrentRequestId,
 } from "./utils/async_context";
+export {
+  createSamplingState,
+  finalizeSampling,
+} from "./utils/sampling";

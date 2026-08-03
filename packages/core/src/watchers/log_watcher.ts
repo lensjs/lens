@@ -1,5 +1,5 @@
-import { getStore } from "../context/context";
 import Watcher from "../core/watcher";
+import { persistEntry } from "../utils/sampling";
 import { LogEntry, WatcherTypeEnum } from "../types";
 import { nowISO } from "@lensjs/date";
 
@@ -7,7 +7,7 @@ export default class LogWatcher extends Watcher {
   name = WatcherTypeEnum.LOG;
 
   async log(data: LogEntry) {
-    await getStore().save({
+    await persistEntry({
       requestId: data.requestId ?? "",
       type: this.name,
       minimal_data: {

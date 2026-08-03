@@ -1,4 +1,5 @@
 import {
+  assertValidConfig,
   CacheWatcher,
   ExceptionWatcher,
   Lens,
@@ -46,6 +47,8 @@ export const lens = async (config: ExpressAdapterConfig) => {
     ...defaultConfig,
     ...config,
   } as RequiredExpressAdapterConfig;
+
+  assertValidConfig(mergedConfig);
 
   const defaultWatchers = [
     {
