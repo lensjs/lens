@@ -1,0 +1,60 @@
+{
+  "name": "@lensjs/mcp",
+  "version": "0.0.0",
+  "description": "Model Context Protocol server for LensJs - lets AI agents read captured errors, requests, and queries to diagnose and fix issues",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "lens",
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "llm",
+    "agent",
+    "cursor",
+    "claude",
+    "debugging",
+    "monitoring",
+    "observability",
+    "errors"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lensjs/lens.git",
+    "directory": "packages/mcp"
+  },
+  "homepage": "https://lensjs.vercel.app/",
+  "bugs": {
+    "url": "https://github.com/lensjs/lens/issues"
+  },
+  "bin": {
+    "lens-mcp": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup --clean",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@lensjs/core": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@lensjs/typescript-config": "workspace:*",
+    "@types/node": "^24.10.13",
+    "vitest": "^3.2.4"
+  }
+}

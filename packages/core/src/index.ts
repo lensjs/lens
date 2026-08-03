@@ -1,9 +1,12 @@
 export { default as Lens } from "./core/lens";
 
-export { assertValidConfig } from "./core/validate_config";
+export { createLensReader } from "./core/reader";
+export type { LensReader, ReaderWindow, RequestTimeline } from "./core/reader";
 
 export { createLensNotifier } from "./core/notifier";
 export type { LensNotifier } from "./core/notifier";
+
+export { assertValidConfig } from "./core/validate_config";
 
 export { createLensMetrics } from "./core/metrics";
 export type {

@@ -8,6 +8,7 @@ import type {
   Paginator,
   RouteDefinitionHandler,
 } from "../types";
+import { createLensReader } from "./reader";
 import { createLensMetrics, groupExceptions } from "./metrics";
 
 export class ApiController {
@@ -18,77 +19,15 @@ export class ApiController {
   }
 
   static async getRequest({ params }: RouteDefinitionHandler) {
-    const request = await getStore().find(WatcherTypeEnum.REQUEST, params.id);
+    const timeline = await createLensReader(getStore()).getRequestTimeline(
+      params.id,
+    );
 
-    if (!request) {
+    if (!timeline) {
       return this.notFoundResponse();
     }
 
-    const queries = await getStore().allByRequestId(
-      request.id,
-      WatcherTypeEnum.QUERY,
-    );
-
-    const cacheEntries = await getStore().allByRequestId(
-      request.id,
-      WatcherTypeEnum.CACHE,
-    );
-
-    const exceptions = await getStore().allByRequestId(
-      request.id,
-      WatcherTypeEnum.EXCEPTION,
-      false,
-    );
-
-    const emails = await getStore().allByRequestId(
-      request.id,
-      WatcherTypeEnum.MAIL,
-      false,
-    );
-
-    const httpEntries = await getStore().allByRequestId(
-      request.id,
-      WatcherTypeEnum.HTTP,
-    );
-
-    const eventEntries = await getStore().allByRequestId(
-      request.id,
-      WatcherTypeEnum.EVENT,
-    );
-
-    const redisEntries = await getStore().allByRequestId(
-      request.id,
-      WatcherTypeEnum.REDIS,
-    );
-
-    const fcmEntries = await getStore().allByRequestId(
-      request.id,
-      WatcherTypeEnum.FCM,
-    );
-
-    const logEntries = await getStore().allByRequestId(
-      request.id,
-      WatcherTypeEnum.LOG,
-    );
-
-    const jobEntries = await getStore().allByRequestId(
-      request.id,
-      WatcherTypeEnum.JOB,
-    );
-
-    return this.resourceResponse({
-      request,
-      queries,
-      cacheEntries,
-      exceptions,
-      emails,
-      httpEntries,
-      eventEntries,
-      redisEntries,
-      fcmEntries,
-      logEntries,
-      jobEntries,
-    });
+    return this.resourceResponse(timeline);
   }
 
   static async getQueries({

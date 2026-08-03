@@ -224,6 +224,10 @@ export default defineConfig({
         ],
       },
       {
+        text: "MCP Server (AI)",
+        link: "/mcp",
+      },
+      {
         text: "UI Interaction",
         link: "/ui-interaction",
       },

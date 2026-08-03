@@ -137,3 +137,23 @@
   --docsearch-primary-color: var(--vp-c-brand-1) !important;
 }
 
+/**
+ * Component: Mermaid diagrams
+ * -------------------------------------------------------------------------- */
+
+.mermaid-figure {
+  margin: 16px 0;
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  background: var(--vp-c-bg-soft);
+}
+
+.mermaid-figure svg {
+  max-width: 100%;
+  height: auto;
+}
+

@@ -49,6 +49,34 @@ describe("BetterSqliteStore", () => {
       expect(Database).toHaveBeenCalledWith("lens.db");
       expect(setupSchemaSpy).toHaveBeenCalled();
     });
+
+    it("should open a custom databasePath from config", async () => {
+      const customStore = new BetterSqliteStore({ databasePath: "custom.db" });
+      (customStore as any).connection = mockConnection;
+      const setupSchemaSpy = vi.spyOn(customStore as any, "setupSchema");
+
+      await customStore.initialize();
+
+      expect(Database).toHaveBeenCalledWith("custom.db");
+      expect(setupSchemaSpy).toHaveBeenCalled();
+    });
+
+    it("should open read-only and skip schema setup", async () => {
+      const readonlyStore = new BetterSqliteStore({
+        databasePath: "readonly.db",
+        readonly: true,
+      });
+      (readonlyStore as any).connection = mockConnection;
+      const setupSchemaSpy = vi.spyOn(readonlyStore as any, "setupSchema");
+
+      await readonlyStore.initialize();
+
+      expect(Database).toHaveBeenCalledWith("readonly.db", {
+        readonly: true,
+        fileMustExist: true,
+      });
+      expect(setupSchemaSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe("truncate", () => {

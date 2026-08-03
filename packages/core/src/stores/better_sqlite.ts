@@ -4,6 +4,7 @@ import {
   WatcherTypeEnum,
   type PaginationParams,
   type LensEntry,
+  type QueuedStoreConfig,
 } from "../types/index";
 import Database from "libsql";
 import { nowISO } from "@lensjs/date";
@@ -16,8 +17,25 @@ const PRUNE_BATCH_SIZE = 1000;
 export default class BetterSqliteStore extends Store {
   protected connection!: Database.Database;
 
+  constructor(config?: QueuedStoreConfig) {
+    super();
+    this.storeConfig = config;
+  }
+
   public async initialize() {
-    this.connection = new Database("lens.db");
+    const databasePath = this.storeConfig?.databasePath ?? "lens.db";
+    const readonly = this.storeConfig?.readonly ?? false;
+
+    this.connection = readonly
+      ? new Database(databasePath, { readonly: true, fileMustExist: true })
+      : new Database(databasePath);
+
+    if (readonly) {
+      // A read-only handle (e.g. the @lensjs/mcp reader) must not run the schema
+      // creation or WAL pragmas — those are writes the writer process already
+      // applied — and must stay silent so it never writes to stdout.
+      return;
+    }
 
     this.setupSchema();
     console.log("Connected to Lens (SQLite) database.");

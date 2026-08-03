@@ -385,6 +385,14 @@ export interface QueuedStoreConfig {
   dbPruneSizeGb?: number;
   /** Age-based retention policy (per signal type). */
   retention?: LensRetentionConfig;
+  /** SQLite database file path. Defaults to `"lens.db"` in the current working directory. */
+  databasePath?: string;
+  /**
+   * Open the database read-only. Skips schema creation and WAL pragmas (which are
+   * writes the writer process already applied). Used by read-only consumers such
+   * as the `@lensjs/mcp` reader.
+   */
+  readonly?: boolean;
 }
 
 export * from './mail'
