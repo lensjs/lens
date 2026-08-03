@@ -63,6 +63,28 @@ export default defineConfig({
             ],
           },
           {
+            text: "Hono",
+            collapsed: true,
+            items: [
+              { text: "Installation", link: "/adapters/hono/installation" },
+              {
+                text: "Configuration",
+                link: "/adapters/hono/configuration",
+              },
+            ],
+          },
+          {
+            text: "Next.js",
+            collapsed: true,
+            items: [
+              { text: "Installation", link: "/adapters/nextjs/installation" },
+              {
+                text: "Configuration",
+                link: "/adapters/nextjs/configuration",
+              },
+            ],
+          },
+          {
             text: "AdonisJS",
             collapsed: true,
             items: [

@@ -1,0 +1,3 @@
+{
+  "extends": "@lensjs/typescript-config/hono.json"
+}

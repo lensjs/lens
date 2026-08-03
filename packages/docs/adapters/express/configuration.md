@@ -162,7 +162,7 @@ await lens({
 });
 ```
 
-> Sampling is applied on **Express**, where the request context wraps the full lifecycle. When a request is sampled-out, its entries are buffered and only written if an always-on rule keeps it (so an errored request keeps its queries too).
+> Sampling is applied on **Express, Hono, and Next.js**, where the request context wraps the full lifecycle. When a request is sampled-out, its entries are buffered and only written if an always-on rule keeps it (so an errored request keeps its queries too).
 
 ## Retention
 

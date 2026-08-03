@@ -1,0 +1,23 @@
+{
+  "name": "example-nextjs",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev"
+  },
+  "dependencies": {
+    "@lensjs/core": "workspace:*",
+    "@lensjs/date": "workspace:*",
+    "@lensjs/nextjs": "workspace:*",
+    "@lensjs/watchers": "workspace:*",
+    "next": "^16.2.12",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.13",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "typescript": "^5.9.2"
+  }
+}

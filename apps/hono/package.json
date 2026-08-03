@@ -1,0 +1,25 @@
+{
+  "name": "example-hono",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm dlx tsx src/index.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.0.12",
+    "@lensjs/core": "workspace:*",
+    "@lensjs/date": "workspace:*",
+    "@lensjs/hono": "workspace:*",
+    "@lensjs/watchers": "workspace:*",
+    "hono": "^4.12.33",
+    "sequelize": "^6.37.7",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.13",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  },
+  "module": "src/index.ts"
+}

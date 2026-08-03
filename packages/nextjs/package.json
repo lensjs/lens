@@ -1,0 +1,62 @@
+{
+  "name": "@lensjs/nextjs",
+  "version": "0.0.0",
+  "description": "Next.js (App Router) adapter for LensJs",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "nextjs",
+    "next",
+    "lens",
+    "monitoring",
+    "debugging",
+    "logging",
+    "database",
+    "queries",
+    "requests",
+    "cache"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lensjs/lens.git",
+    "directory": "packages/nextjs"
+  },
+  "homepage": "https://lensjs.vercel.app/",
+  "bugs": {
+    "url": "https://github.com/lensjs/lens/issues"
+  },
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    },
+    "./middleware": {
+      "require": "./dist/middleware.cjs",
+      "import": "./dist/middleware.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup --clean",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@lensjs/core": "workspace:*",
+    "@lensjs/date": "workspace:*",
+    "@lensjs/typescript-config": "workspace:*",
+    "@lensjs/watchers": "workspace:*"
+  },
+  "peerDependencies": {
+    "next": ">=14.0.0"
+  },
+  "devDependencies": {
+    "next": "^16.2.12",
+    "vitest": "^3.2.4"
+  }
+}
