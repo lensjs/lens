@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none" role="img" aria-label="Lens - Monitoring and debugging for Node.js">
+  <defs>
+    <radialGradient id="glow" cx="88%" cy="8%" r="70%">
+      <stop offset="0%" stop-color="#4F46E5" stop-opacity="0.35"/>
+      <stop offset="55%" stop-color="#4F46E5" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#4F46E5" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="hair" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="#0B0B0D"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- subtle dotted grid, top-right -->
+  <g fill="#ffffff" opacity="0.05">
+    <g id="row">
+      <circle cx="740" cy="70" r="2"/><circle cx="790" cy="70" r="2"/><circle cx="840" cy="70" r="2"/>
+      <circle cx="890" cy="70" r="2"/><circle cx="940" cy="70" r="2"/><circle cx="990" cy="70" r="2"/>
+      <circle cx="1040" cy="70" r="2"/><circle cx="1090" cy="70" r="2"/><circle cx="1140" cy="70" r="2"/>
+    </g>
+    <use href="#row" y="50"/><use href="#row" y="100"/><use href="#row" y="150"/>
+    <use href="#row" y="200"/><use href="#row" y="250"/>
+  </g>
+
+  <!-- logo tile -->
+  <g transform="translate(96 232)">
+    <rect width="96" height="96" rx="24" fill="#4F46E5"/>
+    <g transform="translate(16 16) scale(2)" fill="none">
+      <g stroke="#A5B4FC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 11.5V8h3.5"/><path d="M20.5 8H24v3.5"/>
+        <path d="M24 20.5V24h-3.5"/><path d="M11.5 24H8v-3.5"/>
+      </g>
+      <circle cx="16" cy="16" r="4.3" stroke="#FFFFFF" stroke-width="2"/>
+      <circle cx="16" cy="16" r="1.7" fill="#FFFFFF"/>
+    </g>
+  </g>
+
+  <!-- wordmark + tagline -->
+  <text x="224" y="292" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="112" font-weight="800" letter-spacing="-4" fill="#F4F4F5">Lens</text>
+  <text x="98" y="392" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="40" font-weight="600" letter-spacing="-1" fill="#D4D4D8">Monitoring &amp; debugging for Node.js</text>
+  <text x="98" y="446" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="26" font-weight="450" fill="#9CA3AF">Requests, queries, cache, exceptions, mail &amp; jobs in one self-hosted dashboard.</text>
+
+  <line x1="98" y1="512" x2="1102" y2="512" stroke="url(#hair)" stroke-width="1"/>
+
+  <text x="98" y="560" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="24" font-weight="500" fill="#818CF8">npm i @lensjs/express @lensjs/watchers</text>
+  <text x="1102" y="560" text-anchor="end" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="24" font-weight="500" fill="#71717A">Open source &amp; MIT licensed</text>
+</svg>

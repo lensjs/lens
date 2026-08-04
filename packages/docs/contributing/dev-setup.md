@@ -1,56 +1,88 @@
 # Contributing to Lens
 
-First off, thank you for considering contributing to Lens! It's people like you that make Lens such a great tool.
+<p class="lens-lead">
+Thank you for considering a contribution to Lens! It's people like you that make Lens a great
+tool. This guide gets your local development environment up and running.
+</p>
 
-## Getting Started
+<Callout type="info" title="Prerequisites">
+You'll need <a href="https://nodejs.org/" target="_blank" rel="noreferrer">Node.js</a> v18+,
+<a href="https://git-scm.com/" target="_blank" rel="noreferrer">Git</a>, and
+<a href="https://pnpm.io" target="_blank" rel="noreferrer">pnpm</a>. Lens is a pnpm + Turborepo
+monorepo — always use <strong>pnpm</strong> (never npm or yarn).
+</Callout>
 
-### Prerequisites
+## Getting started
 
-- [Node.js](https://nodejs.org/) (v18 or higher)
-- [Git](https://git-scm.com/)
-- [pnpm](https://pnpm.io)
+<Steps>
+<Step title="Clone the repository">
 
-### Setup
+<CommandCopy command="git clone https://github.com/lensjs/lens.git && cd lens" />
 
-1.  **Clone the repository:**
+</Step>
+<Step title="Install dependencies">
 
-    ```bash
-    git clone https://github.com/lensjs/lens.git
-    cd lens
-    ```
+`pnpm install` at the root installs dependencies for all packages and links them together.
 
-2.  **Install dependencies:**
+<CommandCopy command="pnpm install" />
 
-    This project uses `pnpm` as a package manager and `lerna` with workspaces. Running `pnpm install` at the root will install dependencies for all packages and link them together.
+</Step>
+<Step title="Build all packages">
 
-    ```bash
-    pnpm install && pnpmx install husky
-    ```
-3.  **Build all packages:**
+This builds every package in the correct dependency order.
 
-    This command will build all the packages in the correct order.
+<CommandCopy command="pnpm run build" />
 
-    ```bash
-    pnpm run build
-    ```
+</Step>
+<Step title="Run the example app">
 
-4.  **Run the example application:**
+Start the Express example server with hot-reloading.
 
-    This will start the Express server with hot-reloading.
+<CommandCopy command="pnpm run dev" />
 
-    ```bash
-    pnpm run dev
-    ```
+The server runs at `http://localhost:3000`. Visit `http://localhost:3000/add-user` to trigger a
+database query that Lens will capture.
 
-    The server will be running at `http://localhost:3000`. You can visit `http://localhost:3000/add-user` to trigger a database query that will be captured by Lens.
+</Step>
+</Steps>
 
-## Making Changes
+## Making changes
 
-1.  Make your changes in the appropriate package(s).
-2.  If you are working on the UI, you can run the UI dev server:
-    ```bash
-    pnpm run dev:front
-    ```
-3.  Ensure all tests pass. (TODO: Add test running instructions).
-4.  Commit your changes following the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification.
-5.  Push your changes and open a pull request.
+<Steps>
+<Step title="Edit the relevant package(s)">
+
+Make your changes in the appropriate package under `packages/` or `shared/`.
+
+</Step>
+<Step title="Work on the dashboard UI">
+
+If you're changing the dashboard, run the UI dev server:
+
+<CommandCopy command="pnpm run dev:front" />
+
+</Step>
+<Step title="Commit with Conventional Commits">
+
+Follow the
+[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification, then push and
+open a pull request.
+
+</Step>
+</Steps>
+
+<Callout type="best-practice" title="Before you open a PR">
+Ensure the test suite passes with <code>pnpm test</code>, add a changeset for any user-facing
+<code>@lensjs/*</code> change, and keep changes scoped. See the repository's
+<code>CONTRIBUTING.md</code> and <code>.cursor/rules</code> for the full conventions.
+</Callout>
+
+## Next steps
+
+<CardGrid :cols="2">
+  <Card icon="github" title="Open a pull request" href="https://github.com/lensjs/lens/pulls">
+    Browse open PRs or start your own.
+  </Card>
+  <Card icon="bug" title="Report an issue" href="https://github.com/lensjs/lens/issues">
+    Found a bug or have an idea? Let us know.
+  </Card>
+</CardGrid>

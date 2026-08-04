@@ -1,0 +1,237 @@
+/**
+ * Lens design tokens — restrained, near-monochrome.
+ * -------------------------------------------------------------------------
+ * Color is used sparingly: a single indigo accent for links/actions, and a
+ * small set of semantic hues reserved for callouts and product-UI badges.
+ * Everything else relies on neutral surfaces, borders, and whitespace.
+ * No gradients, no glows.
+ */
+
+:root {
+  /* Accent (indigo) ------------------------------------------------------- */
+  --lens-indigo-50: #eef2ff;
+  --lens-indigo-100: #e0e7ff;
+  --lens-indigo-200: #c7d2fe;
+  --lens-indigo-300: #a5b4fc;
+  --lens-indigo-400: #818cf8;
+  --lens-indigo-500: #6366f1;
+  --lens-indigo-600: #4f46e5;
+  --lens-indigo-700: #4338ca;
+
+  /* Semantic hues (callouts, product-UI badges only) --------------------- */
+  --lens-emerald-400: #34d399;
+  --lens-emerald-500: #10b981;
+  --lens-emerald-600: #059669;
+
+  --lens-amber-400: #fbbf24;
+  --lens-amber-500: #f59e0b;
+  --lens-amber-600: #d97706;
+
+  --lens-rose-400: #fb7185;
+  --lens-rose-500: #f43f5e;
+  --lens-rose-600: #e11d48;
+
+  --lens-sky-400: #38bdf8;
+  --lens-sky-500: #0ea5e9;
+  --lens-sky-600: #0284c7;
+
+  /* Radii — modest, never blobby ----------------------------------------- */
+  --lens-radius-sm: 6px;
+  --lens-radius-md: 10px;
+  --lens-radius-lg: 14px;
+  --lens-radius-xl: 20px;
+  --lens-radius-2xl: 24px;
+  --lens-radius-full: 999px;
+
+  /* Type scale — a single modular ramp so every surface shares one rhythm.
+     Use these instead of ad-hoc rem values in components.                   */
+  --lens-text-2xs: 0.6875rem; /* 11px — eyebrows, meta */
+  --lens-text-xs: 0.75rem; /* 12px */
+  --lens-text-sm: 0.8125rem; /* 13px */
+  --lens-text-base: 0.9375rem; /* 15px — body in components */
+  --lens-text-md: 1rem; /* 16px */
+  --lens-text-lg: 1.125rem; /* 18px */
+  --lens-text-xl: 1.375rem; /* 22px */
+  --lens-text-2xl: 1.75rem; /* 28px */
+  --lens-text-3xl: 2.25rem; /* 36px */
+
+  /* Spacing scale — 4px base. Keeps padding/gaps on one grid.              */
+  --lens-space-1: 0.25rem;
+  --lens-space-2: 0.5rem;
+  --lens-space-3: 0.75rem;
+  --lens-space-4: 1rem;
+  --lens-space-5: 1.25rem;
+  --lens-space-6: 1.5rem;
+  --lens-space-8: 2rem;
+  --lens-space-10: 2.5rem;
+  --lens-space-12: 3rem;
+  --lens-space-16: 4rem;
+
+  /* Canonical responsive breakpoints (px). CSS can't share these inside
+     @media, so treat them as the ONLY allowed widths across the theme:
+       --lens-bp-lg: 1024   (sidebar / 3-up -> 2-up, hero stacks)
+       --lens-bp-md:  768   (2-up -> 1-up, tablet)
+       --lens-bp-sm:  640   (compact spacing, mobile)
+       --lens-bp-xs:  480   (single column everywhere)                       */
+  --lens-bp-lg: 1024px;
+  --lens-bp-md: 768px;
+  --lens-bp-sm: 640px;
+  --lens-bp-xs: 480px;
+
+  /* Elevation — layered + very soft; borders do most of the work --------- */
+  --lens-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --lens-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 1px rgba(15, 23, 42, 0.03);
+  --lens-shadow-md: 0 2px 4px rgba(15, 23, 42, 0.04), 0 8px 20px rgba(15, 23, 42, 0.07);
+  --lens-shadow-lg: 0 4px 8px rgba(15, 23, 42, 0.05), 0 14px 34px rgba(15, 23, 42, 0.09);
+  --lens-shadow-xl: 0 8px 16px rgba(15, 23, 42, 0.06), 0 22px 48px rgba(15, 23, 42, 0.11);
+
+  /* Rings ----------------------------------------------------------------- */
+  --lens-ring: 0 0 0 3px rgba(99, 102, 241, 0.32);
+  --lens-ring-soft: 0 0 0 4px rgba(99, 102, 241, 0.12);
+
+  /* Motion — short and quiet --------------------------------------------- */
+  --lens-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --lens-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --lens-dur-fast: 120ms;
+  --lens-dur: 200ms;
+  --lens-dur-slow: 320ms;
+
+  /* Surfaces (light) ------------------------------------------------------ */
+  --lens-surface: #ffffff;
+  --lens-surface-2: #fbfbfa;
+  --lens-surface-3: #f5f5f4;
+  --lens-border: rgba(23, 23, 23, 0.08);
+  --lens-border-strong: rgba(23, 23, 23, 0.12);
+  --lens-hairline: rgba(23, 23, 23, 0.07);
+}
+
+/* ------------------------------------------------------------------------ *
+ * Map onto VitePress's contract — LIGHT
+ * ------------------------------------------------------------------------ */
+:root {
+  --vp-c-default-1: var(--vp-c-gray-1);
+  --vp-c-default-2: var(--vp-c-gray-2);
+  --vp-c-default-3: var(--vp-c-gray-3);
+  --vp-c-default-soft: var(--vp-c-gray-soft);
+
+  --vp-c-brand-1: var(--lens-indigo-600);
+  --vp-c-brand-2: var(--lens-indigo-500);
+  --vp-c-brand-3: var(--lens-indigo-500);
+  --vp-c-brand-soft: rgba(99, 102, 241, 0.1);
+  --vp-c-brand-softer: rgba(99, 102, 241, 0.055);
+
+  --vp-c-tip-1: var(--lens-indigo-600);
+  --vp-c-tip-2: var(--lens-indigo-500);
+  --vp-c-tip-3: var(--lens-indigo-500);
+  --vp-c-tip-soft: rgba(99, 102, 241, 0.09);
+
+  --vp-c-note-1: var(--lens-sky-600);
+  --vp-c-note-soft: rgba(14, 165, 233, 0.09);
+
+  --vp-c-success-1: var(--lens-emerald-600);
+  --vp-c-success-2: var(--lens-emerald-500);
+  --vp-c-success-3: var(--lens-emerald-500);
+  --vp-c-success-soft: rgba(16, 185, 129, 0.09);
+
+  --vp-c-warning-1: var(--lens-amber-600);
+  --vp-c-warning-2: var(--lens-amber-500);
+  --vp-c-warning-3: var(--lens-amber-500);
+  --vp-c-warning-soft: rgba(245, 158, 11, 0.1);
+
+  --vp-c-danger-1: var(--lens-rose-600);
+  --vp-c-danger-2: var(--lens-rose-500);
+  --vp-c-danger-3: var(--lens-rose-500);
+  --vp-c-danger-soft: rgba(244, 63, 94, 0.09);
+
+  /* Backgrounds / surfaces */
+  --vp-c-bg: #fcfcfb;
+  --vp-c-bg-alt: #f7f7f5;
+  --vp-c-bg-elv: var(--lens-surface);
+  --vp-c-bg-soft: #f5f5f3;
+
+  /* Borders / dividers */
+  --vp-c-border: var(--lens-border-strong);
+  --vp-c-divider: var(--lens-hairline);
+  --vp-c-gutter: var(--lens-hairline);
+
+  /* Text */
+  --vp-c-text-1: #1c1917;
+  --vp-c-text-2: #57534e;
+  --vp-c-text-3: #8a857f;
+
+  /* Layout */
+  --vp-layout-max-width: 1440px;
+  --vp-sidebar-width: 292px;
+  --vp-nav-height: 64px;
+}
+
+/* ------------------------------------------------------------------------ *
+ * Map onto VitePress's contract — DARK
+ * ------------------------------------------------------------------------ */
+.dark {
+  --lens-surface: #161618;
+  --lens-surface-2: #131315;
+  --lens-surface-3: #1c1c20;
+  --lens-border: rgba(255, 255, 255, 0.07);
+  --lens-border-strong: rgba(255, 255, 255, 0.11);
+  --lens-hairline: rgba(255, 255, 255, 0.06);
+
+  --lens-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --lens-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 1px rgba(0, 0, 0, 0.3);
+  --lens-shadow-md: 0 2px 4px rgba(0, 0, 0, 0.4), 0 8px 22px rgba(0, 0, 0, 0.5);
+  --lens-shadow-lg: 0 4px 10px rgba(0, 0, 0, 0.45), 0 16px 38px rgba(0, 0, 0, 0.55);
+  --lens-shadow-xl: 0 8px 18px rgba(0, 0, 0, 0.5), 0 24px 52px rgba(0, 0, 0, 0.6);
+
+  --vp-c-brand-1: var(--lens-indigo-300);
+  --vp-c-brand-2: var(--lens-indigo-400);
+  --vp-c-brand-3: var(--lens-indigo-500);
+  --vp-c-brand-soft: rgba(129, 140, 248, 0.14);
+  --vp-c-brand-softer: rgba(129, 140, 248, 0.07);
+
+  --vp-c-tip-1: var(--lens-indigo-300);
+  --vp-c-tip-soft: rgba(129, 140, 248, 0.12);
+
+  --vp-c-success-1: var(--lens-emerald-400);
+  --vp-c-success-soft: rgba(52, 211, 153, 0.12);
+  --vp-c-warning-1: var(--lens-amber-400);
+  --vp-c-warning-soft: rgba(251, 191, 36, 0.12);
+  --vp-c-danger-1: var(--lens-rose-400);
+  --vp-c-danger-soft: rgba(251, 113, 133, 0.12);
+  --vp-c-note-1: var(--lens-sky-400);
+  --vp-c-note-soft: rgba(56, 189, 248, 0.12);
+
+  --vp-c-bg: #0b0b0d;
+  --vp-c-bg-alt: #0f0f11;
+  --vp-c-bg-elv: var(--lens-surface);
+  --vp-c-bg-soft: #161619;
+
+  --vp-c-border: var(--lens-border-strong);
+  --vp-c-divider: var(--lens-hairline);
+  --vp-c-gutter: #000000;
+
+  --vp-c-text-1: #f4f4f5;
+  --vp-c-text-2: #b5b3bb;
+  --vp-c-text-3: #83818c;
+}
+
+/* ------------------------------------------------------------------------ *
+ * Buttons (brand) — solid, flat, no glow
+ * ------------------------------------------------------------------------ */
+:root {
+  --vp-button-brand-border: transparent;
+  --vp-button-brand-text: #ffffff;
+  --vp-button-brand-bg: var(--lens-indigo-600);
+  --vp-button-brand-hover-border: transparent;
+  --vp-button-brand-hover-text: #ffffff;
+  --vp-button-brand-hover-bg: var(--lens-indigo-700);
+  --vp-button-brand-active-border: transparent;
+  --vp-button-brand-active-text: #ffffff;
+  --vp-button-brand-active-bg: var(--lens-indigo-700);
+}
+
+/* ------------------------------------------------------------------------ *
+ * Residual default-theme home bits — solid accent, no gradient
+ * ------------------------------------------------------------------------ */
+:root {
+  --vp-home-hero-name-color: var(--vp-c-brand-1);
+}

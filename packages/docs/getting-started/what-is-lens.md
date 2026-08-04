@@ -1,53 +1,61 @@
 # What is Lens?
 
-**LensJS** is a lightweight, framework-agnostic monitoring toolkit for Node.js.
-It helps you **observe your application in real time** by tracking requests, queries, and custom events — all through a simple and intuitive API.
+<p class="lens-lead">
+Lens is a lightweight, framework-agnostic monitoring toolkit for Node.js. It helps you observe
+your application in real time — tracking requests, database queries, cache, mail, exceptions, and
+custom events — through a simple API and a self-hosted dashboard.
+</p>
 
-## Key Features
+## Key features
 
-*   **Lightweight:** Minimal overhead ensures easy integration without impacting your application's performance.
-*   **Framework Agnostic:** Works seamlessly with any Node.js framework, with current support for Express and AdonisJS.
-*   **Extensible:** Build custom watchers and adapters on top of `@lensjs/core` to fit your unique monitoring needs.
-*   **Developer-Friendly Dashboard:** Inspect requests, queries, and events in your browser with an intuitive, real-time interface.
+- **Lightweight.** Minimal, non-blocking overhead — capture is queued off your request path, so it never slows your app down.
+- **Framework agnostic.** One engine and one dashboard across Express, Fastify, NestJS, Hono, Next.js, and AdonisJS.
+- **Correlated by request.** Every query, cache operation, and log line is tied to the request that produced it.
+- **Private by default.** Data is written to a store you control, and secrets and PII are redacted before they are persisted.
+- **Extensible.** Build custom watchers, stores, adapters, and ORM handlers on top of `@lensjs/core`.
 
-## How It Works
+## How it works
 
-Lens uses **adapters** to connect to your framework (e.g., Express, AdonisJS).
-These adapters collect and forward data (like requests and queries) to the Lens dashboard, where you can analyze performance and debug issues.
+Lens uses **adapters** to connect to your framework. Each adapter translates that framework's
+request, response, error, and database primitives into neutral calls on the core engine, which
+persists them to a pluggable store and serves the dashboard.
 
-```mermaid
-flowchart LR
-    A[ Node.js App ] --> B[Adapter]
-    B --> C[@lensjs/core]
-    C --> D[Lens Dashboard]
-```
+<ArchitectureDiagram />
 
-## Why Choose Lens?
+Everything Lens captures is correlated to a single **request id**, so you can trace a request
+straight through to the queries, cache operations, and logs it produced.
 
-Many existing monitoring tools can be:
+## Why Lens?
 
-*   **Overly Complex:** Too heavy for small to medium-sized projects.
-*   **Framework-Specific:** Tied to a single framework, limiting flexibility.
-*   **Difficult to Customize:** Hard to extend or tailor to specific requirements.
+Many monitoring tools are heavy, locked to a single framework, or hard to customize. Lens takes
+the opposite approach: fast to set up, universal across Node.js frameworks, and hackable — extend
+it with your own adapters, watchers, and data stores whenever you need to.
 
-**LensJS** provides a solution by being:
+<Callout type="security" title="Private by design">
+Lens is fully self-hosted. Captured data is written to a store you control, and secrets and PII
+are redacted before they are ever persisted. See <a href="./securing-the-dashboard">Securing the
+Dashboard</a>.
+</Callout>
 
-*   **Simple:** Fast setup and minimal configuration get you monitoring quickly.
-*   **Universal:** Designed to work across multiple Node.js frameworks.
-*   **Hackable:** Easily extendable with your own adapters, watchers, and data stores.
+## Next steps
 
-## Contributing
-
-We welcome contributions from the community!
-
-*   Open an issue if you find a bug or have an idea for a new feature.
-*   Submit a Pull Request to improve existing features or enhance the documentation.
-
-See the [Contributing Guide](../contributing/dev-setup.md) to get started.
+<CardGrid :cols="2">
+  <Card icon="rocket" title="Quick Start" href="/getting-started/quick-start">
+    Install an adapter and open your dashboard.
+  </Card>
+  <Card icon="database" title="Watchers" href="/watchers/">
+    Capture queries, cache, mail, jobs and more.
+  </Card>
+  <Card icon="hard-drive" title="Storage Backends" href="/getting-started/stores">
+    Use SQLite, Postgres, or MySQL.
+  </Card>
+  <Card icon="git-branch" title="Contributing" href="/contributing/dev-setup">
+    Help shape the future of Lens.
+  </Card>
+</CardGrid>
 
 ## License
 
-Lens is licensed under the **MIT License**. See the LICENSE file for details.
-
-Project by [Mohammed Elattar](https://github.com/MohammedElattar).
-If you find Lens useful, please consider giving it a star on GitHub — it really helps support the project!  
+Lens is released under the **MIT License**. Project by
+[Mohammed Elattar](https://github.com/MohammedElattar). If you find Lens useful, please consider
+giving it a [star on GitHub](https://github.com/lensjs/lens).

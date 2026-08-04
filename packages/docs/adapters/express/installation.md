@@ -1,24 +1,32 @@
-# Express Adapter Installation
+# Express Adapter
 
-The **Express adapter** seamlessly integrates LensJS into your Express application, allowing you to monitor requests, queries, and other events.
+<p class="lens-lead">
+The Express adapter integrates Lens into your Express application, capturing requests, queries,
+and other events with a couple of lines of code.
+</p>
 
-## 1. Install Packages
+<Callout type="info" title="Requirements">
+Node.js 18+ and an Express app. Add <code>@lensjs/watchers</code> too if you want the pre-built
+ORM/mailer handlers (Prisma, Kysely, Sequelize, and more).
+</Callout>
 
-First, install the Express adapter package:
+## Installation
 
-```bash
-npm install @lensjs/express
-```
+<Steps>
+  <Step title="Install the packages">
 
-If you plan to use pre-built watcher handlers (e.g., for Prisma), you should also install the `@lensjs/watchers` package:
+Install the Express adapter:
 
-```bash
-npm install @lensjs/watchers
-```
+<CommandCopy pkg="@lensjs/express" />
 
-## 2. Minimal Setup (with Prisma Query Watcher)
+If you plan to use pre-built watcher handlers (e.g. Prisma), also install the watchers package:
 
-Here's a minimal example demonstrating how to set up Lens with an Express application, including a Prisma query watcher:
+<CommandCopy pkg="@lensjs/watchers" />
+
+  </Step>
+  <Step title="Register Lens">
+
+Here's a minimal setup with a Prisma query watcher:
 
 ```ts
 import { lens } from "@lensjs/express";
@@ -51,12 +59,36 @@ app.listen(port, () => {
 });
 ```
 
-### Try it out
+  </Step>
+  <Step title="Try it out">
 
-1.  Start your Express application.
-2.  Visit `http://localhost:3000/hello-world` in your browser. This will trigger a request and a database query, which Lens will log.
-3.  Navigate to `http://localhost:3000/lens` to open the Lens dashboard and view the monitored activity.
+<TerminalWindow title="try it out">
+<p><span class="c-dim"># 1.</span> Start your Express application</p>
+<p><span class="c-dim"># 2.</span> Trigger a request + query</p>
+<p><span class="c-blue">http://localhost:3000/hello-world</span></p>
+<p><span class="c-dim"># 3.</span> Open the dashboard</p>
+<p><span class="c-green">http://localhost:3000/lens</span> <span class="c-dim"><Icon name="check" :size="12" /> activity captured</span></p>
+</TerminalWindow>
 
-## 3. Next Steps
+  </Step>
+</Steps>
 
-*   Explore more advanced configuration options in the [Configuration Guide](./configuration.md).  
+## Your dashboard
+
+Once a request comes in, Lens records it and everything it triggered — visible instantly at
+`/lens`.
+
+<BrowserMockup url="localhost:3000/lens">
+  <img src="/screenshots/requests.png" alt="The Lens dashboard showing captured HTTP requests with method, path, status, and duration" />
+</BrowserMockup>
+
+## Next steps
+
+<CardGrid :cols="2">
+  <Card icon="settings" title="Configuration" href="/adapters/express/configuration">
+    Every option, with sampling, retention, and security.
+  </Card>
+  <Card icon="database" title="Query watchers" href="/watchers/database">
+    Prisma, Kysely, Sequelize, MikroORM, and custom handlers.
+  </Card>
+</CardGrid>

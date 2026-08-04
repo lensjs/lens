@@ -1,30 +1,31 @@
-# AdonisJS Adapter Installation
+---
+outline: deep
+---
 
-The AdonisJS adapter makes it easy to integrate Lens into your AdonisJS app and start monitoring requests, queries, and more.
+# AdonisJS Adapter
 
-### Prerequisites
+<p class="lens-lead">
+The AdonisJS adapter makes it easy to integrate Lens into your AdonisJS app and start monitoring
+requests, queries, and more — with a single configure command.
+</p>
 
-To fully leverage LensJS, you need to enable the `useAsyncLocalStorage` option in your `config/app.ts` file. LensJS relies on this to correctly associate entries with their corresponding requests. If `useAsyncLocalStorage` is not enabled, all monitored entries will be detached from the main request context.
+<Callout type="warning" title="Prerequisite: enable AsyncLocalStorage">
+Lens relies on <code>useAsyncLocalStorage</code> to associate entries with their request. If it is
+not enabled in <code>config/app.ts</code>, all monitored entries will be detached from the request
+context.
+</Callout>
 
-**`config/app.ts`**
+Enable it in your HTTP config:
+
 ```ts
+// config/app.ts
 import env from '#start/env'
 import app from '@adonisjs/core/services/app'
 import { Secret } from '@adonisjs/core/helpers'
 import { defineConfig } from '@adonisjs/core/http'
 
-/**
- * The app key is used for encrypting cookies, generating signed URLs,
- * and by the "encryption" module.
- *
- * The encryption module will fail to decrypt data if the key is lost or
- * changed. Therefore it is recommended to keep the app key secure.
- */
 export const appKey = new Secret(env.get('APP_KEY'))
 
-/**
- * The configuration settings used by the HTTP server
- */
 export const http = defineConfig({
   generateRequestId: true,
   allowMethodSpoofing: false,
@@ -41,35 +42,34 @@ export const http = defineConfig({
 })
 ```
 
-## 1. Install the Package
+## Installation
 
-Install the AdonisJS adapter using npm:
+<Steps>
+<Step title="Install the package">
 
-```bash
-npm install @lensjs/adonis
-```
+<CommandCopy pkg="@lensjs/adonis" />
 
-## 2. Run the Configure Command
+</Step>
+<Step title="Run the configure command">
 
-Lens provides a convenient setup command that automates the integration process:
+Lens provides a setup command that automates the integration:
 
-```bash
-node ace configure @lensjs/adonis
-```
+<CommandCopy command="node ace configure @lensjs/adonis" />
 
-This command will automatically perform the following actions:
+This automatically:
 
-*   Create the `config/lens.ts` configuration file.
-*   Add the `LensServiceProvider` to your `adonisrc.ts` file.
-*   Register the `LensMiddleware` in `start/kernel.ts`.
-*   Add Lens-specific environment variable validation to `start/env.ts`.
+- Creates the `config/lens.ts` configuration file.
+- Adds the `LensServiceProvider` to your `adonisrc.ts` file.
+- Registers the `LensMiddleware` in `start/kernel.ts`.
+- Adds Lens-specific environment variable validation to `start/env.ts`.
 
-## 3. Verify the Setup
+</Step>
+<Step title="Verify the setup">
 
-After running the configure command, you can verify the changes in the following files:
+Confirm the changes across these files.
 
-**`adonisrc.ts`**
-Ensure the `LensServiceProvider` is listed in your providers array:
+**`adonisrc.ts`** — the provider is registered:
+
 ```ts
 providers: [
   // ... other providers
@@ -77,8 +77,8 @@ providers: [
 ],
 ```
 
-**`start/kernel.ts`**
-Confirm that the `LensMiddleware` is added to your server middleware:
+**`start/kernel.ts`** — the middleware is added:
+
 ```ts
 server.use([
     // ... other middleware
@@ -86,8 +86,8 @@ server.use([
 ])
 ```
 
-**`start/env.ts`**
-Check for the addition of Lens environment variables:
+**`start/env.ts`** — the Lens env variables exist:
+
 ```ts
 import { Env } from '@adonisjs/core/env'
 
@@ -108,9 +108,12 @@ export default await Env.create(new URL('../', import.meta.url), {
 })
 ```
 
-## 4. Lens Configuration File (`config/lens.ts`)
+</Step>
+</Steps>
 
-The `config/lens.ts` file is where you can customize the behavior of Lens. Here's an overview of the available options:
+## Configuration file (`config/lens.ts`)
+
+Customize Lens behavior in `config/lens.ts`:
 
 ```ts
 import env from '#start/env'
@@ -183,13 +186,29 @@ const lensConfig = defineConfig({
 export default lensConfig
 ```
 
-## Try It Out
+## Try it out
 
-1.  Start your AdonisJS application:
-    ```bash
-    node ace serve --watch
-    ```
-2.  Access any route in your application to generate requests or database queries.
-3.  Open your web browser and navigate to `http://localhost:3333/lens` to view the Lens dashboard and observe your application's activity.
+<Steps>
+<Step title="Start the dev server">
 
-You have successfully integrated Lens into your AdonisJS application!
+<CommandCopy command="node ace serve --watch" />
+
+</Step>
+<Step title="Generate some activity">
+
+Access any route in your application to produce requests or database queries.
+
+</Step>
+<Step title="Open the dashboard">
+
+Navigate to `http://localhost:3333/lens` to observe your application's activity.
+
+</Step>
+</Steps>
+
+<Callout type="success" title="You're set">
+Lens is now integrated into your AdonisJS application. Explore the
+<a href="/watchers/database">query</a>, <a href="/watchers/cache">cache</a>,
+<a href="/watchers/exceptions">exception</a>, and <a href="/watchers/mail">mail</a>
+watchers next.
+</Callout>

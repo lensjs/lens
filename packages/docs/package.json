@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "vitepress dev",
     "build": "npx vitepress build",
-    "preview": "vitepress preview"
+    "preview": "vitepress preview",
+    "smoke": "node scripts/smoke.mjs",
+    "test:smoke": "vitepress build && node scripts/smoke.mjs",
+    "screenshots": "node scripts/screenshots.mjs"
   },
   "devDependencies": {
     "mermaid": "^11.16.0",

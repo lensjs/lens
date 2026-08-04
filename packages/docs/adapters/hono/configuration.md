@@ -1,10 +1,22 @@
+---
+outline: deep
+---
+
 # Hono Adapter Configuration
 
-The `lens` function accepts a single configuration object that controls how Lens integrates with your Hono application. This guide provides a clear reference and practical examples to help you set it up quickly.
+<p class="lens-lead">
+The <code>lens()</code> function accepts a single configuration object that controls how Lens
+integrates with your Hono application. This is the complete reference.
+</p>
 
-## Example: Prisma Query Watcher
+<Callout type="info" title="Full reference">
+This page covers the Hono-specific setup. For every <code>lens()</code> option in one place, see
+the <a href="/configuration">Configuration reference</a>.
+</Callout>
 
-Here's how to enable query watching specifically for **Prisma** in your Hono application:
+## Quick example
+
+Enable query watching for **Prisma**:
 
 ```ts
 import { Hono } from "hono";
@@ -18,23 +30,29 @@ const prisma = new PrismaClient({ log: ["query"] });
 
 await lens({
   app,
-  path: "/lens", // The Lens dashboard will be available at http://localhost:3000/lens
+  path: "/lens", // dashboard at http://localhost:3000/lens
   appName: "My Hono App",
   queryWatcher: {
-    enabled: true, // Enable query watching
-    handler: createPrismaHandler({
-      prisma,
-      provider: "mysql",
-    }),
+    enabled: true,
+    handler: createPrismaHandler({ prisma, provider: "mysql" }),
   },
 });
 
 serve({ fetch: app.fetch, port: 3000 });
 ```
 
-## Complete Example: Full Configuration Options
+## Watchers at a glance
 
-This snippet illustrates all available configuration options for the Hono adapter, along with inline comments for clarity:
+<CardGrid :cols="3">
+  <Card icon="activity" title="requestWatcherEnabled">Capture requests. Default <code>true</code>.</Card>
+  <Card icon="bug" title="exceptionWatcherEnabled">Capture exceptions. Default <code>true</code>.</Card>
+  <Card icon="database" title="queryWatcher">Capture DB queries via a handler. Off unless set.</Card>
+  <Card icon="hard-drive" title="cacheWatcherEnabled">Capture cache ops. Default <code>false</code>.</Card>
+  <Card icon="mail" title="mailWatcherEnabled">Capture outgoing mail. Default <code>false</code>.</Card>
+  <Card icon="boxes" title="jobWatcherEnabled">Capture jobs/queues. Default <code>false</code>.</Card>
+</CardGrid>
+
+## Full configuration reference
 
 ```ts
 import { Hono, type Context } from "hono";
@@ -144,7 +162,7 @@ await lens({
 });
 ```
 
-## Password-Protecting the Dashboard
+## Password-protecting the dashboard
 
 Set `auth.password` to lock the dashboard behind a login screen:
 
@@ -157,4 +175,7 @@ await lens({
 });
 ```
 
-See [Securing the Dashboard](../../getting-started/securing-the-dashboard.md) for all options.
+<Callout type="security" title="Learn more">
+See <a href="../../getting-started/securing-the-dashboard">Securing the Dashboard</a> for all
+authentication options and hardening details.
+</Callout>

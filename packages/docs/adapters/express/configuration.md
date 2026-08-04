@@ -1,10 +1,23 @@
+---
+outline: deep
+---
+
 # Express Adapter Configuration
 
-The `lens` function accepts a single configuration object that controls how Lens integrates with your Express application. This guide provides a clear reference and practical examples to help you set it up quickly.
+<p class="lens-lead">
+The <code>lens()</code> function accepts a single configuration object that controls how Lens
+integrates with your Express application. This is the complete reference.
+</p>
 
-## Example: Prisma Query Watcher
+<Callout type="info" title="Full reference">
+This page covers the Express-specific setup. For every <code>lens()</code> option in one place —
+watchers, filtering, privacy, auth, sampling, and the store — see the
+<a href="/configuration">Configuration reference</a>.
+</Callout>
 
-Here’s how to enable query watching specifically for **Prisma** in your Express application:
+## Quick example
+
+Enable query watching for **Prisma**:
 
 ```ts
 import { lens } from "@lensjs/express";
@@ -17,21 +30,29 @@ const prisma = new PrismaClient({ log: ["query"] });
 
 await lens({
   app,
-  path: "/lens", // The Lens dashboard will be available at http://localhost:3000/lens
+  path: "/lens", // dashboard at http://localhost:3000/lens
   appName: "My Express App",
   queryWatcher: {
-    enabled: true, // Enable query watching
-    handler: createPrismaHandler({
-      prisma,
-      provider: "mysql"
-    }),
+    enabled: true,
+    handler: createPrismaHandler({ prisma, provider: "mysql" }),
   },
 });
 ```
 
-## Complete Example: Full Configuration Options
+## Watchers at a glance
 
-This snippet illustrates all available configuration options for the Express adapter, along with inline comments for clarity:
+<CardGrid :cols="3">
+  <Card icon="activity" title="requestWatcherEnabled">Capture requests. Default <code>true</code>.</Card>
+  <Card icon="bug" title="exceptionWatcherEnabled">Capture exceptions. Default <code>true</code>.</Card>
+  <Card icon="database" title="queryWatcher">Capture DB queries via a handler. Off unless set.</Card>
+  <Card icon="hard-drive" title="cacheWatcherEnabled">Capture cache ops. Default <code>false</code>.</Card>
+  <Card icon="mail" title="mailWatcherEnabled">Capture outgoing mail. Default <code>false</code>.</Card>
+  <Card icon="boxes" title="jobWatcherEnabled">Capture jobs/queues. Default <code>false</code>.</Card>
+</CardGrid>
+
+## Full configuration reference
+
+This snippet illustrates every available option with inline comments:
 
 ```ts
 import express, { Request } from "express";
@@ -147,9 +168,15 @@ await lens({
 });
 ```
 
+<Callout type="security" title="Redaction is on by default">
+<code>hiddenParams</code> extends Lens's built-in redaction — <code>Authorization</code>/<code>Basic</code>
+headers and common password fields are always masked to <code>*******</code> before storage.
+</Callout>
+
 ## Sampling
 
-Capture only a fraction of traffic while never dropping errors or slow requests. Correlated signals (queries, cache, logs, …) are kept or discarded together with their request.
+Capture only a fraction of traffic while never dropping errors or slow requests. Correlated
+signals (queries, cache, logs, …) are kept or discarded together with their request.
 
 ```ts
 await lens({
@@ -162,11 +189,16 @@ await lens({
 });
 ```
 
-> Sampling is applied on **Express, Hono, and Next.js**, where the request context wraps the full lifecycle. When a request is sampled-out, its entries are buffered and only written if an always-on rule keeps it (so an errored request keeps its queries too).
+<Callout type="performance" title="Where sampling applies">
+Sampling is applied on <strong>Express, Hono, and Next.js</strong>, where the request context
+wraps the full lifecycle. When a request is sampled-out, its entries are buffered and only
+written if an always-on rule keeps it (so an errored request keeps its queries too).
+</Callout>
 
 ## Retention
 
-Automatically purge entries older than a max age, per signal type — complementing the size-based `dbMaxSizeGb`/`dbPruneSizeGb` pruning. Configured on `storeQueueConfig.retention`:
+Automatically purge entries older than a max age, per signal type — complementing the size-based
+`dbMaxSizeGb`/`dbPruneSizeGb` pruning. Configured on `storeQueueConfig.retention`:
 
 ```ts
 await lens({
@@ -184,6 +216,11 @@ await lens({
 });
 ```
 
-## Configuration Validation
+## Configuration validation
 
-Lens validates your configuration at boot and throws a single, aggregated error listing every problem it finds (for example an out-of-range `sampling.rate`, a malformed `alerts.webhookUrl`, or a non-numeric retention age), so misconfigurations fail fast with an actionable message.
+<Callout type="best-practice" title="Fail fast on misconfiguration">
+Lens validates your configuration at boot and throws a single, aggregated error listing every
+problem it finds (for example an out-of-range <code>sampling.rate</code>, a malformed
+<code>alerts.webhookUrl</code>, or a non-numeric retention age), so misconfigurations fail fast
+with an actionable message.
+</Callout>

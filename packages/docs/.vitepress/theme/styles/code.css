@@ -1,0 +1,180 @@
+/**
+ * Code blocks & code groups — rounded, elevated, with a language/filename
+ * header bar and an always-available copy button.
+ */
+
+.vp-doc div[class*="language-"] {
+  position: relative;
+  margin: 1.5rem 0;
+  border-radius: var(--lens-radius-lg);
+  border: 1px solid var(--vp-c-divider);
+  background: var(--lens-code-bg, #0c0c10);
+  overflow: hidden;
+}
+
+:root {
+  --lens-code-bg: #faf9f8;
+}
+
+.dark {
+  --lens-code-bg: #0d0d12;
+}
+
+.vp-doc div[class*="language-"] pre {
+  margin: 0;
+  padding: 20px 0;
+  background: transparent;
+}
+
+.vp-doc div[class*="language-"] code {
+  font-size: 0.855rem;
+  line-height: 1.7;
+  font-family: var(--vp-font-family-mono);
+  font-feature-settings: "liga" 0;
+}
+
+/* Language label as a header pill */
+.vp-doc div[class*="language-"] .lang {
+  position: absolute;
+  top: 10px;
+  right: 54px;
+  z-index: 2;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vp-c-text-3);
+  transition: opacity var(--lens-dur) var(--lens-ease);
+  opacity: 1;
+}
+
+/* Copy button — always visible, refined */
+.vp-doc div[class*="language-"] > button.copy {
+  top: 8px;
+  right: 8px;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  border: 1px solid var(--vp-c-divider);
+  background-color: var(--vp-c-bg-soft);
+  opacity: 1;
+  transition: all var(--lens-dur) var(--lens-ease);
+}
+
+.vp-doc div[class*="language-"] > button.copy:hover {
+  border-color: var(--vp-c-brand-2);
+  background-color: var(--vp-c-brand-soft);
+}
+
+/* Filename title bar (```ts [file.ts] / ```ts:file.ts) */
+.vp-doc div[class*="language-"] > span.lang + pre,
+.vp-doc [class*="language-"] .shiki {
+  scrollbar-width: thin;
+}
+
+.vp-doc div[class*="language-"].has-diff .diff.remove {
+  background: var(--vp-c-danger-soft);
+}
+
+.vp-doc div[class*="language-"].has-diff .diff.add {
+  background: var(--vp-c-success-soft);
+}
+
+.vp-doc .line-numbers-mode .line-numbers-wrapper {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+/* Highlighted lines */
+.vp-doc div[class*="language-"] .highlighted {
+  background: color-mix(in srgb, var(--vp-c-brand-soft) 60%, transparent);
+  border-left: 2px solid var(--vp-c-brand-2);
+  margin-left: -2px;
+}
+
+.vp-doc div[class*="language-"] .highlighted.error {
+  background: var(--vp-c-danger-soft);
+  border-left-color: var(--vp-c-danger-2);
+}
+
+.vp-doc div[class*="language-"] .highlighted.warning {
+  background: var(--vp-c-warning-soft);
+  border-left-color: var(--vp-c-warning-2);
+}
+
+/* Focused lines */
+.vp-doc div[class*="language-"] .has-focused-lines .line:not(.has-focus) {
+  filter: blur(0.085rem);
+  opacity: 0.55;
+  transition: filter var(--lens-dur) var(--lens-ease),
+    opacity var(--lens-dur) var(--lens-ease);
+}
+
+.vp-doc div[class*="language-"]:hover .has-focused-lines .line:not(.has-focus) {
+  filter: none;
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------------------ *
+ * Code groups (tabs)
+ * ------------------------------------------------------------------------ */
+.vp-doc .vp-code-group {
+  margin: 1.5rem 0;
+}
+
+.vp-doc .vp-code-group .tabs {
+  border-radius: var(--lens-radius-lg) var(--lens-radius-lg) 0 0;
+  border: 1px solid var(--vp-c-divider);
+  border-bottom: none;
+  background: var(--vp-c-bg-soft);
+  box-shadow: none;
+  padding: 6px 6px 0;
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.vp-doc .vp-code-group .tabs::after {
+  display: none;
+}
+
+.vp-doc .vp-code-group .tabs label {
+  padding: 0.5rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--vp-c-text-2);
+  border-radius: 8px 8px 0 0;
+  transition: all var(--lens-dur-fast) var(--lens-ease);
+  position: relative;
+}
+
+.vp-doc .vp-code-group .tabs label:hover {
+  color: var(--vp-c-text-1);
+  background: var(--vp-c-bg);
+}
+
+.vp-doc .vp-code-group .tabs input:checked + label {
+  color: var(--vp-c-brand-1);
+  background: var(--lens-code-bg);
+}
+
+.vp-doc .vp-code-group .tabs input:checked + label::after {
+  content: "";
+  position: absolute;
+  left: 0.85rem;
+  right: 0.85rem;
+  bottom: 0;
+  height: 2px;
+  background: var(--vp-c-brand-1);
+  border-radius: 2px;
+}
+
+.vp-doc .vp-code-group div[class*="language-"] {
+  border-radius: 0 0 var(--lens-radius-lg) var(--lens-radius-lg);
+  margin: 0 !important;
+  box-shadow: none;
+}
+
+.vp-doc .vp-code-group .blocks {
+  border-radius: 0 0 var(--lens-radius-lg) var(--lens-radius-lg);
+}

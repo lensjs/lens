@@ -4,9 +4,18 @@ outline: deep
 
 # MCP Server (AI Agents)
 
-`@lensjs/mcp` exposes everything Lens has captured — requests, database queries, log lines, background jobs, cache operations, sent mail, outbound HTTP, and **exceptions with their stack traces and code frames** — to AI agents over the [Model Context Protocol](https://modelcontextprotocol.io). Point Cursor, Claude Desktop, or any MCP client at it and the agent can read your errors, understand the request that caused them, and propose a fix.
+<p class="lens-lead">
+<code>@lensjs/mcp</code> exposes everything Lens has captured — requests, queries, logs, jobs,
+cache, mail, outbound HTTP, and <strong>exceptions with stack traces and code frames</strong> — to
+AI agents over the <a href="https://modelcontextprotocol.io" target="_blank" rel="noreferrer">Model
+Context Protocol</a>. Point Cursor, Claude Desktop, or any MCP client at it and the agent can read
+your errors, understand the request that caused them, and propose a fix.
+</p>
 
-Everything is **read-only** and the data is already redacted at capture time — the agent can see and explain, but never modify your application or its data.
+<Callout type="security" title="Read-only and pre-redacted">
+Everything is <strong>read-only</strong> and the data is already redacted at capture time — the
+agent can see and explain, but never modify your application or its data.
+</Callout>
 
 ```mermaid
 flowchart LR
@@ -22,23 +31,26 @@ flowchart LR
   http --> store
 ```
 
-There are two ways to run it: a **standalone stdio server** for local development (the common case), and a **mountable HTTP handler** for hosted/shared setups.
+There are two ways to run it: a **standalone stdio server** for local development (the common
+case), and a **mountable HTTP handler** for hosted/shared setups.
 
-## 1. Install
+## Install
 
-```bash
-npm install @lensjs/mcp
-```
+<CommandCopy pkg="@lensjs/mcp" />
 
-For the stdio server you don't even need to install it — `npx` can run it on demand (see below).
+<Callout type="tip" title="No install needed for stdio">
+For the stdio server you don't even need to install it — <code>npx</code> can run it on demand
+(see below).
+</Callout>
 
-## 2. Use with Cursor / Claude Desktop (stdio)
+## Use with Cursor / Claude Desktop (stdio)
 
-The stdio server reads your Lens SQLite database directly, so it works whether or not your app is running.
+The stdio server reads your Lens SQLite database directly, so it works whether or not your app is
+running. By default Lens writes to `lens.db` in your app's working directory — point the server at
+that file with `--db` (or the `LENS_DB_PATH` environment variable).
 
-By default Lens writes to `lens.db` in your app's working directory. Point the server at that file with `--db` (or the `LENS_DB_PATH` environment variable).
-
-### Cursor
+<CodeTabs :tabs="['Cursor', 'ClaudeDesktop']">
+<template #Cursor>
 
 Add the server to your `.cursor/mcp.json` (project) or `~/.cursor/mcp.json` (global):
 
@@ -53,7 +65,8 @@ Add the server to your `.cursor/mcp.json` (project) or `~/.cursor/mcp.json` (glo
 }
 ```
 
-### Claude Desktop
+</template>
+<template #ClaudeDesktop>
 
 Add the same entry to `claude_desktop_config.json`:
 
@@ -68,9 +81,13 @@ Add the same entry to `claude_desktop_config.json`:
 }
 ```
 
-Then ask your agent things like *"What's the most recent exception in Lens and how do I fix it?"* or run the `diagnose_exception` prompt.
+</template>
+</CodeTabs>
 
-## 3. Tools, prompts & resources
+Then ask your agent things like *"What's the most recent exception in Lens and how do I fix it?"*
+or run the `diagnose_exception` prompt.
+
+## Tools, prompts & resources
 
 Everything maps onto the same data the dashboard shows.
 
@@ -92,23 +109,31 @@ Everything maps onto the same data the dashboard shows.
 | `lens_list_entries` / `lens_get_entry` | Any remaining signal by type: cache, mail, outbound HTTP, events, redis, FCM. |
 | `lens_search` | Substring search across every signal type (or the ones you name). |
 
-Every list tool takes `search`, `from`, `to`, `limit`, and `cursor`. Filters, search, and time ranges are applied **in the database over the whole dataset**, so `minStatus: 500` finds every failing request, not just the failures on the first page.
+<Callout type="performance" title="Filtered in the database">
+Every list tool takes <code>search</code>, <code>from</code>, <code>to</code>, <code>limit</code>,
+and <code>cursor</code>. Filters, search, and time ranges are applied <strong>in the database over
+the whole dataset</strong>, so <code>minStatus: 500</code> finds every failing request, not just
+the failures on the first page.
+</Callout>
 
 ### Prompts
 
-- **`diagnose_exception`** — bundles an exception's message, stack trace, code frame, and triggering request into a ready-to-run prompt that asks for a root cause, a concrete file/line fix, and prevention.
-- **`investigate_issue`** — takes an issue fingerprint and bundles its frequency, time span, and latest occurrence, asking for the cause behind *every* occurrence.
-- **`debug_request`** — bundles a request's timeline (slow queries, exceptions, outbound HTTP) and asks for a diagnosis.
-- **`analyze_performance`** — bundles the last 24 hours of throughput, latency percentiles, slowest endpoints and queries, and asks for concrete optimizations.
+<CardGrid :cols="2">
+  <Card icon="bug" title="diagnose_exception">Bundles an exception's message, stack trace, code frame, and triggering request into a ready-to-run prompt asking for root cause, a concrete file/line fix, and prevention.</Card>
+  <Card icon="boxes" title="investigate_issue">Takes an issue fingerprint and bundles its frequency, time span, and latest occurrence, asking for the cause behind every occurrence.</Card>
+  <Card icon="route" title="debug_request">Bundles a request's timeline (slow queries, exceptions, outbound HTTP) and asks for a diagnosis.</Card>
+  <Card icon="trending-up" title="analyze_performance">Bundles the last 24 hours of throughput, latency percentiles, slowest endpoints and queries, and asks for concrete optimizations.</Card>
+</CardGrid>
 
 ### Resources
 
 - `lens://overview` — the current health snapshot, attachable as context.
 - `lens://exception/{id}` and `lens://request/{id}` — reference a specific entry by URI.
 
-## 4. Hosted setup (Streamable HTTP)
+## Hosted setup (Streamable HTTP)
 
-For shared/staging/production, mount the HTTP handler inside your running app. It uses your app's configured store (any backend), so it is not limited to SQLite.
+For shared/staging/production, mount the HTTP handler inside your running app. It uses your app's
+configured store (any backend), so it is not limited to SQLite.
 
 ```ts
 import express from "express";
@@ -134,9 +159,11 @@ app.post(
 );
 ```
 
-::: warning Protect the HTTP endpoint
-The endpoint exposes captured data, so always require authentication, bind to a trusted network, and serve it over HTTPS. Add its path to Lens's `ignoredPaths` so Lens does not record itself.
-:::
+<Callout type="warning" title="Protect the HTTP endpoint">
+The endpoint exposes captured data, so always require authentication, bind to a trusted network,
+and serve it over HTTPS. Add its path to Lens's <code>ignoredPaths</code> so Lens does not record
+itself.
+</Callout>
 
 ## Options
 
@@ -156,6 +183,8 @@ The endpoint exposes captured data, so always require authentication, bind to a 
 
 ## Security
 
-- **Read-only.** No tool can mutate captured data or your application.
-- **Already redacted.** Headers/body params are hidden and large/binary bodies are purged at capture time; the server only reads what Lens stored.
-- **stdio stays clean.** The stdio server logs only to stderr, keeping the JSON-RPC channel on stdout intact.
+<CardGrid :cols="3">
+  <Card icon="lock" title="Read-only">No tool can mutate captured data or your application.</Card>
+  <Card icon="shield-check" title="Already redacted">Headers/body params are hidden and large/binary bodies purged at capture time; the server only reads what Lens stored.</Card>
+  <Card icon="terminal" title="stdio stays clean">The stdio server logs only to stderr, keeping the JSON-RPC channel on stdout intact.</Card>
+</CardGrid>

@@ -1,0 +1,160 @@
+/**
+ * Callout containers — the built-in VitePress custom blocks plus Lens's own
+ * (best-practice / performance / security / experimental / success). Each has
+ * its own accent color and a lucide icon drawn in via CSS mask.
+ *
+ * Markdown usage:  ::: tip / warning / danger / info / success /
+ *                  best-practice / performance / security / experimental
+ */
+
+.vp-doc .custom-block {
+  position: relative;
+  border: 1px solid var(--lens-cb-border, var(--vp-c-divider));
+  border-radius: var(--lens-radius-lg);
+  padding: 1rem 1.15rem 1rem 3rem;
+  margin: 1.5rem 0;
+  background: var(--lens-cb-bg, var(--vp-c-bg-soft));
+  font-size: 0.925rem;
+  line-height: 1.7;
+  box-shadow: var(--lens-shadow-xs);
+}
+
+.vp-doc .custom-block .custom-block-title {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.35rem;
+  color: var(--lens-cb-accent, var(--vp-c-text-1));
+}
+
+.vp-doc .custom-block p {
+  margin: 0.4rem 0;
+  color: var(--vp-c-text-1);
+}
+
+.vp-doc .custom-block a {
+  color: var(--lens-cb-accent, var(--vp-c-brand-1));
+  font-weight: 600;
+}
+
+.vp-doc .custom-block code {
+  background: color-mix(in srgb, var(--lens-cb-accent, var(--vp-c-brand-1)) 12%, transparent);
+  border-color: transparent;
+  color: var(--vp-c-text-1);
+  overflow-wrap: anywhere;
+}
+
+/* icon */
+.vp-doc .custom-block::before {
+  content: "";
+  position: absolute;
+  left: 1rem;
+  top: 1.05rem;
+  width: 20px;
+  height: 20px;
+  background-color: var(--lens-cb-accent, var(--vp-c-brand-1));
+  -webkit-mask: var(--lens-cb-icon) center / contain no-repeat;
+  mask: var(--lens-cb-icon) center / contain no-repeat;
+}
+
+/* ---- palette per type -------------------------------------------------- */
+.vp-doc .custom-block.tip {
+  --lens-cb-accent: var(--vp-c-brand-1);
+  --lens-cb-bg: var(--vp-c-brand-softer);
+  --lens-cb-border: color-mix(in srgb, var(--vp-c-brand-1) 22%, transparent);
+  --lens-cb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5'/%3E%3Cpath d='M9 18h6'/%3E%3Cpath d='M10 22h4'/%3E%3C/svg%3E");
+}
+
+.vp-doc .custom-block.info {
+  --lens-cb-accent: var(--vp-c-note-1);
+  --lens-cb-bg: var(--vp-c-note-soft);
+  --lens-cb-border: color-mix(in srgb, var(--vp-c-note-1) 22%, transparent);
+  --lens-cb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-4'/%3E%3Cpath d='M12 8h.01'/%3E%3C/svg%3E");
+}
+
+.vp-doc .custom-block.note {
+  --lens-cb-accent: var(--vp-c-text-2);
+  --lens-cb-bg: var(--vp-c-bg-soft);
+  --lens-cb-border: var(--vp-c-divider);
+  --lens-cb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 3h5v5'/%3E%3Cpath d='M8 3H3v5'/%3E%3Cpath d='M3 16v5h5'/%3E%3Cpath d='M16 21h5v-5'/%3E%3C/svg%3E");
+}
+
+.vp-doc .custom-block.success {
+  --lens-cb-accent: var(--vp-c-success-1);
+  --lens-cb-bg: var(--vp-c-success-soft);
+  --lens-cb-border: color-mix(in srgb, var(--vp-c-success-1) 22%, transparent);
+  --lens-cb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21.801 10A10 10 0 1 1 17 3.335'/%3E%3Cpath d='m9 11 3 3L22 4'/%3E%3C/svg%3E");
+}
+
+.vp-doc .custom-block.warning {
+  --lens-cb-accent: var(--vp-c-warning-1);
+  --lens-cb-bg: var(--vp-c-warning-soft);
+  --lens-cb-border: color-mix(in srgb, var(--vp-c-warning-1) 24%, transparent);
+  --lens-cb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/%3E%3Cpath d='M12 9v4'/%3E%3Cpath d='M12 17h.01'/%3E%3C/svg%3E");
+}
+
+.vp-doc .custom-block.danger {
+  --lens-cb-accent: var(--vp-c-danger-1);
+  --lens-cb-bg: var(--vp-c-danger-soft);
+  --lens-cb-border: color-mix(in srgb, var(--vp-c-danger-1) 24%, transparent);
+  --lens-cb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='m15 9-6 6'/%3E%3Cpath d='m9 9 6 6'/%3E%3C/svg%3E");
+}
+
+.vp-doc .custom-block.best-practice {
+  --lens-cb-accent: var(--lens-emerald-600);
+  --lens-cb-bg: var(--vp-c-success-soft);
+  --lens-cb-border: color-mix(in srgb, var(--lens-emerald-500) 24%, transparent);
+  --lens-cb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z'/%3E%3Cpath d='m9 12 2 2 4-4'/%3E%3C/svg%3E");
+}
+
+.dark .vp-doc .custom-block.best-practice {
+  --lens-cb-accent: var(--lens-emerald-400);
+}
+
+.vp-doc .custom-block.performance {
+  --lens-cb-accent: var(--vp-c-brand-1);
+  --lens-cb-bg: var(--vp-c-brand-softer);
+  --lens-cb-border: color-mix(in srgb, var(--vp-c-brand-1) 22%, transparent);
+  --lens-cb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black' stroke='none'%3E%3Cpath d='M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z'/%3E%3C/svg%3E");
+}
+
+.dark .vp-doc .custom-block.performance {
+  --lens-cb-accent: var(--vp-c-brand-1);
+}
+
+.vp-doc .custom-block.security {
+  --lens-cb-accent: var(--lens-sky-600);
+  --lens-cb-bg: var(--vp-c-note-soft);
+  --lens-cb-border: color-mix(in srgb, var(--lens-sky-500) 24%, transparent);
+  --lens-cb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z'/%3E%3C/svg%3E");
+}
+
+.dark .vp-doc .custom-block.security {
+  --lens-cb-accent: var(--lens-sky-400);
+}
+
+.vp-doc .custom-block.experimental {
+  --lens-cb-accent: var(--lens-amber-600);
+  --lens-cb-bg: var(--vp-c-warning-soft);
+  --lens-cb-border: color-mix(in srgb, var(--lens-amber-500) 24%, transparent);
+  --lens-cb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 2v7.31'/%3E%3Cpath d='M14 9.3V2'/%3E%3Cpath d='M8.5 2h7'/%3E%3Cpath d='M14 9.3a6.5 6.5 0 1 1-4 0'/%3E%3Cpath d='M5.58 16.5h12.85'/%3E%3C/svg%3E");
+}
+
+.dark .vp-doc .custom-block.experimental {
+  --lens-cb-accent: var(--lens-amber-400);
+}
+
+/* details block */
+.vp-doc .custom-block.details {
+  --lens-cb-bg: var(--vp-c-bg-soft);
+  --lens-cb-border: var(--vp-c-divider);
+  padding-left: 1.15rem;
+}
+
+.vp-doc .custom-block.details::before {
+  display: none;
+}
+
+.vp-doc .custom-block.details summary {
+  font-weight: 600;
+  margin-bottom: 0;
+}

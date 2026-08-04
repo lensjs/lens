@@ -1,0 +1,480 @@
+/**
+ * Base layer — typography, prose, layout chrome (nav / sidebar / aside),
+ * breadcrumbs, and tasteful motion. Built for calm, spacious reading.
+ */
+
+:root {
+  --vp-font-family-base: "Inter Variable", "Inter", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --vp-font-family-mono: "JetBrains Mono Variable", "JetBrains Mono",
+    ui-monospace, "SF Mono", "Cascadia Code", "Fira Code", Menlo, Consolas,
+    monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  letter-spacing: -0.011em;
+}
+
+/* ------------------------------------------------------------------------ *
+ * Prose typography (.vp-doc)
+ * ------------------------------------------------------------------------ */
+.vp-doc {
+  --vp-content-container: 768px;
+}
+
+.vp-doc h1 {
+  font-size: clamp(2.1rem, 1.6rem + 2.2vw, 2.9rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+  margin-bottom: 0.35em;
+}
+
+.vp-doc h2 {
+  margin-top: 3rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--vp-c-divider);
+  font-size: 1.6rem;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+.vp-doc h3 {
+  margin-top: 2.25rem;
+  font-size: 1.24rem;
+  letter-spacing: -0.015em;
+  font-weight: 650;
+}
+
+.vp-doc h4 {
+  margin-top: 1.75rem;
+  font-weight: 650;
+}
+
+.vp-doc h1,
+.vp-doc h2,
+.vp-doc h3,
+.vp-doc h4 {
+  scroll-margin-top: calc(var(--vp-nav-height) + 24px);
+}
+
+.vp-doc p,
+.vp-doc li {
+  line-height: 1.78;
+}
+
+.vp-doc p {
+  margin: 1.1rem 0;
+  color: var(--vp-c-text-1);
+}
+
+.vp-doc h2 + p,
+.vp-doc h3 + p {
+  margin-top: 0.75rem;
+}
+
+.vp-doc a {
+  font-weight: 550;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color var(--lens-dur-fast) var(--lens-ease);
+}
+
+.vp-doc ul,
+.vp-doc ol {
+  padding-left: 1.35rem;
+}
+
+.vp-doc li + li {
+  margin-top: 0.4rem;
+}
+
+.vp-doc ul > li::marker {
+  color: var(--vp-c-brand-1);
+}
+
+/* Inline code */
+.vp-doc :not(pre) > code {
+  font-size: 0.85em;
+  font-weight: 550;
+  padding: 0.15em 0.4em;
+  border-radius: 6px;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  color: var(--vp-c-text-1);
+  /* Long tokens (@lensjs/*, /lens/requests/:id, URLs) must wrap, not overflow. */
+  overflow-wrap: anywhere;
+  transition: color var(--lens-dur-fast) var(--lens-ease);
+}
+
+.vp-doc a > code {
+  color: var(--vp-c-brand-1);
+}
+
+/* Long links/URLs wrap instead of forcing horizontal scroll. */
+.vp-doc a {
+  word-break: break-word;
+}
+
+/* Blockquote */
+.vp-doc blockquote {
+  border-left: 3px solid var(--vp-c-brand-2);
+  background: var(--vp-c-brand-softer);
+  border-radius: 0 var(--lens-radius-md) var(--lens-radius-md) 0;
+  padding: 0.4rem 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.vp-doc blockquote > p {
+  color: var(--vp-c-text-2);
+}
+
+/* Tables — premium card style. `display: block` + `overflow-x: auto` lets a
+   wide table scroll horizontally inside its own box instead of overflowing the
+   page (there is no wrapper element around a Markdown table). `width: 100%`
+   keeps the common case full-bleed; cell wrapping (below) avoids scroll for
+   ordinary long tokens. */
+.vp-doc table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 1.75rem 0;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: var(--lens-radius-lg);
+  overflow-x: auto;
+}
+
+.vp-doc thead {
+  background: var(--vp-c-bg-soft);
+}
+
+.vp-doc th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--vp-c-text-2);
+  font-weight: 650;
+  text-align: left;
+}
+
+.vp-doc th,
+.vp-doc td {
+  border: none;
+  border-bottom: 1px solid var(--vp-c-divider);
+  padding: 0.75rem 1rem;
+  /* Break only genuinely long/unbreakable tokens; ordinary identifiers like
+     `appName` keep their column width. Extreme cases scroll within the table. */
+  overflow-wrap: break-word;
+}
+
+.vp-doc tr:last-child td {
+  border-bottom: none;
+}
+
+.vp-doc tbody tr {
+  background: var(--vp-c-bg);
+  transition: background var(--lens-dur-fast) var(--lens-ease);
+}
+
+.vp-doc tbody tr:hover {
+  background: var(--vp-c-bg-soft);
+}
+
+/* Horizontal rule */
+.vp-doc hr {
+  margin: 2.75rem 0;
+  border: none;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--vp-c-divider) 20%,
+    var(--vp-c-divider) 80%,
+    transparent
+  );
+}
+
+/* Images inside prose */
+.vp-doc img {
+  border-radius: var(--lens-radius-md);
+}
+
+/* ------------------------------------------------------------------------ *
+ * Top navigation
+ * ------------------------------------------------------------------------ */
+.VPNav {
+  backdrop-filter: saturate(160%) blur(14px);
+}
+
+.VPNavBar:not(.top) {
+  background: color-mix(in srgb, var(--vp-c-bg) 78%, transparent);
+}
+
+.VPNavBar .divider {
+  display: none;
+}
+
+.VPNavBar.has-sidebar .content {
+  border-bottom: 1px solid transparent;
+}
+
+.VPNavBar .title {
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.VPNavBarMenuLink,
+.VPNavBarMenuGroup .text {
+  font-weight: 550 !important;
+}
+
+.VPNavBar .VPNavBarMenuLink.active {
+  color: var(--vp-c-brand-1) !important;
+}
+
+/* subtle bottom hairline once scrolled */
+.VPNavBar:not(.top)::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 1px;
+  background: var(--vp-c-divider);
+}
+
+/* ------------------------------------------------------------------------ *
+ * Sidebar — grouped, spacious, active pill
+ * ------------------------------------------------------------------------ */
+.VPSidebar {
+  padding-top: 1.25rem;
+  scrollbar-width: thin;
+}
+
+.VPSidebarItem.level-0 {
+  padding-bottom: 1.35rem;
+}
+
+.VPSidebarItem.level-0 > .item > .text,
+.VPSidebarItem.level-0 > .item .text {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--vp-c-text-2);
+}
+
+.VPSidebarItem.level-0 > .item {
+  padding-bottom: 0.35rem;
+}
+
+/* group heading icon injected via progressive enhancement (see index.ts) */
+.lens-group-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  color: var(--vp-c-text-3);
+  flex: 0 0 auto;
+  vertical-align: -3px;
+}
+
+.lens-group-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.VPSidebarItem.level-0 > .item > .text {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* links */
+.VPSidebarItem .link .text {
+  font-size: 0.875rem;
+  transition: color var(--lens-dur-fast) var(--lens-ease);
+}
+
+.VPSidebarItem.level-1 .items,
+.VPSidebarItem.level-2 .items,
+.VPSidebarItem.level-3 .items {
+  border-left: 1px solid var(--vp-c-divider);
+  margin-left: 4px;
+  padding-left: 12px;
+}
+
+.VPSidebarItem.is-link > .item .link,
+.VPSidebarItem .link {
+  border-radius: 8px;
+  transition: background var(--lens-dur-fast) var(--lens-ease),
+    color var(--lens-dur-fast) var(--lens-ease);
+}
+
+.VPSidebarItem.is-link:hover > .item .text {
+  color: var(--vp-c-text-1);
+}
+
+.VPSidebarItem.level-1 > .item,
+.VPSidebarItem.level-2 > .item,
+.VPSidebarItem.level-3 > .item {
+  border-radius: 8px;
+  padding-left: 10px;
+  margin-left: -10px;
+  transition: background var(--lens-dur-fast) var(--lens-ease);
+}
+
+.VPSidebarItem.is-link:not(.is-active):hover > .item {
+  background: var(--vp-c-bg-soft);
+}
+
+.VPSidebarItem.is-active > .item {
+  background: transparent;
+  position: relative;
+}
+
+.VPSidebarItem.is-active > .item .link .text {
+  color: var(--vp-c-brand-1);
+  font-weight: 650;
+}
+
+.VPSidebarItem.is-active > .item::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 16px;
+  border-radius: 3px;
+  background: var(--vp-c-brand-1);
+}
+
+/* ------------------------------------------------------------------------ *
+ * Aside / table of contents
+ * ------------------------------------------------------------------------ */
+.VPDocAsideOutline .outline-marker {
+  background: var(--vp-c-brand-1);
+  width: 2px;
+  border-radius: 2px;
+}
+
+.VPDocAsideOutline .outline-link {
+  transition: color var(--lens-dur-fast) var(--lens-ease);
+  font-size: 0.82rem;
+}
+
+.VPDocAsideOutline .outline-link.active {
+  color: var(--vp-c-brand-1);
+  font-weight: 600;
+}
+
+.VPDocAside .aside-curtain {
+  display: none;
+}
+
+/* ------------------------------------------------------------------------ *
+ * Doc footer (prev / next)
+ * ------------------------------------------------------------------------ */
+.VPDocFooter .pager-link {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: var(--lens-radius-lg);
+  background: var(--vp-c-bg-elv);
+  transition: transform var(--lens-dur) var(--lens-ease),
+    border-color var(--lens-dur) var(--lens-ease),
+    box-shadow var(--lens-dur) var(--lens-ease);
+}
+
+.VPDocFooter .pager-link:hover {
+  border-color: var(--vp-c-brand-2);
+}
+
+.VPDocFooter .pager-link .title {
+  color: var(--vp-c-brand-1);
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------------------ *
+ * Breadcrumbs (custom component, doc-before slot)
+ * ------------------------------------------------------------------------ */
+.lens-breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--vp-c-text-3);
+  margin-bottom: 1.5rem;
+}
+
+.lens-breadcrumbs a {
+  color: var(--vp-c-text-2);
+  text-decoration: none;
+  transition: color var(--lens-dur-fast) var(--lens-ease);
+}
+
+.lens-breadcrumbs a:hover {
+  color: var(--vp-c-brand-1);
+}
+
+.lens-breadcrumbs .sep {
+  opacity: 0.5;
+  display: inline-flex;
+}
+
+.lens-breadcrumbs .current {
+  color: var(--vp-c-text-1);
+  font-weight: 550;
+}
+
+/* ------------------------------------------------------------------------ *
+ * Reveal-on-scroll animation
+ * ------------------------------------------------------------------------ */
+.lens-reveal {
+  opacity: 0;
+  transition: opacity 0.5s var(--lens-ease-out);
+  will-change: opacity;
+}
+
+.lens-reveal.is-visible {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lens-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus visibility for keyboard users */
+:where(a, button, [tabindex], summary):focus-visible {
+  outline: none;
+  box-shadow: var(--lens-ring);
+  border-radius: 6px;
+}

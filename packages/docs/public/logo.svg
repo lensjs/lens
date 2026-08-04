@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none" role="img" aria-label="Lens">
+  <rect width="32" height="32" rx="8" fill="#4F46E5"/>
+  <!-- viewfinder focus reticle (secondary) -->
+  <g stroke="#A5B4FC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 11.5V8h3.5"/>
+    <path d="M20.5 8H24v3.5"/>
+    <path d="M24 20.5V24h-3.5"/>
+    <path d="M11.5 24H8v-3.5"/>
+  </g>
+  <!-- lens ring + focal dot (primary) -->
+  <circle cx="16" cy="16" r="4.3" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+  <circle cx="16" cy="16" r="1.7" fill="#FFFFFF"/>
+</svg>

@@ -1,27 +1,34 @@
-# Next.js Adapter Installation
+# Next.js Adapter
 
-The **Next.js adapter** integrates LensJS into a Next.js **App Router** application. Because Next.js has no central `app` object, Lens is wired up through:
+<p class="lens-lead">
+The Next.js adapter integrates Lens into a Next.js <strong>App Router</strong> application.
+Because Next.js has no central <code>app</code> object, Lens is wired up through a catch-all Route
+Handler and a <code>withLens()</code> wrapper for your own handlers.
+</p>
 
-- a **catch-all Route Handler** that serves the dashboard, the Lens API, and the SSE live tail, and
-- a **`withLens()` wrapper** for your own Route Handlers, which captures the request/response and correlates any queries, logs, and exceptions to it.
+<Callout type="info" title="How it's wired">
+Lens runs on the <strong>Node.js runtime</strong> (the default SQLite store needs Node) via two pieces:
+a <strong>catch-all Route Handler</strong> that serves the dashboard, the Lens API, and the SSE live
+tail; and a <strong><code>withLens()</code> wrapper</strong> that captures a request/response and
+correlates any queries, logs, and exceptions to it.
+</Callout>
 
-It runs on the **Node.js runtime** (the default SQLite store needs Node).
+## Installation
 
-## 1. Install Packages
+<Steps>
+  <Step title="Install the packages">
 
-```bash
-npm install @lensjs/nextjs
-```
+<CommandCopy pkg="@lensjs/nextjs" />
 
-If you plan to use pre-built watcher handlers (e.g., for Prisma), also install `@lensjs/watchers`:
+For pre-built watcher handlers (e.g. Prisma), also install the watchers package:
 
-```bash
-npm install @lensjs/watchers
-```
+<CommandCopy pkg="@lensjs/watchers" />
 
-## 2. Initialize Lens (once)
+  </Step>
+  <Step title="Initialize Lens once">
 
-Create a single Lens instance and reuse it everywhere. `createLens` returns the `handlers` you mount and the `withLens` wrapper.
+Create a single Lens instance and reuse it everywhere. `createLens` returns the `handlers` you
+mount and the `withLens` wrapper.
 
 ```ts
 // app/lens.ts
@@ -33,9 +40,11 @@ export const lens = await createLens({
 });
 ```
 
-## 3. Mount the Dashboard + API
+  </Step>
+  <Step title="Mount the dashboard + API">
 
-Re-export the handlers from a **catch-all** Route Handler and from a separate **`/lens-config`** Route Handler (the dashboard fetches its config from the origin root):
+Re-export the handlers from a **catch-all** Route Handler and from a separate
+**`/lens-config`** Route Handler (the dashboard fetches its config from the origin root):
 
 ```ts
 // app/lens/[[...lensjs]]/route.ts
@@ -57,11 +66,16 @@ export const dynamic = "force-dynamic";
 export const { GET } = lens.handlers;
 ```
 
-> The `runtime = "nodejs"` and `dynamic = "force-dynamic"` exports are required so the engine runs on Node and the SSE stream is not cached.
+<Callout type="warning" title="Required exports">
+The <code>runtime = "nodejs"</code> and <code>dynamic = "force-dynamic"</code> exports are required
+so the engine runs on Node and the SSE stream is not cached.
+</Callout>
 
-## 4. Capture Your Own Route Handlers
+  </Step>
+  <Step title="Capture your own route handlers">
 
-Wrap any Route Handler with `withLens` to record its request/response and correlate everything emitted during it:
+Wrap any Route Handler with `withLens` to record its request/response and correlate everything
+emitted during it:
 
 ```ts
 // app/api/users/route.ts
@@ -74,9 +88,11 @@ export const GET = lens.withLens(async () => {
 });
 ```
 
-## 5. Keep the Engine out of the Bundler
+  </Step>
+  <Step title="Keep the engine out of the bundler">
 
-Tell Next.js to treat the Lens packages (and the native SQLite driver) as external server packages:
+Tell Next.js to treat the Lens packages (and the native SQLite driver) as external server
+packages:
 
 ```js
 // next.config.mjs
@@ -94,12 +110,31 @@ const nextConfig = {
 export default nextConfig;
 ```
 
-### Try it out
+  </Step>
+</Steps>
 
-1.  Start your Next.js app (`npm run dev`).
-2.  Visit `http://localhost:3000/api/users` to trigger a captured request.
-3.  Navigate to `http://localhost:3000/lens` to open the Lens dashboard.
+## Try it out
 
-## 6. Next Steps
+<TerminalWindow title="try it out">
+<p><span class="c-dim"># 1.</span> Start your Next.js app</p>
+<p><span class="c-violet">npm run dev</span></p>
+<p><span class="c-dim"># 2.</span> Trigger a captured request</p>
+<p><span class="c-blue">http://localhost:3000/api/users</span></p>
+<p><span class="c-dim"># 3.</span> Open the dashboard</p>
+<p><span class="c-green">http://localhost:3000/lens</span> <span class="c-dim"><Icon name="check" :size="12" /> activity captured</span></p>
+</TerminalWindow>
 
-*   Explore all options, request correlation, and the optional middleware in the [Configuration Guide](./configuration.md).
+<BrowserMockup url="localhost:3000/lens">
+  <img src="/screenshots/requests.png" alt="The Lens dashboard showing captured HTTP requests with method, path, status, and duration" />
+</BrowserMockup>
+
+## Next steps
+
+<CardGrid :cols="2">
+  <Card icon="settings" title="Configuration" href="/adapters/nextjs/configuration">
+    All options, request correlation, and the optional middleware.
+  </Card>
+  <Card icon="database" title="Watchers" href="/watchers/">
+    Capture queries, logs, jobs, and more.
+  </Card>
+</CardGrid>

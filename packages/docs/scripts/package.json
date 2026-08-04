@@ -1,0 +1,9 @@
+{
+  "name": "lens-docs-screenshots",
+  "private": true,
+  "type": "module",
+  "description": "Isolated tooling to capture real Lens dashboard screenshots for the docs. Kept out of the pnpm workspace so it can be installed with npm without disturbing workspace symlinks.",
+  "dependencies": {
+    "playwright-core": "^1.49.0"
+  }
+}

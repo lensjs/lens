@@ -1,10 +1,22 @@
+---
+outline: deep
+---
+
 # NestJS Adapter Configuration
 
-The `lens` function accepts a single configuration object that controls how Lens integrates with your NestJS application. This guide provides a clear reference and practical examples to help you set it up quickly.
+<p class="lens-lead">
+The <code>lens()</code> function accepts a single configuration object that controls how Lens
+integrates with your NestJS application. This is the complete reference.
+</p>
 
-## Example: Prisma Query Watcher
+<Callout type="info" title="Full reference">
+This page covers the NestJS-specific setup. For every <code>lens()</code> option in one place, see
+the <a href="/configuration">Configuration reference</a>.
+</Callout>
 
-Here’s how to enable query watching specifically for **Sequelize** in your NestJS application:
+## Quick example
+
+Enable query watching for **Sequelize** on a Fastify-powered NestJS app:
 
 ```ts
 import { NestFactory } from '@nestjs/core';
@@ -39,7 +51,13 @@ async function bootstrap() {
 bootstrap();
 ```
 
-## Complete Example: Full Configuration Options
+<Callout type="info" title="Choosing the driver">
+Set <code>adapter: 'fastify'</code> to run on Fastify; omit it (or use <code>'express'</code>) for
+the default Express driver.
+</Callout>
+
+## Full configuration reference
+
 ```ts
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
@@ -156,6 +174,13 @@ async function bootstrap() {
 bootstrap();
 ```
 
-## 3. Next Steps
+## Next steps
 
-*   Explore more advanced configuration options in the [Installation Guide](./installation.md).
+<CardGrid :cols="2">
+  <Card icon="plug" title="Installation" href="/adapters/nestjs/installation">
+    Back to the setup guide.
+  </Card>
+  <Card icon="shield" title="Secure the dashboard" href="/getting-started/securing-the-dashboard">
+    Add a password lock for shared environments.
+  </Card>
+</CardGrid>

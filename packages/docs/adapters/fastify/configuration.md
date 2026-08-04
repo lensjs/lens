@@ -1,10 +1,22 @@
+---
+outline: deep
+---
+
 # Fastify Adapter Configuration
 
-The `lens` function accepts a single configuration object that controls how Lens integrates with your Fastify application. This guide provides a clear reference and practical examples to help you set it up quickly.
+<p class="lens-lead">
+The <code>lens()</code> function accepts a single configuration object that controls how Lens
+integrates with your Fastify application. This is the complete reference.
+</p>
 
-## Example: Prisma Query Watcher
+<Callout type="info" title="Full reference">
+This page covers the Fastify-specific setup. For every <code>lens()</code> option in one place, see
+the <a href="/configuration">Configuration reference</a>.
+</Callout>
 
-Here’s how to enable query watching specifically for **Prisma** in your Fastify application:
+## Quick example
+
+Enable query watching for **Prisma**:
 
 ```ts
 import { lens } from "@lensjs/fastify";
@@ -17,25 +29,34 @@ const prisma = new PrismaClient({ log: ["query"] });
 
 await lens({
   app,
-  path: "/lens", // The Lens dashboard will be available at http://localhost:3000/lens
+  path: "/lens", // dashboard at http://localhost:3000/lens
   appName: "My Fastify App",
   queryWatcher: {
-    enabled: true, // Enable query watching
-    handler: createPrismaHandler({
-      prisma,
-      provider: "mysql",
-    }),
+    enabled: true,
+    handler: createPrismaHandler({ prisma, provider: "mysql" }),
   },
 });
 
 await app.listen({ port: 3000 });
-
-console.log("Server listening on http://localhost:3000");
 ```
 
-## Complete Example: Full Configuration Options
+## Watchers at a glance
 
-This snippet illustrates all available configuration options for the Fastify adapter, along with inline comments for clarity:
+<CardGrid :cols="3">
+  <Card icon="activity" title="requestWatcherEnabled">Capture requests. Default <code>true</code>.</Card>
+  <Card icon="bug" title="exceptionWatcherEnabled">Capture exceptions. Default <code>true</code>.</Card>
+  <Card icon="database" title="queryWatcher">Capture DB queries via a handler. Off unless set.</Card>
+  <Card icon="hard-drive" title="cacheWatcherEnabled">Capture cache ops. Default <code>false</code>.</Card>
+  <Card icon="mail" title="mailWatcherEnabled">Capture outgoing mail. Default <code>false</code>.</Card>
+  <Card icon="terminal" title="logWatcherEnabled">Capture console/pino/winston logs. Default <code>false</code>.</Card>
+</CardGrid>
+
+<Callout type="info" title="Fastify-specific">
+Set <code>registerErrorHandler: false</code> if you register your own Fastify error handler and
+want Lens to skip auto-wiring one (defaults to <code>true</code>).
+</Callout>
+
+## Full configuration reference
 
 ```ts
 import { lens } from "@lensjs/fastify";
@@ -144,3 +165,8 @@ await lens({
   },
 });
 ```
+
+<Callout type="security" title="Redaction is on by default">
+<code>hiddenParams</code> extends Lens's built-in redaction. To lock the dashboard behind a
+password, see <a href="../../getting-started/securing-the-dashboard">Securing the Dashboard</a>.
+</Callout>

@@ -1,2 +1,0 @@
-- first i will create a link for getting started by selecting his framework, then i will route him based on selected adapter it has it'w own installation
- and configurations to make

@@ -1,31 +1,47 @@
-# NestJS Adapter Installation
+# NestJS Adapter
 
-The **NestJS adapter** seamlessly integrates LensJS into your NestJS application.
+<p class="lens-lead">
+The NestJS adapter integrates Lens into your NestJS application. NestJS can run on top of Express
+or Fastify — Lens supports both.
+</p>
 
-If you didn't already, you can create a new nestjs project by following the [NestJS Quick Start](https://docs.nestjs.com/first-steps#setup)
+<Callout type="info" title="New to NestJS?">
+Spin up a project first with the <a href="https://docs.nestjs.com/first-steps#setup" target="_blank" rel="noreferrer">NestJS Quick Start</a>, then come back here.
+</Callout>
 
-Then you can install lens's nestjs adapter in your project:
+## Installation
 
-```bash
-npm install @lensjs/nestjs 
-```
+<Steps>
+  <Step title="Install the adapter">
 
-NestJS can run on top of Express or Fastify as its HTTP server.
-Depending on which one you choose, you’ll need to install the corresponding package.
+<CommandCopy pkg="@lensjs/nestjs" />
 
-Using Express (default):
+  </Step>
+  <Step title="Install the HTTP driver">
 
-```bash
-npm install @lensjs/express
-```
+NestJS runs on Express (default) or Fastify. Install the matching Lens adapter.
 
-Using Fastify:
+<CodeTabs :tabs="['Express', 'Fastify']">
+<template #Express>
 
-```bash
-npm install @lensjs/fastify
-```
+Express is the default HTTP driver:
 
-A minimal setup with express would look something like this:
+<CommandCopy pkg="@lensjs/express" />
+
+</template>
+<template #Fastify>
+
+Prefer Fastify? Install its adapter instead:
+
+<CommandCopy pkg="@lensjs/fastify" />
+
+</template>
+</CodeTabs>
+
+  </Step>
+  <Step title="Register Lens">
+
+A minimal setup with Express looks like this:
 
 ```ts
 import { NestFactory } from '@nestjs/core';
@@ -42,15 +58,31 @@ async function bootstrap() {
 bootstrap();
 ```
 
-And for fastify, you only need to pass the adapter property:
+For Fastify, just pass the `adapter` property:
 
 ```ts
 await lens({
-  adapter: 'fastify', 
+  adapter: 'fastify',
   app,
 });
 ```
 
-### Next Steps
+  </Step>
+</Steps>
 
-Check out the [Configuration](./configuration.md) Guide to enable watchers and customize LensJS.
+## Your dashboard
+
+<BrowserMockup url="localhost:3000/lens">
+  <img src="/screenshots/requests.png" alt="The Lens dashboard showing captured HTTP requests with method, path, status, and duration" />
+</BrowserMockup>
+
+## Next steps
+
+<CardGrid :cols="2">
+  <Card icon="settings" title="Configuration" href="/adapters/nestjs/configuration">
+    Enable watchers and customize Lens.
+  </Card>
+  <Card icon="database" title="Query watchers" href="/watchers/database">
+    Correlate ORM queries to requests.
+  </Card>
+</CardGrid>

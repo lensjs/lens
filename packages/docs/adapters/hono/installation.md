@@ -1,24 +1,32 @@
-# Hono Adapter Installation
+# Hono Adapter
 
-The **Hono adapter** seamlessly integrates LensJS into your Hono application, allowing you to monitor requests, queries, and other events. It targets the Node.js runtime (via `@hono/node-server`), where the default SQLite store runs.
+<p class="lens-lead">
+The Hono adapter integrates Lens into your Hono application. It targets the Node.js runtime (via
+<code>@hono/node-server</code>), where the default SQLite store runs.
+</p>
 
-## 1. Install Packages
+<Callout type="info" title="Requirements">
+Node.js 18+, a Hono app running on <code>@hono/node-server</code>, and optionally
+<code>@lensjs/watchers</code> for ORM/mailer handlers.
+</Callout>
 
-First, install the Hono adapter package:
+## Installation
 
-```bash
-npm install @lensjs/hono
-```
+<Steps>
+  <Step title="Install the packages">
 
-If you plan to use pre-built watcher handlers (e.g., for Prisma), you should also install the `@lensjs/watchers` package:
+Install the Hono adapter:
 
-```bash
-npm install @lensjs/watchers
-```
+<CommandCopy pkg="@lensjs/hono" />
 
-## 2. Minimal Setup (with Prisma Query Watcher)
+For pre-built watcher handlers (e.g. Prisma), also install the watchers package:
 
-Here's a minimal example demonstrating how to set up Lens with a Hono application, including a Prisma query watcher:
+<CommandCopy pkg="@lensjs/watchers" />
+
+  </Step>
+  <Step title="Register Lens">
+
+A minimal setup with a Prisma query watcher:
 
 ```ts
 import { Hono } from "hono";
@@ -52,12 +60,33 @@ serve({ fetch: app.fetch, port }, (info) => {
 });
 ```
 
-### Try it out
+  </Step>
+  <Step title="Try it out">
 
-1.  Start your Hono application.
-2.  Visit `http://localhost:3000/hello-world` in your browser. This will trigger a request and a database query, which Lens will log.
-3.  Navigate to `http://localhost:3000/lens` to open the Lens dashboard and view the monitored activity.
+<TerminalWindow title="try it out">
+<p><span class="c-dim"># 1.</span> Start your Hono application</p>
+<p><span class="c-dim"># 2.</span> Trigger a request + query</p>
+<p><span class="c-blue">http://localhost:3000/hello-world</span></p>
+<p><span class="c-dim"># 3.</span> Open the dashboard</p>
+<p><span class="c-green">http://localhost:3000/lens</span> <span class="c-dim"><Icon name="check" :size="12" /> activity captured</span></p>
+</TerminalWindow>
 
-## 3. Next Steps
+  </Step>
+</Steps>
 
-*   Explore more advanced configuration options in the [Configuration Guide](./configuration.md).
+## Your dashboard
+
+<BrowserMockup url="localhost:3000/lens">
+  <img src="/screenshots/requests.png" alt="The Lens dashboard showing captured HTTP requests with method, path, status, and duration" />
+</BrowserMockup>
+
+## Next steps
+
+<CardGrid :cols="2">
+  <Card icon="settings" title="Configuration" href="/adapters/hono/configuration">
+    All options, sampling, and password protection.
+  </Card>
+  <Card icon="database" title="Watchers" href="/watchers/">
+    Capture queries, cache, mail, and jobs.
+  </Card>
+</CardGrid>

@@ -1,24 +1,32 @@
-# Fastify Adapter Installation
+# Fastify Adapter
 
-The **Fastify adapter** seamlessly integrates LensJS into your Fastify application, allowing you to monitor requests, queries, and other events.
+<p class="lens-lead">
+The Fastify adapter integrates Lens into your Fastify application, capturing requests, queries,
+and other events with minimal setup.
+</p>
 
-## 1. Install Packages
+<Callout type="info" title="Requirements">
+Node.js 18+ and a Fastify app. Add <code>@lensjs/watchers</code> for the pre-built ORM/mailer
+handlers.
+</Callout>
 
-First, install the Fastify adapter package:
+## Installation
 
-```bash
-npm install @lensjs/fastify
-```
+<Steps>
+  <Step title="Install the packages">
 
-If you plan to use pre-built watcher handlers (e.g., for Prisma), you should also install the `@lensjs/watchers` package:
+Install the Fastify adapter:
 
-```bash
-npm install @lensjs/watchers
-```
+<CommandCopy pkg="@lensjs/fastify" />
 
-## 2. Minimal Setup (with Prisma Query Watcher)
+For pre-built watcher handlers (e.g. Prisma), also install the watchers package:
 
-Here's a minimal example demonstrating how to set up Lens with a Fastify application, including a Prisma query watcher:
+<CommandCopy pkg="@lensjs/watchers" />
+
+  </Step>
+  <Step title="Register Lens">
+
+A minimal setup with a Prisma query watcher:
 
 ```ts
 import { lens } from "@lensjs/fastify";
@@ -51,12 +59,33 @@ await app.listen({ port: 3000 });
 console.log(`Server running on http://localhost:${port}`);
 ```
 
-### Try it out
+  </Step>
+  <Step title="Try it out">
 
-1.  Start your Fastify application.
-2.  Visit `http://localhost:3000/hello-world` in your browser. This will trigger a request and a database query, which Lens will log.
-3.  Navigate to `http://localhost:3000/lens` to open the Lens dashboard and view the monitored activity.
+<TerminalWindow title="try it out">
+<p><span class="c-dim"># 1.</span> Start your Fastify application</p>
+<p><span class="c-dim"># 2.</span> Trigger a request + query</p>
+<p><span class="c-blue">http://localhost:3000/hello-world</span></p>
+<p><span class="c-dim"># 3.</span> Open the dashboard</p>
+<p><span class="c-green">http://localhost:3000/lens</span> <span class="c-dim"><Icon name="check" :size="12" /> activity captured</span></p>
+</TerminalWindow>
 
-## 3. Next Steps
+  </Step>
+</Steps>
 
-*   Explore more advanced configuration options in the [Configuration Guide](./configuration.md).  
+## Your dashboard
+
+<BrowserMockup url="localhost:3000/lens">
+  <img src="/screenshots/requests.png" alt="The Lens dashboard showing captured HTTP requests with method, path, status, and duration" />
+</BrowserMockup>
+
+## Next steps
+
+<CardGrid :cols="2">
+  <Card icon="settings" title="Configuration" href="/adapters/fastify/configuration">
+    All options, including watchers and redaction.
+  </Card>
+  <Card icon="database" title="Query watchers" href="/watchers/database">
+    Wire up Prisma, Kysely, Sequelize, and more.
+  </Card>
+</CardGrid>

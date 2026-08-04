@@ -1,12 +1,32 @@
+---
+outline: deep
+---
+
 # Next.js Adapter Configuration
 
-`createLens` accepts a single configuration object and returns the pieces you wire into your app:
+<p class="lens-lead">
+<code>createLens</code> accepts a single configuration object and returns the pieces you wire into
+your app.
+</p>
 
-- `handlers` — the `GET`/`POST`/`DELETE` Route Handlers for the dashboard, API, and SSE live tail.
-- `withLens` — wraps your Route Handlers to capture requests and correlate queries/logs/exceptions.
-- `lensMiddleware` — the optional request-id middleware (also available from `@lensjs/nextjs/middleware`).
+<CardGrid :cols="3">
+  <Card icon="route" title="handlers">
+    The <code>GET</code>/<code>POST</code>/<code>DELETE</code> Route Handlers for the dashboard, API, and SSE live tail.
+  </Card>
+  <Card icon="activity" title="withLens">
+    Wraps your Route Handlers to capture requests and correlate queries/logs/exceptions.
+  </Card>
+  <Card icon="git-branch" title="lensMiddleware">
+    The optional request-id middleware (also from <code>@lensjs/nextjs/middleware</code>).
+  </Card>
+</CardGrid>
 
-## Complete Example: Full Configuration Options
+<Callout type="info" title="Full reference">
+This page covers the Next.js-specific setup. For every option in one place, see the
+<a href="/configuration">Configuration reference</a>.
+</Callout>
+
+## Full configuration reference
 
 ```ts
 // app/lens.ts
@@ -77,11 +97,15 @@ export const lens = await createLens({
 });
 ```
 
-> The `isAuthenticated`, `getUser`, and `getRequestIp` callbacks receive the Web `Request` object.
+<Callout type="info" title="Web Request callbacks">
+The <code>isAuthenticated</code>, <code>getUser</code>, and <code>getRequestIp</code> callbacks
+receive the Web <code>Request</code> object.
+</Callout>
 
-## Mounting the Handlers
+## Mounting the handlers
 
-Re-export the handlers from the catch-all and the config route (see the [Installation Guide](./installation.md)):
+Re-export the handlers from the catch-all and the config route (see the
+[Installation Guide](./installation)):
 
 ```ts
 // app/lens/[[...lensjs]]/route.ts
@@ -103,9 +127,11 @@ export const dynamic = "force-dynamic";
 export const { GET } = lens.handlers;
 ```
 
-## Capturing Requests with `withLens`
+## Capturing requests with `withLens`
 
-Only requests that flow through a `withLens`-wrapped Route Handler are captured (there is no global middleware capture in Next.js). Queries, cache operations, logs, and exceptions emitted while the wrapped handler runs are correlated to that request automatically.
+Only requests that flow through a `withLens`-wrapped Route Handler are captured (there is no
+global middleware capture in Next.js). Queries, cache operations, logs, and exceptions emitted
+while the wrapped handler runs are correlated to that request automatically.
 
 ```ts
 // app/api/orders/route.ts
@@ -120,9 +146,11 @@ export const POST = lens.withLens(async (request: Request) => {
 });
 ```
 
-## Optional: Request-ID Middleware
+## Optional: request-ID middleware
 
-To correlate a request across middleware and the Route Handler, add the Edge-safe middleware. Import it from the dedicated `@lensjs/nextjs/middleware` subpath so the Node-only engine is not pulled into the Edge bundle:
+To correlate a request across middleware and the Route Handler, add the Edge-safe middleware.
+Import it from the dedicated `@lensjs/nextjs/middleware` subpath so the Node-only engine is not
+pulled into the Edge bundle:
 
 ```ts
 // middleware.ts
@@ -135,9 +163,12 @@ export const config = {
 };
 ```
 
-The middleware stamps a stable `x-lens-request-id` header that `withLens` reuses.
+<Callout type="tip" title="Stable request id">
+The middleware stamps a stable <code>x-lens-request-id</code> header that <code>withLens</code>
+reuses.
+</Callout>
 
-## Password-Protecting the Dashboard
+## Password-protecting the dashboard
 
 ```ts
 export const lens = await createLens({
@@ -147,4 +178,6 @@ export const lens = await createLens({
 });
 ```
 
-See [Securing the Dashboard](../../getting-started/securing-the-dashboard.md) for all options.
+<Callout type="security" title="Learn more">
+See <a href="../../getting-started/securing-the-dashboard">Securing the Dashboard</a> for all options.
+</Callout>
