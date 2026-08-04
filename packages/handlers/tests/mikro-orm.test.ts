@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, Mock } from "vitest";
 import { createMikroOrmHandler } from "../src/query/mikro-orm";
+import { createMikroOrmLensLogger } from "../src/query/mikro-orm-logger";
 import { watcherEmitter } from "../src/utils/emitter";
 import { lensUtils } from "@lensjs/core";
 
@@ -7,6 +8,7 @@ import { lensUtils } from "@lensjs/core";
 vi.mock("../src/utils/emitter", () => ({
   watcherEmitter: {
     on: vi.fn(),
+    emit: vi.fn(),
   },
 }));
 
@@ -189,5 +191,25 @@ describe("createMikroOrmHandler", () => {
         "test-request-id",
       );
     }
+  });
+});
+
+describe("createMikroOrmLensLogger", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("lazily builds a MikroORM logger that emits mikroOrmQuery on logQuery", () => {
+    // Constructs successfully -> `@mikro-orm/core` was resolved lazily at call time.
+    const logger = createMikroOrmLensLogger({ logger: () => {} } as any) as any;
+    expect(typeof logger.logQuery).toBe("function");
+
+    // Bypass DefaultLogger's debug-mode gate to assert the emit path directly.
+    logger.isEnabled = () => true;
+    logger.logQuery({ query: "SELECT 1", params: [1], took: 2.5 });
+
+    expect(watcherEmitter.emit).toHaveBeenCalledWith("mikroOrmQuery", {
+      query: "SELECT 1",
+      params: [1],
+      took: 2.5,
+    });
   });
 });

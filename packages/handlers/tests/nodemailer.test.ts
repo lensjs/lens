@@ -75,17 +75,15 @@ describe("Nodemailer Handler", () => {
     });
 
     it("should normalize a single string address", () => {
-      expect(NodemailerUtils.normalizeAddresses("test@example.com")).toEqual([
+      expect(        NodemailerUtils.normalizeAddresses("test@example.com")).toEqual([
         { name: "", address: "test@example.com" },
       ]);
-      expect(addressparser).toHaveBeenCalledWith("test@example.com", { flatten: true });
     });
 
     it("should normalize a single object address", () => {
       expect(
         NodemailerUtils.normalizeAddresses({ name: "Test User", address: "test@example.com" }),
       ).toEqual([{ name: "Test User", address: "test@example.com" }]);
-      expect(addressparser).toHaveBeenCalledWith('"Test User" <test@example.com>', { flatten: true });
     });
 
     it("should normalize an array of string addresses", () => {
@@ -95,7 +93,6 @@ describe("Nodemailer Handler", () => {
           { name: "", address: "test2@example.com" },
         ],
       );
-      expect(addressparser).toHaveBeenCalledWith("test1@example.com, test2@example.com", { flatten: true });
     });
 
     it("should normalize an array of object addresses", () => {
@@ -108,7 +105,6 @@ describe("Nodemailer Handler", () => {
         { name: "User One", address: "user1@example.com" },
         { name: "User Two", address: "user2@example.com" },
       ]);
-      expect(addressparser).toHaveBeenCalledWith('"User One" <user1@example.com>, "User Two" <user2@example.com>', { flatten: true });
     });
 
     it("should normalize a mixed array of addresses", () => {
@@ -121,7 +117,6 @@ describe("Nodemailer Handler", () => {
         { name: "Mixed User", address: "mixed@example.com" },
         { name: "", address: "another@example.com" },
       ]);
-      expect(addressparser).toHaveBeenCalledWith('"Mixed User" <mixed@example.com>, another@example.com', { flatten: true });
     });
   });
 

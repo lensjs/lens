@@ -1,8 +1,24 @@
-import { Transporter } from "nodemailer";
-import SMTPTransport from "nodemailer/lib/smtp-transport";
-import addressParser from "nodemailer/lib/addressparser";
+import { createRequire } from "node:module";
+import type { Transporter } from "nodemailer";
+import type SMTPTransport from "nodemailer/lib/smtp-transport";
+import type AddressParser from "nodemailer/lib/addressparser";
 import { Readable } from "stream";
 import fs from "fs";
+
+// Resolve nodemailer's address parser lazily so importing `@lensjs/watchers`
+// never requires nodemailer to be installed (it is an optional peer).
+const nodeRequire = createRequire(import.meta.url);
+let cachedAddressParser: typeof AddressParser | undefined;
+function getAddressParser(): typeof AddressParser {
+  if (!cachedAddressParser) {
+    const mod = nodeRequire("nodemailer/lib/addressparser") as
+      | typeof AddressParser
+      | { default: typeof AddressParser };
+    cachedAddressParser =
+      typeof mod === "function" ? mod : mod.default;
+  }
+  return cachedAddressParser;
+}
 import {
   Mailbox,
   MailEntry,
@@ -11,7 +27,7 @@ import {
   lensEmitter,
   getCurrentRequestId,
 } from "@lensjs/core";
-import { AttachmentLike } from "nodemailer/lib/mailer";
+import type { AttachmentLike } from "nodemailer/lib/mailer";
 
 // Nodemailer transporter type
 type NodeMailerTransporter = Transporter<
@@ -44,12 +60,24 @@ export function normalizeAddresses(input: AddressInput): Mailbox[] {
     inputString = input;
   }
 
-  const parsed = addressParser(inputString, { flatten: true });
+  const parsed = getAddressParser()(inputString, { flatten: true });
   return parsed.map((addr) => ({ name: addr.name, address: addr.address }));
 }
 
 export function parseStatus(code: number): "sent" | "failed" {
   return code >= 200 && code < 300 ? "sent" : "failed";
+}
+
+/**
+ * Derive a send status from a transport's response line. SMTP transports return
+ * a line like `"250 Message accepted"`; json/stream/sendmail transports resolve
+ * with no `response` at all. A resolved `sendMail()` means the message was
+ * handed off successfully, so treat a missing/non-numeric response as "sent"
+ * and only mark "failed" on an explicit non-2xx SMTP code.
+ */
+export function resolveSendStatus(response: unknown): "sent" | "failed" {
+  const code = parseInt(String(response ?? "").split(" ")[0] ?? "", 10);
+  return Number.isNaN(code) ? "sent" : parseStatus(code);
 }
 
 type ResolveContentParam =
@@ -545,7 +573,9 @@ export async function logNodeMailerEntry<T extends NodeMailerTransporter>(
     meta: {
       driver: "nodemailer",
       transport,
-      status: parseStatus(parseInt(message.response.split(" ")[0] as string)),
+      // Some transports (json/stream/sendmail) resolve without an SMTP
+      // response line; a resolved sendMail still means the message was sent.
+      status: resolveSendStatus(message.response),
       //@ts-ignore
       durationMs: message.envelopeTime ?? message.messageTime,
       driverResponse: null,
