@@ -1,5 +1,42 @@
 # @lensjs/nestjs
 
+## 5.0.0
+
+### Minor Changes
+
+- 3e5244b: Add exception fingerprinting/grouping and config-driven outbound alerting.
+  - Every exception now gets a stable `fingerprint` (from its type + originating file/function, with a normalized-message fallback) stored in `minimal_data`, so repeat errors collapse into one issue. The dashboard Exceptions page gains a "Group by issue" toggle (count + last seen) that drill-downs to a single issue's occurrences via the server-side `fingerprint` filter, backed by a new `GET /api/exceptions/groups` endpoint.
+  - New `alerts` config posts to Slack, Discord, or a generic webhook when a new exception issue is captured — deduped by fingerprint within a cooldown and delivered non-blocking (never throws into the app). Exposed as `createLensNotifier` from `@lensjs/core`; adapters forward the `alerts` option to core.
+
+- 4ba5a0c: Add a Jobs / Queue watcher that captures background jobs (BullMQ, Agenda) as one live-updating row per job.
+  - New `job` signal in `@lensjs/core`: `JobWatcher`, `JobEntry`, `WatcherTypeEnum.JOB`, `/api/jobs` endpoints, reader correlation, and a dashboard Jobs view (status badge, queue, attempts, duration, data/result) that also appears in Live Tail and the request timeline.
+  - The store `save` now upserts by `id` (`INSERT OR REPLACE`) and the dashboard live feed replaces rows by id, so a job's status updates in place (active -> completed/failed) in real time. Unique-id signals are unaffected.
+  - New driver integrations in `@lensjs/watchers`: `attachBullmqLens(worker)`, `attachAgendaLens(agenda)`, and `emitLensJob()` for custom queues. `bullmq` and `agenda` are optional peer dependencies.
+  - Enable per adapter with `jobWatcherEnabled: true` (Express/Fastify/NestJS) or `watchers.job: true` (AdonisJS).
+
+- 4ba5a0c: Add a Logs watcher that captures application log output and correlates it to the request that produced it.
+  - New `log` signal in `@lensjs/core`: `LogWatcher`, `LogEntry`, the `WatcherTypeEnum.LOG` member, the `/api/logs` endpoints, reader correlation, and a dedicated dashboard view (level badge, message, context) that also shows up in Live Tail and the request timeline.
+  - New driver integrations in `@lensjs/watchers`: `patchConsole()`, `createLensPinoStream()`, `createLensWinstonTransport()`, and `emitLensLog()` for custom loggers. `pino` and `winston` are optional peer dependencies.
+  - Enable it per adapter via `logWatcherEnabled: true` (Express/Fastify/NestJS) or `watchers.log: true` (AdonisJS). Log context is redacted (password/secret/token/authorization/apiKey…) and size-capped before storage.
+
+### Patch Changes
+
+- Updated dependencies [39d9f80]
+- Updated dependencies [39d9f80]
+- Updated dependencies [3e5244b]
+- Updated dependencies [4ba5a0c]
+- Updated dependencies [4ba5a0c]
+- Updated dependencies [68f0f5d]
+- Updated dependencies [ad56591]
+- Updated dependencies [14dab1b]
+- Updated dependencies [39d9f80]
+- Updated dependencies [a32f0e2]
+- Updated dependencies [14dab1b]
+- Updated dependencies [baaf802]
+  - @lensjs/core@3.1.0
+  - @lensjs/express@1.7.0
+  - @lensjs/fastify@1.4.0
+
 ## 4.0.0
 
 ### Minor Changes

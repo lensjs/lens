@@ -1,5 +1,71 @@
 # @lensjs/core
 
+## 3.1.0
+
+### Minor Changes
+
+- 39d9f80: Validate Lens configuration at boot with a single, aggregated, actionable error.
+  - New `assertValidConfig` (exported from `@lensjs/core`) checks the neutral `LensConfig` surface (`path`, `hiddenParams`, `storeQueueConfig`, `sampling`, `retention`, `alerts`) and throws one error listing every problem it finds.
+  - Each adapter runs it as it starts, so misconfigurations fail fast with a clear message instead of surfacing later.
+
+- 39d9f80: Dashboard: query issue flags, export, and live exception toasts.
+  - Flag **slow**, **duplicate**, and **N+1** queries — a slow badge on the query lists, and duplicate/N+1 badges on the request timeline (detected per request, client-side over the request's full query set).
+  - **Export** the loaded, filtered rows of any list as JSON or CSV from the toolbar, and export a single request as **HAR** from its detail page.
+  - **Exception toasts** — new exceptions surface as toasts via the live SSE stream, deduped by fingerprint, respecting the recording-pause toggle, and deep-linking to the exception.
+
+- 3e5244b: Add exception fingerprinting/grouping and config-driven outbound alerting.
+  - Every exception now gets a stable `fingerprint` (from its type + originating file/function, with a normalized-message fallback) stored in `minimal_data`, so repeat errors collapse into one issue. The dashboard Exceptions page gains a "Group by issue" toggle (count + last seen) that drill-downs to a single issue's occurrences via the server-side `fingerprint` filter, backed by a new `GET /api/exceptions/groups` endpoint.
+  - New `alerts` config posts to Slack, Discord, or a generic webhook when a new exception issue is captured — deduped by fingerprint within a cooldown and delivered non-blocking (never throws into the app). Exposed as `createLensNotifier` from `@lensjs/core`; adapters forward the `alerts` option to core.
+
+- 4ba5a0c: Add a Jobs / Queue watcher that captures background jobs (BullMQ, Agenda) as one live-updating row per job.
+  - New `job` signal in `@lensjs/core`: `JobWatcher`, `JobEntry`, `WatcherTypeEnum.JOB`, `/api/jobs` endpoints, reader correlation, and a dashboard Jobs view (status badge, queue, attempts, duration, data/result) that also appears in Live Tail and the request timeline.
+  - The store `save` now upserts by `id` (`INSERT OR REPLACE`) and the dashboard live feed replaces rows by id, so a job's status updates in place (active -> completed/failed) in real time. Unique-id signals are unaffected.
+  - New driver integrations in `@lensjs/watchers`: `attachBullmqLens(worker)`, `attachAgendaLens(agenda)`, and `emitLensJob()` for custom queues. `bullmq` and `agenda` are optional peer dependencies.
+  - Enable per adapter with `jobWatcherEnabled: true` (Express/Fastify/NestJS) or `watchers.job: true` (AdonisJS).
+
+- 4ba5a0c: Add a Logs watcher that captures application log output and correlates it to the request that produced it.
+  - New `log` signal in `@lensjs/core`: `LogWatcher`, `LogEntry`, the `WatcherTypeEnum.LOG` member, the `/api/logs` endpoints, reader correlation, and a dedicated dashboard view (level badge, message, context) that also shows up in Live Tail and the request timeline.
+  - New driver integrations in `@lensjs/watchers`: `patchConsole()`, `createLensPinoStream()`, `createLensWinstonTransport()`, and `emitLensLog()` for custom loggers. `pino` and `winston` are optional peer dependencies.
+  - Enable it per adapter via `logWatcherEnabled: true` (Express/Fastify/NestJS) or `watchers.log: true` (AdonisJS). Log context is redacted (password/secret/token/authorization/apiKey…) and size-capped before storage.
+
+- 68f0f5d: Add a public read facade and a configurable SQLite store so external, read-only consumers can read captured data:
+  - `createLensReader(store)` (+ `LensReader`, `ReaderWindow` and `RequestTimeline` types) — the read/correlation surface the `ApiController` now delegates to. It covers listing any signal type with the dashboard's server-side search/filter/sort/date-range options, request timelines, the aggregated overview, and fingerprint-grouped exception issues.
+  - `QueuedStoreConfig.databasePath` and `QueuedStoreConfig.readonly`, plus a `BetterSqliteStore` constructor, so the store can open an arbitrary database file read-only (schema/WAL setup is skipped in read-only mode).
+
+  All changes are additive and backward compatible.
+
+- ad56591: Add a metrics/analytics Overview dashboard as the new home page.
+  - New `createLensMetrics(store)` (exported from `@lensjs/core`) computes an overview for a time window: throughput over time, 5xx/4xx error rate, p50/p95/p99 latency, slowest endpoints (grouped by method+path), slowest queries, and top exceptions (grouped by name+message).
+  - New `GET /api/metrics?from=&to=` endpoint (added to `uiConfig.api.metrics`); adapters need no changes.
+  - New dashboard Overview page with dependency-free SVG charts (stat cards, area chart, ranked bar lists), a date-range picker, and drill-down links into the filtered lists. Overview is now the default landing route.
+  - Latency is derived from the stored duration strings via a new `parseDurationMs` utility; aggregation runs over the window's entries.
+
+- 14dab1b: Add age-based retention policies that purge entries older than a max age, per signal type.
+  - New `storeQueueConfig.retention` (`{ defaultMaxAgeMs, perType, sweepIntervalMs }`); a `RetentionStore` mixin sweeps on an interval for both the SQLite and SQL stores, complementing the existing size-based pruning.
+  - Adds `Store.pruneOlderThan(cutoffISO, type?)` (a default no-op, implemented by the built-in stores) — additive, so custom stores keep working.
+
+- 39d9f80: Add request/trace sampling with error- and slow-biased always-on rules.
+  - New `sampling` config (`{ rate, alwaysOnErrors, alwaysOnSlowMs }`). Sampled-out requests buffer their entries and are only written if they error (5xx) or exceed the slow threshold — so a kept request keeps its correlated queries/logs too. Exceptions are always captured.
+  - Applied on Express, Hono, and Next.js (where the request context wraps the full request lifecycle). Exposed via `createSamplingState` / `finalizeSampling`; watchers now persist through a sampling-aware choke point.
+
+- a32f0e2: Move dashboard list filtering, search, date-range, and sort to the server so they apply across the whole dataset instead of only the loaded page.
+  - `PaginationParams` gains optional `q`, `from`, `to`, `filters` (field + operator), `sort`, `dir`, and `numericSort`; the default `BetterSqliteStore` applies them as bound `WHERE`/`ORDER BY` clauses (injection-safe, field names sanitized).
+  - The default newest-first view keeps cursor pagination + live tail; any explicit sort switches that view to offset ordering and pauses the live feed.
+  - The list API endpoints parse these from the query string (`?q=&from=&to=&sort=&dir=` plus `field` / `field__op` filters); adapters need no changes since they already forward the query string.
+  - The dashboard toolbar adds a date-range picker and a clear-filters action, and search is debounced. All controls are URL-synced and deep-linkable.
+
+- 14dab1b: Add a production-ready PostgreSQL / MySQL storage backend alongside the default SQLite store, for shared, multi-instance deployments.
+  - New `QueuedSqlStore` (and the underlying `SqlStore`) implement the full `Store` contract for both engines from a single dialect-parameterized implementation: cursor + offset pagination, server-side search / date-range / field filtering, real-time job upserts (fresh `seq` cursor), and size-based pruning.
+  - Inject it with `Lens.setStore(new QueuedSqlStore({ dialect: "postgres" | "mysql", connectionString }))` before starting your adapter; works unchanged across Express, Fastify, NestJS, and AdonisJS. You can also pass an existing `pool`.
+  - `pg` and `mysql2` are optional peer dependencies, imported dynamically only when the matching dialect is used, so SQLite users are unaffected.
+  - Exposes `SqlStore`, `QueuedSqlStore`, and the `SqlStoreConfig` / `SqlDialect` types from the package barrel.
+
+- baaf802: Add W3C trace context support so Lens can participate in distributed traces.
+  - New core tracing primitives (`setLensTraceSink`, `createTraceContext`, `getActiveTraceparent`, `flushTrace`, `parseTraceparent`/`buildTraceparent`, `generateTraceId`/`generateSpanId`) and a `trace` field on the request context that collects the request's correlated entries. Everything is opt-in: with no sink registered there is zero overhead on the request path.
+  - Incoming `traceparent` headers are honored on Express, Hono, and Next.js — the request joins the caller's trace instead of starting a new one — and the completed trace is flushed to the registered sink after the response.
+  - `instrumentFetch()` injects a `traceparent` into outgoing calls (never overwriting one the caller set), so downstream services continue the same trace.
+  - Consumed by the new `@lensjs/otel` package to export OTLP spans.
+
 ## 3.0.0
 
 ### Major Changes

@@ -1,5 +1,61 @@
 # @lensjs/watchers
 
+## 1.4.1
+
+### Patch Changes
+
+- Make optional driver imports lazy so importing `@lensjs/watchers` never requires optional peers to be installed.
+
+  Previously the package barrel statically value-imported `@mikro-orm/core` (`MikroOrmLensLogger extends DefaultLogger`), `winston-transport` (`extends TransportStream`), and `nodemailer/lib/addressparser`. Because those are all optional peer dependencies, any `import … from "@lensjs/watchers"` threw `ERR_MODULE_NOT_FOUND` unless all three were installed — even for consumers that don't use MikroORM, Winston, or the mail watcher. Each is now resolved lazily (only when the relevant factory/handler actually runs).
+
+  Adds `createMikroOrmLensLogger(options)` as the preferred API; `MikroOrmLensLogger` is retained as a backward-compatible, lazily-constructed alias.
+
+## 1.4.0
+
+### Minor Changes
+
+- 60b042c: Add Drizzle and Mongoose query handlers.
+  - `createDrizzleHandler({ provider })` + `createLensDrizzleLogger()` capture Drizzle ORM queries in-context (pass the logger to `drizzle(client, { logger })`); `provider` is `"postgresql" | "mysql" | "sqlite"`.
+  - `createMongooseHandler()` + `attachMongooseLens(mongoose)` capture MongoDB operations via Mongoose's `debug` hook, recorded with the `mongodb` provider.
+  - `drizzle-orm` and `mongoose` are optional peer dependencies. Both hooks fire at query-issue time so queries correlate to the request; neither exposes a duration, so entries are recorded with `0 ms`.
+
+- 4ba5a0c: Add a Jobs / Queue watcher that captures background jobs (BullMQ, Agenda) as one live-updating row per job.
+  - New `job` signal in `@lensjs/core`: `JobWatcher`, `JobEntry`, `WatcherTypeEnum.JOB`, `/api/jobs` endpoints, reader correlation, and a dashboard Jobs view (status badge, queue, attempts, duration, data/result) that also appears in Live Tail and the request timeline.
+  - The store `save` now upserts by `id` (`INSERT OR REPLACE`) and the dashboard live feed replaces rows by id, so a job's status updates in place (active -> completed/failed) in real time. Unique-id signals are unaffected.
+  - New driver integrations in `@lensjs/watchers`: `attachBullmqLens(worker)`, `attachAgendaLens(agenda)`, and `emitLensJob()` for custom queues. `bullmq` and `agenda` are optional peer dependencies.
+  - Enable per adapter with `jobWatcherEnabled: true` (Express/Fastify/NestJS) or `watchers.job: true` (AdonisJS).
+
+- 4ba5a0c: Add a Logs watcher that captures application log output and correlates it to the request that produced it.
+  - New `log` signal in `@lensjs/core`: `LogWatcher`, `LogEntry`, the `WatcherTypeEnum.LOG` member, the `/api/logs` endpoints, reader correlation, and a dedicated dashboard view (level badge, message, context) that also shows up in Live Tail and the request timeline.
+  - New driver integrations in `@lensjs/watchers`: `patchConsole()`, `createLensPinoStream()`, `createLensWinstonTransport()`, and `emitLensLog()` for custom loggers. `pino` and `winston` are optional peer dependencies.
+  - Enable it per adapter via `logWatcherEnabled: true` (Express/Fastify/NestJS) or `watchers.log: true` (AdonisJS). Log context is redacted (password/secret/token/authorization/apiKey…) and size-capped before storage.
+
+- baaf802: Add W3C trace context support so Lens can participate in distributed traces.
+  - New core tracing primitives (`setLensTraceSink`, `createTraceContext`, `getActiveTraceparent`, `flushTrace`, `parseTraceparent`/`buildTraceparent`, `generateTraceId`/`generateSpanId`) and a `trace` field on the request context that collects the request's correlated entries. Everything is opt-in: with no sink registered there is zero overhead on the request path.
+  - Incoming `traceparent` headers are honored on Express, Hono, and Next.js — the request joins the caller's trace instead of starting a new one — and the completed trace is flushed to the registered sink after the response.
+  - `instrumentFetch()` injects a `traceparent` into outgoing calls (never overwriting one the caller set), so downstream services continue the same trace.
+  - Consumed by the new `@lensjs/otel` package to export OTLP spans.
+
+### Patch Changes
+
+- Fix mail capture for transports that resolve without an SMTP response line.
+
+  `logNodeMailerEntry` derived the send status from `message.response.split(" ")`, which threw a `TypeError` for transports that don't return a `response` (e.g. Nodemailer's `jsonTransport`, `streamTransport`, or `sendmail`). Because the log call is fire-and-forget, the rejection was swallowed and the message was silently never recorded. Sent mail is now captured for every transport: a missing/non-numeric response is treated as `sent`, and only an explicit non-2xx SMTP code is marked `failed`.
+
+- Updated dependencies [39d9f80]
+- Updated dependencies [39d9f80]
+- Updated dependencies [3e5244b]
+- Updated dependencies [4ba5a0c]
+- Updated dependencies [4ba5a0c]
+- Updated dependencies [68f0f5d]
+- Updated dependencies [ad56591]
+- Updated dependencies [14dab1b]
+- Updated dependencies [39d9f80]
+- Updated dependencies [a32f0e2]
+- Updated dependencies [14dab1b]
+- Updated dependencies [baaf802]
+  - @lensjs/core@3.1.0
+
 ## 1.3.0
 
 ### Minor Changes

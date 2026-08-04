@@ -1,6 +1,6 @@
 {
   "name": "@lensjs/mcp",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Model Context Protocol server for LensJs - lets AI agents read captured errors, requests, and queries to diagnose and fix issues",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

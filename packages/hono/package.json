@@ -1,6 +1,6 @@
 {
   "name": "@lensjs/hono",
-  "version": "0.0.0",
+  "version": "0.1.1",
   "description": "Hono adapter for LensJs",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
