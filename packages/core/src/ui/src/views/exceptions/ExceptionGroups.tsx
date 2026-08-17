@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { humanDifferentDate } from "@lensjs/date";
 import Table, { type TableColumn } from "../../components/Table";
 import ListToolbar from "../../components/ListToolbar";
+import PageHeader from "../../components/PageHeader";
 import GroupToggle from "../../components/GroupToggle";
 import { DetailSkeleton } from "../../components/Skeleton";
 import { useListView } from "../../hooks/useListView";
@@ -70,6 +71,10 @@ export default function ExceptionGroups() {
 
   return (
     <div>
+      <PageHeader
+        title="Exceptions"
+        description="Grouped by type — counts, first and last seen."
+      />
       <ListToolbar
         controls={controls}
         stats={stats}

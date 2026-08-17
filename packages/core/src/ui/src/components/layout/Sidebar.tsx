@@ -28,7 +28,7 @@ const Sidebar = ({
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-14 z-20 h-[calc(100vh-3.5rem)] w-64 shrink-0 border-r border-border bg-canvas p-4",
+          "fixed left-0 top-14 z-20 h-[calc(100vh-3.5rem)] w-64 shrink-0 border-r border-border bg-sidebar p-4",
           "transition-transform duration-200 ease-out",
           "lg:sticky lg:top-6 lg:z-0 lg:h-auto lg:w-56 lg:self-start lg:border-r-0 lg:bg-transparent lg:p-0",
           isMobileSidebarOpen
@@ -57,7 +57,7 @@ const Sidebar = ({
                 )}
               >
                 {isActive && (
-                  <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-accent" />
+                  <span className="lens-gradient absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full" />
                 )}
                 <span
                   className={cn(

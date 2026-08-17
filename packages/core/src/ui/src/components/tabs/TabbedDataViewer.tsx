@@ -35,6 +35,13 @@ const TabbedDataViewer: React.FC<TabbedDataProps> = ({
     return null;
   }
 
+  // Fall back to the first visible tab when the active/default tab is hidden
+  // (e.g. the default tab has no data for this entry) so a tab is always
+  // selected and its content shown.
+  const activeId = visibleTabs.some((t) => t.id === activeTab)
+    ? activeTab
+    : (visibleTabs[0]?.id ?? "");
+
   return (
     <div className="card-panel overflow-hidden">
       {/* Header */}
@@ -53,17 +60,17 @@ const TabbedDataViewer: React.FC<TabbedDataProps> = ({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              aria-selected={activeTab === tab.id}
+              aria-selected={activeId === tab.id}
               role="tab"
               className={cn(
                 "relative whitespace-nowrap px-3 py-2.5 text-sm font-medium transition-colors",
-                activeTab === tab.id
+                activeId === tab.id
                   ? "text-accent"
                   : "text-muted hover:text-fg",
               )}
             >
               {tab.label}
-              {activeTab === tab.id && (
+              {activeId === tab.id && (
                 <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-accent" />
               )}
             </button>
@@ -76,7 +83,7 @@ const TabbedDataViewer: React.FC<TabbedDataProps> = ({
         {visibleTabs.map((tab) => (
           <div
             key={tab.id}
-            className={activeTab === tab.id ? "block" : "hidden"}
+            className={activeId === tab.id ? "block" : "hidden"}
           >
             {tab.content ? (
               <div className="text-fg">{tab.content}</div>

@@ -53,7 +53,7 @@ const useColumns = (): TableColumn<EventTableRow>[] => {
       render: (row) => (
         <Link
           to={`${paths.EVENTS}/${row.id}`}
-          className="text-muted transition-colors hover:text-accent"
+          className="text-muted transition-colors hover:text-fg"
         >
           <CircleArrowRightIcon size={20} />
         </Link>

@@ -21,7 +21,7 @@ const useColumns = (): TableColumn<RequestTableRow>[] => {
       render: (row) => (
         <Link
           to={`${paths.REQUESTS}/${row.id}`}
-          className="line-clamp-2 max-w-80 min-w-40 text-base font-medium text-accent hover:text-accent-hover hover:underline"
+          className="line-clamp-2 max-w-80 min-w-40 text-[15px] font-medium text-fg hover:underline"
         >
           {row.data.path}
         </Link>
@@ -49,7 +49,7 @@ const useColumns = (): TableColumn<RequestTableRow>[] => {
       render: (row) => (
         <Link
           to={`${paths.REQUESTS}/${row.id}`}
-          className="text-muted transition-colors hover:text-accent"
+          className="text-muted transition-colors hover:text-fg"
         >
           <CircleArrowRightIcon size={20} />
         </Link>

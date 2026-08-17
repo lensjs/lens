@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { LoadMoreButton } from "../../components/LoadMore";
 import Table from "../../components/Table";
 import ListToolbar from "../../components/ListToolbar";
+import PageHeader from "../../components/PageHeader";
 import {
   useListView,
   type FilterDef,
@@ -52,6 +53,10 @@ const RedisTable = ({
 
   return (
     <div>
+      <PageHeader
+        title="Redis"
+        description="Inspect Redis commands and responses."
+      />
       <ListToolbar
         controls={controls}
         filters={filters}

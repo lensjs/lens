@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import JsonView from "@uiw/react-json-view";
 import { nordTheme } from "@uiw/react-json-view/nord";
 import { Check, Copy } from "lucide-react";
@@ -36,12 +36,39 @@ const lensJsonTheme = {
   "--w-rjv-type-undefined-color": "#fb7185",
 } as React.CSSProperties;
 
+// Request/response bodies and headers are frequently captured as JSON *strings*.
+// Decode them so the viewer shows a real tree instead of an escaped string
+// literal (e.g. "{\"ok\":true}"). Genuine plain strings are left untouched.
+function normalizeJson(data: unknown): unknown {
+  if (typeof data !== "string") return data;
+
+  const trimmed = data.trim();
+  const looksLikeJson =
+    (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+    (trimmed.startsWith("[") && trimmed.endsWith("]"));
+
+  if (looksLikeJson) {
+    try {
+      return JSON.parse(trimmed);
+    } catch {
+      /* not valid JSON — render the raw string */
+    }
+  }
+
+  return data;
+}
+
 const JsonViewer: React.FC<JsonViewerProps> = ({ data }) => {
   const [copied, setCopied] = useState(false);
+  const value = useMemo(() => normalizeJson(data), [data]);
+  const isTree = typeof value === "object" && value !== null;
+  const rawText = typeof value === "string" ? value : String(value ?? "");
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+      await navigator.clipboard.writeText(
+        isTree ? JSON.stringify(value, null, 2) : rawText,
+      );
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -67,17 +94,17 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data }) => {
         </button>
       </div>
       <div className="min-h-10 whitespace-pre-wrap pr-20 text-fg">
-        {typeof data === "string" || Array.isArray(data) ? (
-          <pre className="text-fg">{JSON.stringify(data, null, 2)}</pre>
-        ) : (
+        {isTree ? (
           <JsonView
-            value={(data ?? {}) as object}
+            value={value as object}
             enableClipboard={false}
             style={lensJsonTheme}
             collapsed={false}
             displayDataTypes={false}
             displayObjectSize={false}
           />
+        ) : (
+          <pre className="text-fg">{rawText}</pre>
         )}
       </div>
     </div>

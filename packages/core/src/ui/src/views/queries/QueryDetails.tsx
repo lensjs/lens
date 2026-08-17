@@ -14,7 +14,7 @@ export default function QueryDetails({ query }: { query: OneQuery }) {
       value: (
         <Link
           to={`${getRoutesPaths(useConfig()).REQUESTS}/${query.lens_entry_id}`}
-          className="text-accent hover:text-accent-hover hover:underline font-semibold"
+          className="text-fg hover:underline font-semibold"
         >
           View Request
         </Link>

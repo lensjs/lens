@@ -5,7 +5,8 @@ import { useConfig } from "../../utils/context";
 import { clearToken, UNAUTHORIZED_EVENT } from "../../utils/auth";
 import DeleteButton from "./DeleteButton";
 import RecordingToggle from "./RecordingToggle";
-import { LensLogo } from "../LensLogo";
+import { LensMark } from "../LensMark";
+import { LensWordmark } from "../LensWordmark";
 
 const lockDashboard = () => {
   clearToken();
@@ -22,25 +23,27 @@ interface HeaderProps {
 
 const Header = ({ isMobileSidebarOpen, onToggleMobileSidebar }: HeaderProps) => {
   const config = useConfig();
+  const showAppBadge =
+    !!config.appName && !/^lens\.?(js)?$/i.test(config.appName.trim());
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-canvas/80 backdrop-blur-md">
+    <header className="sticky top-0 z-30 border-b border-border bg-sidebar/85 backdrop-blur-md">
       <div className="container flex h-14 items-center justify-between gap-4">
         <Link
           to={getRoutesPaths(config).REQUESTS}
           className="group flex items-center gap-2.5"
         >
-          <LensLogo
-            size={28}
-            className="text-accent transition-transform group-hover:scale-105"
+          <LensMark
+            size={30}
+            className="rounded-[9px] transition-transform group-hover:scale-105"
           />
-          <span className="flex flex-col leading-none">
-            <span className="text-[15px] font-semibold tracking-tight text-fg">
-              {config.appName}
-            </span>
-            <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-dim">
-              Lens
-            </span>
+          <span className="flex items-center gap-2 leading-none">
+            <LensWordmark className="text-[16px]" />
+            {showAppBadge && (
+              <span className="hidden rounded-md border border-border bg-surface-2/60 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-dim sm:inline-block">
+                {config.appName}
+              </span>
+            )}
           </span>
         </Link>
 

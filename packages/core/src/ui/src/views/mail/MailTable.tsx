@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { LoadMoreButton } from "../../components/LoadMore";
 import Table from "../../components/Table";
 import ListToolbar from "../../components/ListToolbar";
+import PageHeader from "../../components/PageHeader";
 import { useListView, type SortDef } from "../../hooks/useListView";
 import { toTime } from "../../utils/format";
 import { getRoutesPaths } from "../../router/routes";
@@ -32,6 +33,10 @@ const MailTable = ({
 
   return (
     <div>
+      <PageHeader
+        title="Mail"
+        description="Inspect sent mail — recipients, subjects, and payloads."
+      />
       <ListToolbar
         controls={controls}
         sorts={sorts}

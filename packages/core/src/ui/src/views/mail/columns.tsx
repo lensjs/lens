@@ -41,7 +41,7 @@ const useColumns = (): TableColumn<MailTableRow>[] => {
       render: (row) => (
         <Link
           to={`${paths.MAIL}/${row.id}`}
-          className="line-clamp-2 max-w-lg min-w-40 text-base font-medium text-accent hover:text-accent-hover hover:underline"
+          className="line-clamp-2 max-w-lg min-w-40 text-base font-medium text-fg hover:underline"
         >
           {row.data.subject ? decodeRFC2047(row.data.subject) : "(No Subject)"}
         </Link>
@@ -67,7 +67,7 @@ const useColumns = (): TableColumn<MailTableRow>[] => {
       render: (row) => (
         <Link
           to={`${paths.MAIL}/${row.id}`}
-          className="text-muted transition-colors hover:text-accent"
+          className="text-muted transition-colors hover:text-fg"
         >
           <CircleArrowRightIcon size={20} />
         </Link>

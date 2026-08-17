@@ -48,6 +48,7 @@ interface TableProps<T> {
   data: T[];
   emptyMessage?: string;
   onRowClick?: (row: T) => void;
+  isRowSelected?: (row: T) => boolean;
 }
 
 function Table<T>({
@@ -55,12 +56,13 @@ function Table<T>({
   data,
   emptyMessage,
   onRowClick,
+  isRowSelected,
 }: TableProps<T>) {
   const columns = columnsProp.filter((column) => !column.hidden);
 
   return (
     <div className="relative overflow-x-auto">
-      <table className="w-full border-separate border-spacing-y-1.5 text-start">
+      <table className="w-full border-separate border-spacing-0 text-start">
         <thead>
           <tr>
             {columns.map((column, i) => (
@@ -68,7 +70,7 @@ function Table<T>({
                 key={i}
                 scope="col"
                 className={cn(
-                  "min-w-32 bg-surface-2/40 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted first:rounded-s-lg last:rounded-e-lg",
+                  "min-w-32 border-b border-border px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-dim",
                   column.position === "end" && "text-end",
                 )}
               >
@@ -97,17 +99,24 @@ function Table<T>({
               </td>
             </tr>
           )}
-          {data.map((row, rowIndex) => (
+          {data.map((row, rowIndex) => {
+            const selected = isRowSelected?.(row) ?? false;
+            return (
             <tr
               key={rowIndex}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
-              className={cn("group", onRowClick && "cursor-pointer")}
+              aria-selected={selected || undefined}
+              className={cn(
+                "group transition-colors",
+                onRowClick && "cursor-pointer",
+                selected ? "bg-accent/10" : "hover:bg-surface-2/40",
+              )}
             >
               {columns.map((column, colIndex) => (
                 <td
                   key={colIndex}
                   className={cn(
-                    "border-y border-border bg-surface/60 px-4 py-2.5 transition-colors first:rounded-s-xl first:border-l last:rounded-e-xl last:border-r group-hover:border-border-strong group-hover:bg-surface-2/50",
+                    "border-b border-border px-4 py-3 align-middle transition-colors",
                     column.position === "end" ? "text-end" : "text-start",
                   )}
                 >
@@ -139,7 +148,8 @@ function Table<T>({
                 </td>
               ))}
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>

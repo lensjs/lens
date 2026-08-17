@@ -2,39 +2,45 @@
 
 /*
  * LensJS dashboard design tokens.
- * Neutrals are true-neutral (zinc-like, no blue undertone). The accent is a
+ * Near-black surfaces + a restrained purple/blue brand accent. The accent is a
  * single source of truth — change --color-accent to re-theme the whole app.
+ * Brand identity (accent/gradient) is kept distinct from telemetry status
+ * colors (success/warning/danger/info) on purpose: purple/blue = LensJS,
+ * green/amber/red = state.
  */
 @theme {
-  /* Surfaces (dark, neutral) */
-  --color-canvas: #0a0a0b;
-  --color-surface: #141416;
-  --color-surface-2: #1c1c1f;
-  --color-elevated: #232327;
+  /* Surfaces (near-black, faint cool undertone) */
+  --color-canvas: #07080d;
+  --color-surface: #0b0d13;
+  --color-surface-2: #10131b;
+  --color-elevated: #151923;
+  --color-sidebar: #090a0f;
 
   /* Lines */
-  --color-border: #26262a;
-  --color-border-strong: #35353b;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.13);
 
   /* Text */
-  --color-fg: #fafafa;
-  --color-muted: #a1a1aa;
-  --color-dim: #71717a;
+  --color-fg: #f7f7fa;
+  --color-muted: #b5bac7;
+  --color-dim: #777e8d;
 
-  /* Accent — emerald (single swappable token) */
-  --color-accent: #10b981;
-  --color-accent-hover: #34d399;
-  --color-accent-fg: #04160e;
+  /* Accent — LensJS violet (single swappable token) */
+  --color-accent: #8b5cf6;
+  --color-accent-hover: #a855f7;
+  --color-accent-fg: #ffffff;
 
-  /* Semantic (non-blue) */
-  --color-success: #10b981;
+  /* Semantic telemetry (independent of the brand accent) */
+  --color-success: #34d399;
   --color-warning: #f59e0b;
-  --color-danger: #fb7185;
-  --color-info: #a78bfa;
+  --color-danger: #f43f5e;
+  --color-info: #60a5fa;
 }
 
 :root {
   color-scheme: dark;
+  /* Brand gradient — identity, active nav, and primary emphasis only. */
+  --lens-gradient: linear-gradient(135deg, #c04bff 0%, #7c4dff 42%, #2563eb 100%);
 }
 
 @layer base {
@@ -46,10 +52,10 @@
     background-color: var(--color-canvas);
     color: var(--color-fg);
     min-height: 100vh;
-    /* Extremely subtle emerald wash — premium, not colorful */
+    /* Extremely subtle brand wash — premium, not colorful */
     background-image: radial-gradient(
       44rem 44rem at 100% -12%,
-      color-mix(in oklab, var(--color-accent) 7%, transparent),
+      color-mix(in oklab, var(--color-accent) 8%, transparent),
       transparent 60%
     );
     background-attachment: fixed;
@@ -71,7 +77,7 @@
     outline: none;
     box-shadow:
       0 0 0 2px var(--color-canvas),
-      0 0 0 4px color-mix(in oklab, var(--color-accent) 60%, transparent);
+      0 0 0 4px color-mix(in oklab, var(--color-accent) 55%, transparent);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -106,6 +112,18 @@
 
   .tabular {
     font-variant-numeric: tabular-nums;
+  }
+
+  /* Brand gradient helpers (identity + primary emphasis only) */
+  .lens-gradient {
+    background-image: var(--lens-gradient);
+  }
+
+  .lens-gradient-text {
+    background-image: var(--lens-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 }
 

@@ -1,22 +1,21 @@
 /**
  * Lens design tokens — restrained, near-monochrome.
  * -------------------------------------------------------------------------
- * Color is used sparingly: a single indigo accent for links/actions, and a
- * small set of semantic hues reserved for callouts and product-UI badges.
- * Everything else relies on neutral surfaces, borders, and whitespace.
- * No gradients, no glows.
+ * Color is used sparingly: a single LensJS violet accent for links/actions,
+ * and a small set of semantic hues reserved for callouts and product-UI
+ * badges. Everything else relies on neutral surfaces, borders, and whitespace.
  */
 
 :root {
-  /* Accent (indigo) ------------------------------------------------------- */
-  --lens-indigo-50: #eef2ff;
-  --lens-indigo-100: #e0e7ff;
-  --lens-indigo-200: #c7d2fe;
-  --lens-indigo-300: #a5b4fc;
-  --lens-indigo-400: #818cf8;
-  --lens-indigo-500: #6366f1;
-  --lens-indigo-600: #4f46e5;
-  --lens-indigo-700: #4338ca;
+  /* Accent (LensJS brand violet; var names kept for compatibility) --------- */
+  --lens-indigo-50: #f5f3ff;
+  --lens-indigo-100: #ede9fe;
+  --lens-indigo-200: #ddd6fe;
+  --lens-indigo-300: #c4b5fd;
+  --lens-indigo-400: #a78bfa;
+  --lens-indigo-500: #8b5cf6;
+  --lens-indigo-600: #7c3aed;
+  --lens-indigo-700: #6d28d9;
 
   /* Semantic hues (callouts, product-UI badges only) --------------------- */
   --lens-emerald-400: #34d399;

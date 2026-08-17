@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { LoadMoreButton } from "../../components/LoadMore";
 import Table from "../../components/Table";
 import ListToolbar from "../../components/ListToolbar";
+import PageHeader from "../../components/PageHeader";
 import {
   useListView,
   type FilterDef,
@@ -55,6 +56,10 @@ const JobTable = ({
 
   return (
     <div>
+      <PageHeader
+        title="Jobs & Queues"
+        description="Track background jobs and their lifecycle."
+      />
       <ListToolbar
         controls={controls}
         filters={filters}

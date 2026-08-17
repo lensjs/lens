@@ -77,7 +77,7 @@ const useColumns = (): TableColumn<QueryTableRow>[] => {
       render: (row) => (
         <Link
           to={`${paths.QUERIES}/${row.id}`}
-          className="text-muted transition-colors hover:text-accent"
+          className="text-muted transition-colors hover:text-fg"
         >
           <CircleArrowRightIcon size={20} />
         </Link>

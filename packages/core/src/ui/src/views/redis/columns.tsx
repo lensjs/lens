@@ -38,7 +38,7 @@ const useColumns = (): TableColumn<RedisTableRow>[] => {
           className="line-clamp-1 font-mono text-sm text-fg"
           title={redisStatement(row.data)}
         >
-          <span className="font-semibold text-accent">{row.data.command}</span>{" "}
+          <span className="font-semibold text-fg">{row.data.command}</span>{" "}
           <span className="text-muted">{(row.data.args ?? []).join(" ")}</span>
         </span>
       ),
@@ -68,7 +68,7 @@ const useColumns = (): TableColumn<RedisTableRow>[] => {
       render: (row) => (
         <Link
           to={`${paths.REDIS}/${row.id}`}
-          className="text-muted transition-colors hover:text-accent"
+          className="text-muted transition-colors hover:text-fg"
         >
           <CircleArrowRightIcon size={20} />
         </Link>

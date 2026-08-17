@@ -46,12 +46,110 @@ async function renderMermaid(): Promise<void> {
   const { default: mermaid } = await import('mermaid')
   const isDark = document.documentElement.classList.contains('dark')
 
+  const fontStack =
+    'Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif'
+
+  // Brand-matched palette (near-black surfaces + a restrained violet accent) so
+  // diagrams read as part of the LensJS product rather than a stock Mermaid theme.
+  const themeVariables = isDark
+    ? {
+        background: 'transparent',
+        primaryColor: '#151a28',
+        primaryTextColor: '#f7f7fa',
+        primaryBorderColor: '#6b52c8',
+        secondaryColor: '#12172a',
+        secondaryTextColor: '#e4e4e7',
+        secondaryBorderColor: '#3b4256',
+        tertiaryColor: '#0e1220',
+        tertiaryTextColor: '#c7ccd8',
+        tertiaryBorderColor: '#3b4256',
+        mainBkg: '#151a28',
+        nodeBorder: '#6b52c8',
+        nodeTextColor: '#f7f7fa',
+        lineColor: '#6b7183',
+        textColor: '#c7ccd8',
+        titleColor: '#f7f7fa',
+        edgeLabelBackground: '#0b0d13',
+        clusterBkg: 'rgba(124,77,255,0.07)',
+        clusterBorder: 'rgba(124,77,255,0.30)',
+        actorBkg: '#151a28',
+        actorBorder: '#6b52c8',
+        actorTextColor: '#f7f7fa',
+        signalColor: '#c7ccd8',
+        signalTextColor: '#c7ccd8',
+        labelBoxBkgColor: '#151a28',
+        labelBoxBorderColor: '#6b52c8',
+        labelTextColor: '#f7f7fa',
+        noteBkgColor: 'rgba(124,77,255,0.12)',
+        noteBorderColor: 'rgba(124,77,255,0.35)',
+        noteTextColor: '#e4e4e7',
+      }
+    : {
+        background: 'transparent',
+        primaryColor: '#f5f3ff',
+        primaryTextColor: '#11131a',
+        primaryBorderColor: '#7c3aed',
+        secondaryColor: '#eef2ff',
+        secondaryTextColor: '#11131a',
+        secondaryBorderColor: '#c7d2fe',
+        tertiaryColor: '#faf5ff',
+        tertiaryTextColor: '#334155',
+        tertiaryBorderColor: '#e2e8f0',
+        mainBkg: '#f5f3ff',
+        nodeBorder: '#7c3aed',
+        nodeTextColor: '#11131a',
+        lineColor: '#94a3b8',
+        textColor: '#334155',
+        titleColor: '#11131a',
+        edgeLabelBackground: '#ffffff',
+        clusterBkg: 'rgba(124,58,237,0.06)',
+        clusterBorder: 'rgba(124,58,237,0.25)',
+        actorBkg: '#f5f3ff',
+        actorBorder: '#7c3aed',
+        actorTextColor: '#11131a',
+        signalColor: '#475569',
+        signalTextColor: '#475569',
+        labelBoxBkgColor: '#f5f3ff',
+        labelBoxBorderColor: '#7c3aed',
+        labelTextColor: '#11131a',
+        noteBkgColor: 'rgba(124,58,237,0.08)',
+        noteBorderColor: 'rgba(124,58,237,0.30)',
+        noteTextColor: '#11131a',
+      }
+
   mermaid.initialize({
     startOnLoad: false,
-    theme: isDark ? 'dark' : 'default',
     securityLevel: 'strict',
-    fontFamily: 'inherit',
+    theme: 'base',
+    fontFamily: fontStack,
+    themeVariables,
+    flowchart: {
+      curve: 'basis',
+      // SVG text labels (not HTML) so node widths are measured accurately and
+      // labels never clip.
+      htmlLabels: false,
+      useMaxWidth: true,
+      padding: 14,
+      nodeSpacing: 52,
+      rankSpacing: 60,
+    },
+    sequence: {
+      useMaxWidth: true,
+      diagramMarginX: 16,
+      diagramMarginY: 16,
+      actorMargin: 48,
+    },
   })
+
+  // Wait for the web font (Inter) to load before rendering so Mermaid measures
+  // label widths against the final font and nodes never clip long labels.
+  if (document.fonts?.ready) {
+    try {
+      await document.fonts.ready
+    } catch {
+      /* ignore */
+    }
+  }
 
   let index = 0
   for (const block of blocks) {

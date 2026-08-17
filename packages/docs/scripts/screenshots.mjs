@@ -93,7 +93,14 @@ function startServer() {
   log("isolated cwd:", workDir);
   serverProc = spawn(TSX, [ENTRY], {
     cwd: workDir,
-    env: { ...process.env, PORT: String(PORT), NODE_NO_WARNINGS: "1" },
+    env: {
+      ...process.env,
+      PORT: String(PORT),
+      NODE_NO_WARNINGS: "1",
+      // Use the network-free mail transport so the mail watcher always has
+      // data (a live SMTP send can hang/rate-limit in CI/sandboxes).
+      LENS_OFFLINE_MAIL: "1",
+    },
     stdio: ["ignore", "pipe", "pipe"],
   });
   serverProc.stdout.on("data", (d) =>
@@ -121,9 +128,11 @@ async function waitForServer(timeoutMs = 90000) {
 async function hit(path, times = 1, gap = 45) {
   for (let i = 0; i < times; i++) {
     try {
-      await fetch(`${BASE}${path}`);
+      // Cap each request so a slow demo route (e.g. mail over the network)
+      // can't stall activity generation; the fetch is fire-and-forget here.
+      await fetch(`${BASE}${path}`, { signal: AbortSignal.timeout(8000) });
     } catch {
-      /* ignore */
+      /* ignore (including abort timeouts) */
     }
     await sleep(gap);
   }

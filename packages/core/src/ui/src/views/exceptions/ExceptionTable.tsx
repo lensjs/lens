@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { LoadMoreButton } from "../../components/LoadMore";
 import Table from "../../components/Table";
 import ListToolbar from "../../components/ListToolbar";
+import PageHeader from "../../components/PageHeader";
 import GroupToggle from "../../components/GroupToggle";
 import { useListView, type SortDef } from "../../hooks/useListView";
 import { toTime } from "../../utils/format";
@@ -36,6 +37,10 @@ const ExceptionTable = ({
 
   return (
     <div>
+      <PageHeader
+        title="Exceptions"
+        description="Review captured errors and stack traces."
+      />
       <ListToolbar
         controls={controls}
         sorts={sorts}

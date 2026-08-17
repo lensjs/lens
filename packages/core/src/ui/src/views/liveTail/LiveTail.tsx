@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { humanDifferentDate } from "@lensjs/date";
+import PageHeader from "../../components/PageHeader";
 import { cn } from "../../utils/cn";
 import { useConfig } from "../../utils/context";
 import { getRoutesPaths } from "../../router/routes";
@@ -95,6 +96,10 @@ export default function LiveTailView({
 
   return (
     <div>
+      <PageHeader
+        title="Live Tail"
+        description="Watch requests and events stream in as they happen."
+      />
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <span
           className={cn(

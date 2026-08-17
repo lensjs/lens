@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { LoadMoreButton } from "../../components/LoadMore";
 import Table from "../../components/Table";
 import ListToolbar from "../../components/ListToolbar";
+import PageHeader from "../../components/PageHeader";
 import {
   useListView,
   type FilterDef,
@@ -52,6 +53,10 @@ const FcmTable = ({
 
   return (
     <div>
+      <PageHeader
+        title="Push (FCM)"
+        description="Inspect push notifications and delivery status."
+      />
       <ListToolbar
         controls={controls}
         filters={filters}

@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { LoadMoreButton } from "../../components/LoadMore";
 import Table from "../../components/Table";
 import ListToolbar from "../../components/ListToolbar";
+import PageHeader from "../../components/PageHeader";
 import {
   useListView,
   type FilterDef,
@@ -55,6 +56,10 @@ const HttpTable = ({
 
   return (
     <div>
+      <PageHeader
+        title="HTTP Client"
+        description="Inspect outgoing HTTP requests and responses."
+      />
       <ListToolbar
         controls={controls}
         filters={filters}

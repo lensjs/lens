@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { LoadMoreButton } from "../../components/LoadMore";
 import Table from "../../components/Table";
 import ListToolbar from "../../components/ListToolbar";
+import PageHeader from "../../components/PageHeader";
 import {
   useListView,
   type FilterDef,
@@ -39,6 +40,10 @@ const EventTable = ({
 
   return (
     <div>
+      <PageHeader
+        title="Events"
+        description="Inspect dispatched application events and payloads."
+      />
       <ListToolbar
         controls={controls}
         filters={filters}

@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Lock, LoaderCircle } from "lucide-react";
 import { prepareApiUrl } from "../utils/api";
 import { setToken } from "../utils/auth";
-import { LensLogo } from "./LensLogo";
+import { LensMark } from "./LensMark";
 
 interface LoginScreenProps {
   loginUrl: string;
@@ -57,7 +57,7 @@ const LoginScreen = ({ loginUrl, appName, onSuccess }: LoginScreenProps) => {
     <div className="flex min-h-screen items-center justify-center px-4">
       <form onSubmit={submit} className="card-panel w-full max-w-sm space-y-6 p-6">
         <div className="flex flex-col items-center gap-3 text-center">
-          <LensLogo size={40} className="text-accent" />
+          <LensMark size={44} className="rounded-xl" />
           <div className="space-y-1">
             <h1 className="text-lg font-semibold tracking-tight text-fg">
               {appName}

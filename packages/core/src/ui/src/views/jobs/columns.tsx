@@ -59,7 +59,7 @@ const useColumns = (): TableColumn<JobTableRow>[] => {
       render: (row) => (
         <Link
           to={`${paths.JOBS}/${encodeURIComponent(row.id)}`}
-          className="text-muted transition-colors hover:text-accent"
+          className="text-muted transition-colors hover:text-fg"
         >
           <CircleArrowRightIcon size={20} />
         </Link>

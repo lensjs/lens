@@ -6,6 +6,7 @@ import { useConfig } from "../../utils/context";
 import { getRoutesPaths } from "../../router/routes";
 import { useListView } from "../../hooks/useListView";
 import DateRangePicker from "../../components/DateRangePicker";
+import PageHeader from "../../components/PageHeader";
 import StatCard from "../../components/charts/StatCard";
 import AreaChart from "../../components/charts/AreaChart";
 import BarList from "../../components/charts/BarList";
@@ -51,14 +52,17 @@ export default function OverviewView({ overview }: { overview: Overview }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-lg font-semibold text-fg">Overview</h1>
-        <DateRangePicker
-          from={controls.from}
-          to={controls.to}
-          onChange={controls.setDateRange}
-        />
-      </div>
+      <PageHeader
+        title="Overview"
+        description="A real-time summary of your application's activity and health."
+        actions={
+          <DateRangePicker
+            from={controls.from}
+            to={controls.to}
+            onChange={controls.setDateRange}
+          />
+        }
+      />
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         <StatCard

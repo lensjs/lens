@@ -29,7 +29,7 @@ const useColumns = (): TableColumn<FcmTableRow>[] => {
     {
       name: "Method",
       render: (row) => (
-        <span className="font-mono text-sm font-semibold text-accent">
+        <span className="font-mono text-sm font-semibold text-fg">
           {row.data.method}
         </span>
       ),
@@ -78,7 +78,7 @@ const useColumns = (): TableColumn<FcmTableRow>[] => {
       render: (row) => (
         <Link
           to={`${paths.FCM}/${row.id}`}
-          className="text-muted transition-colors hover:text-accent"
+          className="text-muted transition-colors hover:text-fg"
         >
           <CircleArrowRightIcon size={20} />
         </Link>

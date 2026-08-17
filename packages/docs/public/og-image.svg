@@ -1,18 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none" role="img" aria-label="Lens - Monitoring and debugging for Node.js">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none" role="img" aria-label="LensJS - Monitoring and debugging for Node.js">
   <defs>
     <radialGradient id="glow" cx="88%" cy="8%" r="70%">
-      <stop offset="0%" stop-color="#4F46E5" stop-opacity="0.35"/>
-      <stop offset="55%" stop-color="#4F46E5" stop-opacity="0.06"/>
-      <stop offset="100%" stop-color="#4F46E5" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#7C4DFF" stop-opacity="0.38"/>
+      <stop offset="55%" stop-color="#7C4DFF" stop-opacity="0.07"/>
+      <stop offset="100%" stop-color="#7C4DFF" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="hair" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
       <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.10"/>
       <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
     </linearGradient>
+    <linearGradient id="markGrad" x1="28" y1="28" x2="226" y2="226" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C04BFF"/>
+      <stop offset=".42" stop-color="#7C4DFF"/>
+      <stop offset="1" stop-color="#2563EB"/>
+    </linearGradient>
+    <linearGradient id="wordGrad" x1="470" y1="210" x2="640" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C04BFF"/>
+      <stop offset=".42" stop-color="#7C4DFF"/>
+      <stop offset="1" stop-color="#2563EB"/>
+    </linearGradient>
   </defs>
 
-  <rect width="1200" height="630" fill="#0B0B0D"/>
+  <rect width="1200" height="630" fill="#07080D"/>
   <rect width="1200" height="630" fill="url(#glow)"/>
 
   <!-- subtle dotted grid, top-right -->
@@ -26,26 +36,32 @@
     <use href="#row" y="200"/><use href="#row" y="250"/>
   </g>
 
-  <!-- logo tile -->
-  <g transform="translate(96 232)">
-    <rect width="96" height="96" rx="24" fill="#4F46E5"/>
-    <g transform="translate(16 16) scale(2)" fill="none">
-      <g stroke="#A5B4FC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M8 11.5V8h3.5"/><path d="M20.5 8H24v3.5"/>
-        <path d="M24 20.5V24h-3.5"/><path d="M11.5 24H8v-3.5"/>
-      </g>
-      <circle cx="16" cy="16" r="4.3" stroke="#FFFFFF" stroke-width="2"/>
-      <circle cx="16" cy="16" r="1.7" fill="#FFFFFF"/>
+  <!-- logo mark — the aperture + terminal mark (matches the dashboard) -->
+  <g transform="translate(96 232) scale(0.375)">
+    <rect width="256" height="256" rx="52" fill="#0B0D13"/>
+    <g fill="url(#markGrad)">
+      <path d="M78 30 110 46 86 86 50 70a92 92 0 0 1 28-40Z"/>
+      <path d="m116 28 34 6-10 46-44-10 20-42Z"/>
+      <path d="m160 38 38 18 10 22-40 20-26-39 18-21Z"/>
+      <path d="m203 95 21 34-6 37-44-9 4-48 25-14Z"/>
+      <path d="m190 178-27 31-39 15 1-46 46-22 19 22Z"/>
+      <path d="m104 222-35-9-24-28 36-25 36 32-13 30Z"/>
+      <path d="m44 174-18-33 6-36 43 11-4 47-27 11Z"/>
+    </g>
+    <circle cx="128" cy="128" r="62" fill="#07080D"/>
+    <g stroke="#F8FAFC" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m104 112 22 16-22 16"/>
+      <path d="M143 148h22"/>
     </g>
   </g>
 
   <!-- wordmark + tagline -->
-  <text x="224" y="292" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="112" font-weight="800" letter-spacing="-4" fill="#F4F4F5">Lens</text>
+  <text x="224" y="292" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="112" font-weight="800" letter-spacing="-4" fill="#F7F7FA">Lens<tspan fill="url(#wordGrad)">JS</tspan></text>
   <text x="98" y="392" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="40" font-weight="600" letter-spacing="-1" fill="#D4D4D8">Monitoring &amp; debugging for Node.js</text>
   <text x="98" y="446" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="26" font-weight="450" fill="#9CA3AF">Requests, queries, cache, exceptions, mail &amp; jobs in one self-hosted dashboard.</text>
 
   <line x1="98" y1="512" x2="1102" y2="512" stroke="url(#hair)" stroke-width="1"/>
 
-  <text x="98" y="560" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="24" font-weight="500" fill="#818CF8">npm i @lensjs/express @lensjs/watchers</text>
+  <text x="98" y="560" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="24" font-weight="500" fill="#A78BFA">npm i @lensjs/express @lensjs/watchers</text>
   <text x="1102" y="560" text-anchor="end" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="24" font-weight="500" fill="#71717A">Open source &amp; MIT licensed</text>
 </svg>

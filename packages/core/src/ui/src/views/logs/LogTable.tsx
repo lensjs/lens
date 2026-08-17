@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { LoadMoreButton } from "../../components/LoadMore";
 import Table from "../../components/Table";
 import ListToolbar from "../../components/ListToolbar";
+import PageHeader from "../../components/PageHeader";
 import {
   useListView,
   type FilterDef,
@@ -55,6 +56,10 @@ const LogTable = ({
 
   return (
     <div>
+      <PageHeader
+        title="Logs"
+        description="Browse application logs correlated to requests."
+      />
       <ListToolbar
         controls={controls}
         filters={filters}

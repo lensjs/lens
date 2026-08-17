@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { withBase } from 'vitepress'
 import Icon from './Icon.vue'
+import LensMark from './LensMark.vue'
 
 const year = new Date().getFullYear()
 
@@ -66,8 +67,8 @@ const columns = [
       <div class="lens-footer__grid">
         <div class="lens-footer__brand">
           <div class="lens-footer__logo">
-            <span class="lens-footer__mark"><Icon name="lens-mark" :size="17" /></span>
-            <span class="lens-footer__name">Lens</span>
+            <span class="lens-footer__mark"><LensMark :size="26" /></span>
+            <span class="lens-footer__name">LensJS</span>
           </div>
           <p class="lens-footer__tagline">
             Framework-agnostic monitoring and debugging for Node.js.
@@ -161,13 +162,8 @@ const columns = [
 }
 
 .lens-footer__mark {
-  width: 28px;
-  height: 28px;
   display: grid;
   place-items: center;
-  border-radius: 8px;
-  color: #fff;
-  background: var(--lens-indigo-600);
 }
 
 .lens-footer__name {

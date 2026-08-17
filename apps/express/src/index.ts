@@ -120,19 +120,25 @@ attachSequelizeLens(sequelize);
 // Use Ethereal for real preview URLs when online; fall back to an offline JSON
 // transport so the example (and the mail watcher) still work without network.
 let mailTransporter: nodemailer.Transporter;
-try {
-  const testEmailAccount = await nodemailer.createTestAccount();
-  mailTransporter = nodemailer.createTransport({
-    host: testEmailAccount.smtp.host,
-    port: testEmailAccount.smtp.port,
-    secure: testEmailAccount.smtp.secure,
-    auth: {
-      user: testEmailAccount.user,
-      pass: testEmailAccount.pass,
-    },
-  });
-} catch {
+if (process.env.LENS_OFFLINE_MAIL) {
+  // Deterministic, network-free transport (used by the docs screenshot tooling
+  // so the mail watcher always has data without a live SMTP round-trip).
   mailTransporter = nodemailer.createTransport({ jsonTransport: true });
+} else {
+  try {
+    const testEmailAccount = await nodemailer.createTestAccount();
+    mailTransporter = nodemailer.createTransport({
+      host: testEmailAccount.smtp.host,
+      port: testEmailAccount.smtp.port,
+      secure: testEmailAccount.smtp.secure,
+      auth: {
+        user: testEmailAccount.user,
+        pass: testEmailAccount.pass,
+      },
+    });
+  } catch {
+    mailTransporter = nodemailer.createTransport({ jsonTransport: true });
+  }
 }
 
 app.use(

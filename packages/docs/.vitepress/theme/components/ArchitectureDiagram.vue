@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Icon from './Icon.vue'
+import LensMark from './LensMark.vue'
 
 const signals = [
   { icon: 'activity', label: 'Requests' },
@@ -36,7 +37,7 @@ const signals = [
 
       <div class="lens-arch__node is-core">
         <div class="lens-arch__core-head">
-          <Icon name="lens-mark" :size="18" />
+          <LensMark :size="18" />
           <div>
             <p class="lens-arch__title">@lensjs/core</p>
             <p class="lens-arch__sub">The engine — capture, context, store & API</p>

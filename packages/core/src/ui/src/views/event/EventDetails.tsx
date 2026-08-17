@@ -19,7 +19,7 @@ export default function EventDetailsView({ data }: { data: OneEvent }) {
           value: (
             <Link
               to={`${paths.REQUESTS}/${data.lens_entry_id}`}
-              className="text-accent hover:text-accent-hover hover:underline font-semibold"
+              className="text-fg hover:underline font-semibold"
             >
               View Request
             </Link>

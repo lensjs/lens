@@ -57,7 +57,7 @@ const useColumns = (): TableColumn<HttpTableRow>[] => {
       render: (row) => (
         <Link
           to={`${paths.HTTP}/${row.id}`}
-          className="text-muted transition-colors hover:text-accent"
+          className="text-muted transition-colors hover:text-fg"
         >
           <CircleArrowRightIcon size={20} />
         </Link>

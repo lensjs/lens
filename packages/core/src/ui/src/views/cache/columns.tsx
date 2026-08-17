@@ -33,7 +33,7 @@ const useColumns = (): TableColumn<CacheTableRow>[] => {
       render: (row) => (
         <Link
           to={`${paths.CACHE_ENTRIES}/${row.id}`}
-          className="text-muted transition-colors hover:text-accent"
+          className="text-muted transition-colors hover:text-fg"
         >
           <CircleArrowRightIcon size={20} />
         </Link>

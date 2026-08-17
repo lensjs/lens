@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { LoadMoreButton } from "../../components/LoadMore";
 import Table from "../../components/Table";
 import ListToolbar from "../../components/ListToolbar";
+import PageHeader from "../../components/PageHeader";
 import { useListView, type SortDef } from "../../hooks/useListView";
 import { durationToMs, toTime } from "../../utils/format";
 import { getRoutesPaths } from "../../router/routes";
@@ -52,6 +53,10 @@ const QueryTable = ({
 
   return (
     <div>
+      <PageHeader
+        title="Queries"
+        description="Inspect database queries, timing, and N+1 patterns."
+      />
       <ListToolbar
         controls={controls}
         filters={filters}

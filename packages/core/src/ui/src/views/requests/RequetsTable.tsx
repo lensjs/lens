@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { LoadMoreButton } from "../../components/LoadMore";
 import Table from "../../components/Table";
 import ListToolbar from "../../components/ListToolbar";
+import PageHeader from "../../components/PageHeader";
 import { useListView, type FilterDef, type SortDef } from "../../hooks/useListView";
 import { durationToMs, statusClass, toTime } from "../../utils/format";
 import { getRoutesPaths } from "../../router/routes";
@@ -99,6 +100,10 @@ const RequestTable = ({
 
   return (
     <div>
+      <PageHeader
+        title="Requests"
+        description="Inspect incoming HTTP requests and response performance."
+      />
       <ListToolbar
         controls={controls}
         filters={filters}
