@@ -1,6 +1,6 @@
 {
   "name": "@lensjs/otel",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "OpenTelemetry (OTLP) trace export for LensJs — turns captured requests, queries, and more into spans",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

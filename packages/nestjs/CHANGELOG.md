@@ -1,5 +1,16 @@
 # @lensjs/nestjs
 
+## 5.0.1
+
+### Patch Changes
+
+- Updated dependencies [a72a324]
+- Updated dependencies [a72a324]
+- Updated dependencies [a72a324]
+  - @lensjs/core@3.2.0
+  - @lensjs/express@1.7.2
+  - @lensjs/fastify@1.4.2
+
 ## 5.0.0
 
 ### Minor Changes

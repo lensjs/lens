@@ -1,5 +1,16 @@
 # example-nextjs
 
+## 1.0.3
+
+### Patch Changes
+
+- Updated dependencies [a72a324]
+- Updated dependencies [a72a324]
+- Updated dependencies [a72a324]
+  - @lensjs/core@3.2.0
+  - @lensjs/watchers@1.4.2
+  - @lensjs/nextjs@0.1.2
+
 ## 1.0.2
 
 ### Patch Changes

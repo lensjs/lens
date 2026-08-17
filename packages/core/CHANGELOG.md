@@ -1,5 +1,32 @@
 # @lensjs/core
 
+## 3.2.0
+
+### Minor Changes
+
+- a72a324: Refresh the bundled dashboard with the new LensJS brand and a visual refactor.
+  - New aperture + terminal logo mark, `LensJS` wordmark, and updated favicons.
+  - Retuned dark theme: near-black surfaces with a restrained purple/blue brand
+    gradient used only for identity, active navigation, and primary emphasis.
+  - Telemetry status colors (2xx/4xx/5xx) stay semantically green/amber/red; the
+    HTTP method badge now carries the brand violet.
+  - Restyled top bar and sidebar (brand-gradient active rail) and a denser,
+    hairline data table with a faint-violet selected row.
+  - Request details now open in a right-side drawer (still deep-linkable via
+    `requests/:id`), and every watcher page gains a consistent title/description
+    header.
+
+### Patch Changes
+
+- a72a324: Decode JSON string payloads in the dashboard JSON viewer. Request/response bodies
+  and headers captured as JSON strings are now parsed and shown as a real tree
+  instead of an escaped string literal (e.g. `"{\"ok\":true}"`); genuine plain-text
+  bodies render raw without added quotes/escaping.
+- a72a324: Fix detail tab groups not selecting a tab when the default tab has no data for
+  that entry (e.g. HTTP client details with no request headers). `TabbedDataViewer`
+  now always falls back to the first visible tab, so a tab is always active and its
+  content shown.
+
 ## 3.1.0
 
 ### Minor Changes

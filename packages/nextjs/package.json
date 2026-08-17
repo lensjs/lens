@@ -1,6 +1,6 @@
 {
   "name": "@lensjs/nextjs",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Next.js (App Router) adapter for LensJs",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
